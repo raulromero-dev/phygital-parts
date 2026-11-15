@@ -28,6 +28,7 @@ Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for boundaries and data flow;
 | Floating codex chat and selected-part context | `src/assistant.js`, `src/adjustments.js` |
 | Workspace controls and import/export | `src/main.js`, `src/engine.js` |
 | Starters and separate storage namespaces | `src/routes.js`, `src/templates.js` |
+| Sharing, public snapshots and account remixes | `src/sharing.js`, `src/cloud-projects.js`, `supabase/migrations/` |
 | Account auth, sync, RLS | `src/cloud-projects.js`, `src/cloud-sync.js`, `supabase/migrations/` |
 | Project library, local copies and backup imports | `src/saved-projects.js`, `src/main.js`, `src/product.js` |
 | CAD rendering, placement, materials | `src/viewer.js`, `src/proxy.js`, `blender/` |
@@ -76,6 +77,12 @@ Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for boundaries and data flow;
 - Account storage uses RLS and optimistic revisions. Keep caches scoped by user,
   hide them from anonymous discovery, clear visible data on account changes, and
   preserve conflicting drafts. Never ship a service-role key or OAuth secret.
+- Share links are explicit snapshots at `/share/:token`. Anonymous viewing never
+  requires login. Remix requires an account and creates a new private owner row.
+  Preserve snapshot allowlists, owner-only publish/revoke and revision checks;
+  never publish chat, private project notes or prompts with a layout.
+- Keep the header compact: Share (and Remix for a public view), save status and
+  one menu for account, key, theme, projects, export and undo/redo.
 - Assistant actions use trusted catalog IDs and exact ports, apply atomically
   after review, and remain undoable. Questions offer choices plus Other, preserve
   part context, and cannot mix unanswered questions with edits.

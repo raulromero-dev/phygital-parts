@@ -37,8 +37,9 @@ Visitor OpenAI keys remain in tab memory and are not stored in Supabase.
 - `src/cloud-sync.js` serializes writes. Offline drafts remain in a user-scoped
   browser cache; conflicts stop automatic writes and offer Save a copy.
 - Anonymous discovery never lists account caches. Account changes clear visible
-  cloud data and cancel stale save callbacks. Cloud links require sign-in and
-  are not public sharing links. RLS still checks every server operation.
+  cloud data and cancel stale save callbacks. Cloud links require the owner’s sign-in. Explicit `/share/<token>` links read
+  a separate published snapshot; they never expose private cloud rows. RLS still
+  checks every server operation.
 
 Local examples are not uploaded merely by signing in. New prompted builds save
 to the signed-in account. **Save to account**, **Save a copy**, and **Import
@@ -60,3 +61,31 @@ Also verify Google return navigation, project creation/edit/reload, sign-out,
 mobile account controls and a second browser before publishing. Do not claim a
 live sign-in test based on mocked auth. OpenAI behavior is tested with mock
 providers; paid model access is a separate visitor capability.
+
+## Share and remix
+
+Share → Create share link saves a browser project to the owner's account first,
+then publishes a snapshot. The public `/share/<uuid>` page permits inspection,
+orbiting, cable inspection and exports without a session. Editing controls offer
+Remix. Google sign-in is needed only to create the visitor's independent account
+copy; returning from Google resumes the requested remix. Signed-in visitors can
+remix directly. The source owner's document and chat are never modified.
+
+`project_shares` has owner-only SELECT and no client table writes. The bounded
+`get_shared_project(token)` RPC returns only a snapshot and its publication time;
+there is no anonymous listing endpoint. `publish_project` checks ownership and
+revision, applies a top-level allowlist, and keeps the existing random link when
+updating. Chat, brief, project links, research, review notes and decisions are
+excluded. Component descriptions/models, purchase links and cable notes are part
+of the shared assembly. Only included custom parts and active conductors publish.
+`remix_shared_project` requires auth and chooses the new owner from `auth.uid()`;
+callers cannot choose another owner or write to the source. `revoke_project_share`
+removes the public snapshot. Republishing generates a new token; existing remixes
+and any exported copies remain independent. Anyone holding an active link can
+read it; unguessable links are not confidential access controls.
+
+Public routes are marked noindex and skipped by client analytics; public copies
+and chat are not inserted into the browser's project library. Future owner edits
+remain private until **Update shared version** is selected. The database test
+also checks anonymous reads, blocked listing/writes, independent ownership,
+private-field omission, snapshot updates, revocation and preserved remixes.

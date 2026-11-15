@@ -8,7 +8,7 @@ export function savedProjectUrl(key){
  if(!key.startsWith(STORAGE_KEY+':'))return null;
  const id=key.slice(STORAGE_KEY.length+1);
  const account=id.match(/^account:[a-f0-9-]{36}:(cloud-[a-f0-9-]{36})$/);if(account)return projectUrl(account[1]);
- if(id.startsWith('cloud-'))return null;
+ if(id.startsWith('cloud-')||id.startsWith('shared-'))return null;
  if(/^phygital-(compact|bench|wide)$/.test(id))return projectUrl('phygital',id.slice(9));
  for(const path of ['/projects/'+id,'/examples/'+id])if(projectRoute(path))return path;
  return null;

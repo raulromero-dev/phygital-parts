@@ -1,5 +1,12 @@
 # Changelog
 
+## Shareable projects and a simpler header
+
+- Added public read-only share links with account-owned remixes.
+- Owners can update the shared snapshot or turn its link off; chat and private project context remain private.
+- Shared views allow part/cable inspection without sign-in; editing offers a separate remix.
+- Reduced the header to sharing, compact save status and one tools menu on desktop and mobile.
+
 ## 2026-11-15 · Accounts, projects and actionable Codex chat
 
 Added My projects on the home page and a Projects menu inside assemblies.

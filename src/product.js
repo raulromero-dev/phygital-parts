@@ -1,5 +1,5 @@
 import { runProjectBuild } from './project-build.js';
-import { mountAssistant, mountMobileMenu } from './assistant.js';
+import { mountAssistant, mountWorkspaceMenu } from './assistant.js';
 import { projectUrl } from './routes.js';
 import { savedProjectsHtml } from './saved-projects.js';
 import { library, escapeHtml as esc, safeUrl, purchaseHtml, applyProposal } from './product-data.js';
@@ -80,6 +80,7 @@ export function mountProduct(app){
   app.dialog(replace?'Your first assembly':'Parts to consider',`<div class="proposal-intro"><span class="eyebrow">REVIEW BEFORE ADDING</span><h3>${esc(p.projectName)}</h3><p>${esc(p.summary)}</p></div><div class="proposal-parts">${p.parts.map(part=>`<article class="proposal-card"><label class="proposal-select"><input type="checkbox" name="proposal-part" value="${esc(part.key)}" checked><span><strong>${esc(part.name)}</strong><small>${part.dimensions.width} × ${part.dimensions.depth} × ${part.dimensions.height} mm · ${part.dimensions.confidence==='sourced'?'Source dimensions · verify':'Estimated envelope'}</small></span></label>${purchaseHtml(part)}<details><summary>Details & connections</summary><p>${esc(part.description)}</p><p>${esc(part.placement)}</p><p>${esc(part.electrical)}</p><p>${esc(part.interface)}</p>${part.sources.map(s=>`<a href="${esc(safeUrl(s.url)||'#')}" target="_blank" rel="noopener noreferrer">${esc(s.label)} ↗</a>`).join('')}</details></article>`).join('')}</div>${p.connections.length?`<details class="proposal-wires"><summary>${p.connections.length} proposed conductors · review pinouts</summary>${p.connections.map(c=>`<p><strong>${esc(c.fromPart)} / ${esc(c.fromPort)}</strong> → <strong>${esc(c.toPart)} / ${esc(c.toPort)}</strong><br>${esc(c.type)} · ${esc(c.note)}</p>`).join('')}</details>`:''}${p.questions.length?`<section class="proposal-questions"><h4>Before you build</h4><ul>${p.questions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></section>`:''}<details class="proposal-sources"><summary>Research sources (${p.sources.length})</summary>${p.sources.map(s=>`<a href="${esc(safeUrl(s.url)||'#')}" target="_blank" rel="noopener noreferrer">${esc(s.label)} ↗</a>`).join('')}</details><div class="proposal-footer"><p>Review dimensions and pinouts before building.</p><button class="button primary" id="apply-proposal" ${p.parts.length?'':'disabled'}>${replace?'Create assembly':'Add selected parts'} ↗</button></div>`);
   $('#dialog').classList.add('parts-dialog');
   $('#apply-proposal').onclick=()=>{
+   if(!app.ensureEditable())return;
    const keys=$$('input[name="proposal-part"]:checked').map(el=>el.value);if(!keys.length){app.toast('Select at least one part.');return;}
    try{const next=applyProposal(app.getState(),p,keys,{replace});app.replace(next.state,next.selected);$('#dialog').close();showWorkspace();app.fit();app.toast(next.skippedConnections?`Parts added; ${next.skippedConnections} unmatched cables need manual mapping.`:'Parts added. Review fit, contacts and power before building.');}catch(error){app.toast(error.message);}
   };
@@ -94,9 +95,9 @@ export function mountProduct(app){
    const update=()=>{
     const query=$('#catalog-search').value.toLowerCase(),parts=library.filter(p=>(category==='All'||matches[category](p))&&(p.name+' '+p.interface+' '+p.kind).toLowerCase().includes(query));
     $('#catalog-results').innerHTML=parts.length?parts.map(p=>`<article class="catalog-card"><div class="catalog-card-top"><span class="catalog-glyph" aria-hidden="true">${{battery:'▥',motor:'◉',camera:'◎',connector:'⌁',chip:'▦'}[p.kind]||'▤'}</span><span class="catalog-label">${['xiao','lcd-27579','oled-938','mosfet-1','crowpanel-advance-28','cardputer-adv'].includes(p.id)?'Manufacturer CAD':'Planning model'}</span></div><h3>${esc(p.name)}</h3><p class="catalog-dimensions">${p.dimensions[0]} × ${p.dimensions[2]} × ${p.dimensions[1]} mm</p><details class="catalog-details"><summary>Details</summary><p>${esc(p.interface)}</p></details>${purchaseHtml(p)}<button class="button full" data-add-library="${p.id}">＋ Add to assembly</button></article>`).join(''):`<div class="catalog-empty"><h3>Not in the library yet.</h3><p>Describe a part or paste a link.</p><button class="button primary" id="search-beyond">${codexMark} codex</button></div>`;
-    $$('[data-add-library]').forEach(b=>b.onclick=async()=>{app.addLibrary(b.dataset.addLibrary);b.textContent='✓ Added · add another';app.toast('Part added to your assembly.');});
+    $$('[data-add-library]').forEach(b=>b.onclick=async()=>{if(!app.ensureEditable())return;app.addLibrary(b.dataset.addLibrary);b.textContent='✓ Added · add another';app.toast('Part added to your assembly.');});
     $('#search-beyond')?.addEventListener('click',()=>{const q=$('#catalog-search').value;findParts('ai');$('#parts-prompt').value=q;});
-   };$('#catalog-search').oninput=update;$$('[data-category]').forEach(b=>b.onclick=()=>{category=b.dataset.category;$$('[data-category]').forEach(el=>el.classList.toggle('active',el===b));update();});$('#finder-custom').onclick=app.custom;update();
+   };$('#catalog-search').oninput=update;$$('[data-category]').forEach(b=>b.onclick=()=>{category=b.dataset.category;$$('[data-category]').forEach(el=>el.classList.toggle('active',el===b));update();});$('#finder-custom').onclick=()=>{if(app.ensureEditable())app.custom();};update();
   }else{
    $('#finder-content').innerHTML=`<form id="parts-research-form" class="parts-research-form">${tab==='link'?'<label for="parts-link">Product link</label><input id="parts-link" type="url" required placeholder="https://…">':''}<label for="parts-prompt">${tab==='link'?'What would you like to check?':'What are you looking for?'}</label><textarea id="parts-prompt" rows="3" maxlength="8000" ${tab==='ai'?'required':''} placeholder="e.g. A small display, no soldering"></textarea><button class="button primary" type="submit">${tab==='link'?'Research this link ↗':codexMark+' codex'}</button></form>`;
    $('#parts-research-form').onsubmit=e=>{e.preventDefault();const link=$('#parts-link')?.value.trim();research({mode:tab==='link'?'link':'parts',prompt:$('#parts-prompt').value.trim()||(link?'Identify this exact part and how it could fit the current assembly.':''),links:link?[link]:[],images:[]});};
@@ -104,7 +105,7 @@ export function mountProduct(app){
  }
  function reviewResearch(){if(researchResult)showProposal(researchResult,false);else findParts('ai');}
  $('#find-parts').onclick=()=>findParts();$('#empty-find').onclick=()=>findParts();assistant=mountAssistant({...app,getKey:()=>apiKey,ensureKey:next=>apiKey?next():connect(next)});
- mountMobileMenu();
+ mountWorkspaceMenu();
  app.register({findParts,showHome,showWorkspace,reviewResearch,refreshProjects});
  if(app.route||(new URLSearchParams(location.search).get('workspace')==='1'&&app.getState().instances.length)){showWorkspace();app.fit();}else showHome();
 }

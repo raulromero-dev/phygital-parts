@@ -123,3 +123,12 @@ Cancel aborts research and model requests, retains draft parts, and unlocks
 editing. Reload marks running builds interrupted and never silently re-bills.
 Signed-out builds use an isolated localStorage namespace. Signed-in builds use
 a new private cloud project and an account-scoped local cache.
+
+### Public snapshots
+
+`src/sharing.js` loads `/share/:token` through an anonymous-capable RPC. The
+workbench remains interactive for inspection, with mutations gated by Remix.
+The DB copies an explicit allowlist into `project_shares`; it does not relax RLS
+on `projects`. Remix inserts a new document for the authenticated caller and
+navigates to its private cloud route. Publishing is revision-checked, updates
+are explicit, and revocation deletes the snapshot while retaining private rows.

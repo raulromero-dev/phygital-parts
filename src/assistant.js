@@ -11,7 +11,7 @@ export function mountAssistant(app){
  const $=s=>document.querySelector(s);
  let selected=null,pending=false,abort=null,messages=[],sequence=0,build=null,buildTimer,gameOpening=false,projectGeneration=0;
  let historyKey=app.getStorageKey()+'.chat';
- function readHistory(){try{return cleanChat(JSON.parse(localStorage.getItem(historyKey)||'[]')).map(m=>({...m,id:++sequence}));}catch{return [];}}
+ function readHistory(){if(app.isShared?.())return [];try{return cleanChat(JSON.parse(localStorage.getItem(historyKey)||'[]')).map(m=>({...m,id:++sequence}));}catch{return [];}}
  messages=readHistory();
  const root=document.createElement('aside');root.className='codex-chat';root.id='codex-chat';root.hidden=true;root.setAttribute('aria-label','Codex assistant');
  root.innerHTML=`<header class="chat-header"><strong>${codexMark}<span>codex</span></strong><div><button id="chat-game" class="chat-game-trigger" aria-label="Play Cable Hop" title="Play Cable Hop"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 8h5v8H3zM8 10h3m-3 4h3M2 10H0m2 4H0M11 12c5-8 8 8 13 0" stroke-linecap="round" stroke-linejoin="round"/></svg></button><button id="chat-expand" aria-label="Expand chat" title="Expand chat">⤢</button><button id="chat-minimize" aria-label="Minimize chat" title="Minimize chat">−</button></div></header><div id="chat-messages" class="chat-messages" role="log" aria-label="Chat history" aria-live="polite"></div><div class="chat-compose"><div id="chat-context" class="chat-context"></div><form id="chat-form"><label class="sr-only" for="chat-prompt">Message codex</label><textarea id="chat-prompt" required maxlength="4000" rows="2" placeholder="Adjust this build…"></textarea><div class="chat-send-row"><span id="chat-status">Tap a part to attach it.</span><button type="button" id="chat-stop" hidden>Stop</button><button type="submit" id="chat-send" aria-label="Send message">↑</button></div></form></div>`;
@@ -63,7 +63,7 @@ export function mountAssistant(app){
    try{app.applyAdjustment(message.proposal,message.base);message.applied=true;renderMessages();app.toast('Changes applied. Undo is available.');}catch(error){app.toast(error.message);}
   });
   log.scrollTop=log.scrollHeight;
-  try{localStorage.setItem(historyKey,JSON.stringify(cleanChat(messages)));}catch{}
+  try{if(!app.isShared?.())localStorage.setItem(historyKey,JSON.stringify(cleanChat(messages)));}catch{}
   document.dispatchEvent(new CustomEvent('phygital:chat',{detail:{key:historyKey,chat:cleanChat(messages)}}));
  }
  async function send(prompt,target){
@@ -101,14 +101,12 @@ export function mountAssistant(app){
 
 }
 
-export function mountMobileMenu(){
+export function mountWorkspaceMenu(){
  const bar=document.querySelector('.topbar'),menu=document.createElement('details');menu.className='mobile-menu';
  menu.innerHTML='<summary aria-label="Project menu" title="Project menu">⋯</summary><div class="mobile-menu-content"></div>';
  bar.append(menu);const content=menu.querySelector('.mobile-menu-content');
- const entries=['account-button','connect-ai','theme-toggle','snapshots-btn','export-btn'].map(id=>{const node=document.getElementById(id),slot=document.createComment(id+' desktop position');node.before(slot);return {node,slot};});
- const query=matchMedia('(max-width:650px)');
- function arrange(){for(const {node,slot}of entries)if(query.matches)content.append(node);else slot.after(node);menu.open=false;}
- query.addEventListener('change',arrange);arrange();
+ const entries=['account-button','connect-ai','theme-toggle','snapshots-btn','export-btn','undo-btn','redo-btn'].map(id=>document.getElementById(id));
+ for(const node of entries){content.append(node);if(['undo-btn','redo-btn'].includes(node.id))node.insertAdjacentHTML('beforeend','<span>'+node.getAttribute('aria-label')+'</span>');}
  menu.addEventListener('click',event=>{if(event.target.closest('button')&&event.target.closest('button').id!=='theme-toggle')menu.open=false;});
  document.addEventListener('click',event=>{if(!menu.contains(event.target))menu.open=false;});
  document.addEventListener('keydown',event=>{if(event.key==='Escape')menu.open=false;});

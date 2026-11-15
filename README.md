@@ -290,3 +290,11 @@ clear six header gaps and dock into a chip. P pauses; Escape closes. Builds
 continue in the background. The game needs no key or AI requests, keeps
 only the best local score, pauses when hidden, and disposes its graphics on close.
 The blue PCB, connector, metal pins and wire models are original game art.
+
+### Share a project
+
+Choose **Share → Create share link**. Visitors can explore the layout and cable
+mapping without signing in. **Remix** creates a separate project in their own
+Google account. Update the published version or turn the link off from Share.
+Chat, prompts and private project notes are excluded. See [account and sharing
+setup](docs/ACCOUNTS.md) for the database contract.

@@ -8,13 +8,14 @@ export function cloudClient(){
  return url&&key?createClient(url,key,{auth:{flowType:'pkce',detectSessionInUrl:true,persistSession:true,autoRefreshToken:true}}):null;
 }
 export function mountAccounts(app){
- const client=cloudClient();let user=null,rows=[],active=null,queue=null,timer,epoch=0,initial=true,listError='',lastQueued='';
+ const client=cloudClient();let ready=Promise.resolve(),user=null,rows=[],active=null,queue=null,timer,epoch=0,initial=true,listError='',lastQueued='';
  const $=s=>document.querySelector(s),button=$('#account-button');
  function notify(){button.textContent=user?'Account':'Sign in';button.title=user?.email||'Save projects with Google';app.refresh();}
  function chat(){try{return cleanChat(JSON.parse(localStorage.getItem(app.key()+'.chat')||'[]'));}catch{return [];}}
  function draft(){return {document:validateState(app.state()),chat:chat()};}
  function status(value){if(active)app.status(value);}
  function cache(value,dirty,revision){if(!active)return;try{localStorage.setItem(active.key+'.sync',JSON.stringify({...value,dirty,revision}));}catch{app.toast('Local backup unavailable. Keep this tab open until account saving finishes.');}}
+ async function rpc(name,args){if(!client)throw Error('Account sharing is not configured here.');const {data,error}=await client.rpc(name,args);if(error)throw error;return data;}
  async function write(id,value,revision){const {data,error}=await client.rpc('save_project',{p_id:id,p_document:value.document,p_chat:cleanChat(value.chat),p_expected_revision:revision});if(error)throw error;return data[0];}
  function start(row,key){
   queue?.stop();active={id:row.id,key};lastQueued='';
@@ -62,8 +63,31 @@ export function mountAccounts(app){
   if(!user)throw Error('Sign in before saving to your account.');
   const owner=user.id,id=crypto.randomUUID(),document=validateState(value);document.name=name.trim();if(!document.name||document.name.length>120)throw Error('Use a name up to 120 characters.');
   const row=await write(id,{document,chat:cleanChat(history)},null);if(user?.id!==owner)throw Error('Account changed. Sign in again to open your saved project.');
-  await queue?.flush();queue?.stop();active=null;app.navigate('/projects/cloud-'+id);app.load(document,cloudKey(user.id,id),cleanChat(history));app.lock(false);start(row,cloudKey(user.id,id));cache({document,chat:cleanChat(history)},false,row.revision);lastQueued=JSON.stringify({document,chat:cleanChat(history)});rows.unshift(card(row));status('saved');notify();app.closeDialog();
+  await adopt(row);
  }
+ async function adopt(row){
+  const document=validateState(row.document),history=cleanChat(row.chat);
+  await queue?.flush();if(row.owner_id!==user?.id)throw Error('Account changed. Open the project from your account.');queue?.stop();active=null;app.navigate('/projects/cloud-'+row.id);app.load(document,cloudKey(user.id,row.id),history);app.lock(false);start(row,cloudKey(user.id,row.id));cache({document,chat:history},false,row.revision);lastQueued=JSON.stringify({document,chat:history});rows.unshift(card(row));status('saved');notify();app.closeDialog();
+ }
+ async function publish(){
+  if(!user)throw Error('Sign in to share.');
+  if(!app.route()?.cloud)await saveCopy(app.state(),app.state().name);
+  const owner=user.id,id=active?.id;save();await queue?.flush();
+  if(user?.id!==owner||active?.id!==id)throw Error('Account or project changed. Try again.');
+  if(queue?.dirty)throw Error('Save your changes before publishing.');
+  return (await rpc('publish_project',{p_id:id,p_expected_revision:queue.revision}))[0];
+ }
+ async function sharedVersion(){
+  if(!app.route()?.cloud||!active)return null;
+  const {data,error}=await client.from('project_shares').select('token,updated_at').eq('project_id',active.id).maybeSingle();if(error)throw error;return data;
+ }
+ async function remix(token){
+  if(!user)throw Error('Sign in to remix.');const owner=user.id;
+  const rows=await rpc('remix_shared_project',{p_token:token});
+  if(user?.id!==owner)throw Error('Account changed. Sign in again to open your remix.');
+  await adopt(rows[0]);
+ }
+
  function save(){
   if(!queue||!active||app.key()!==active.key)return;
   const value=draft(),json=JSON.stringify(value);if(json===lastQueued)return;lastQueued=json;cache(value,true,queue.revision);queue.enqueue(value);clearTimeout(timer);timer=setTimeout(()=>queue.flush(),600);
@@ -76,7 +100,7 @@ export function mountAccounts(app){
  button.onclick=accountDialog;
  document.addEventListener('phygital:chat',save);window.addEventListener('online',()=>queue?.retry());
  window.addEventListener('beforeunload',event=>{if(queue?.dirty){event.preventDefault();event.returnValue='';}});
- if(client){client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>setUser(session?.user||null),0);});client.auth.getSession().then(async({data,error})=>{
+ if(client){client.auth.onAuthStateChange((_event,session)=>{setTimeout(()=>setUser(session?.user||null),0);});ready=client.auth.getSession().then(async({data,error})=>{
    if(error)app.toast('Google sign-in could not finish. Please try again.');
    await setUser(data.session?.user||null);
    if(new URLSearchParams(location.search).get('auth')==='callback'){
@@ -85,7 +109,7 @@ export function mountAccounts(app){
    }
   });
  }else if(app.route()?.cloud){app.lock(true);app.gate('Account saving is not configured here.',signIn);}
- return {get user(){return user;},get rows(){return rows;},get error(){return listError;},save,saveCopy,signIn,refresh,
+ return {get ready(){return ready;},rpc,publish,sharedVersion,remix,revokeShare:()=>rpc('revoke_project_share',{p_id:active.id}),get user(){return user;},get rows(){return rows;},get error(){return listError;},save,saveCopy,signIn,refresh,
   newProject(id){if(!user)throw Error('Sign in first.');const key=cloudKey(user.id,id);start({id,revision:null},key);return key;},
   retry:()=>queue?.retry(),detach(){clearTimeout(timer);queue?.stop();queue=null;active=null;},get dirty(){return queue?.dirty;}};
 }
