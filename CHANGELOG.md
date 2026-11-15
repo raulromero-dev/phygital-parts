@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-14 · Codex for Raul · main · links in the prompt
+
+Removed the separate homepage links field. The prompt placeholder now says
+“share part links”; pasted URLs are extracted into the research request.
+
 ## 2026-11-14 · Codex for Raul · main · project heading
 
 Changed PROJECT to Project and matched the Parts heading typography.

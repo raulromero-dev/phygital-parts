@@ -51,7 +51,8 @@ for the internal map and Grove expansion contacts. Source and license bundle:
 Find parts cards show names, dimensions and purchasing actions first. Interface
 text and research descriptions are available in collapsed details. Research
 and link forms use brief labels instead of introductory subtitles. The homepage
-keeps project/product links visible in the composer. First-prompt research shows
+accepts part links directly in the main prompt, without a separate links field.
+First-prompt research shows
 inline stages, elapsed time and cancellation, followed by a Review parts action.
 Stages come from provider events; no percentage is invented. A small spacecraft
 dodges a four-pin cable during research, model loading and chat replies, with a
