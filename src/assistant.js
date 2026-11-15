@@ -21,7 +21,7 @@ export function mountAssistant(app){
  function renderContext(){
   const state=app.getState(),part=selected&&state.instances.some(p=>p.id===selected)?partFor(state,selected):null;
   if(!part)selected=null;
-  $('#chat-context').innerHTML=part?`<span>↳ ${esc(part.short)}</span><button id="chat-clear-part" aria-label="Remove part context">×</button>`:'<span class="chat-project-context">This assembly</span>';
+  $('#chat-context').innerHTML=part?`<span>↳ ${esc(part.short)}</span><button id="chat-clear-part" aria-label="Remove part context">×</button>`:'';
   $('#chat-clear-part')?.addEventListener('click',()=>{selected=null;renderContext();});
  }
  function describe(proposal,state){

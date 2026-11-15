@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-14 · Codex for Raul · main · quieter chat composer
+
+Removed the default “This assembly” label and its empty space from Codex chat.
+Selected parts still show their removable context chip.
+
 ## 2026-11-14 · Codex for Raul · main · homepage and Codex branding
 
 Removed the Phygital shortcut from the homepage examples and placed Makeup
