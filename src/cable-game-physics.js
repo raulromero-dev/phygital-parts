@@ -1,4 +1,4 @@
-export const GAME={left:-8,right:8,top:5,bottom:-5,playerX:-4.8,halfWidth:.48,halfHeight:.33,gravity:9.6,jump:4.4,speed:2.65,gap:4.1,gateWidth:.68,spacing:5.4,total:6};
+export const GAME={left:-8,right:8,top:5,bottom:-5,playerX:-4.8,halfWidth:.30,halfHeight:.30,gravity:9.6,jump:4.4,speed:2.65,gap:4.1,gateWidth:.68,spacing:5.4,total:6};
 export function newFlight(random=Math.random){
  return {phase:'ready',y:0,velocity:0,distance:0,score:0,time:0,gateCenters:Array.from({length:GAME.total},(_,i)=>i===GAME.total-1?0:(random()-.5)*3.6),reason:null};
 }

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-15 · Compact Cable Hop connector
+
+Changed arcade labels to sentence case. Replaced the oversized plug with a
+smaller keyed four-pin housing, recessed terminals, retaining latch and thinner
+wires, plus a matching open board header. Adjusted the hitbox and docking pose
+to the new proportions.
+
 ## 2026-11-15 · Text activity and Cable Hop
 
 Replaced the decorative spacecraft loader with concise action text. Added an

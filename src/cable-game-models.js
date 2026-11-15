@@ -16,13 +16,27 @@ function print(group,text,size,position,color='#d8e1e3'){
  const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;const plane=new THREE.Mesh(new THREE.PlaneGeometry(...size),new THREE.MeshBasicMaterial({map:texture,transparent:true,depthWrite:false}));plane.position.set(...position);group.add(plane);
 }
 export function cableModel(m){
- const group=new THREE.Group();box(group,[1.05,.77,.53],[0,0,0],m.housing,.09);box(group,[.62,.5,.08],[-.08,0,.3],m.housing,.035);box(group,[.18,.37,.06],[.2,0,.35],m.housing,.015);
+ // Compact keyed wire-to-board plug: four recessed crimp terminals, a small
+ // retaining latch and thin insulated leads, rather than exposed male blades.
+ const group=new THREE.Group();
+ box(group,[.49,.60,.28],[-.025,0,0],m.housing,.022);
+ box(group,[.12,.60,.035],[.265,0,-.122],m.housing,.008);
+ box(group,[.12,.60,.035],[.265,0,.122],m.housing,.008);
+ for(const y of [-.283,.283])box(group,[.12,.035,.25],[.265,y,0],m.housing,.006);
+ for(const y of [-.13,0,.13])box(group,[.12,.024,.25],[.265,y,0],m.housing,.005);
+ box(group,[.22,.31,.035],[-.04,0,.155],m.housing,.01);
+ box(group,[.055,.31,.035],[.06,0,.18],m.housing,.006);
+ for(const y of [-.27,.27])box(group,[.35,.025,.025],[-.03,y,.145],m.housing,.005);
  for(let i=0;i<4;i++){
-  const y=(i-1.5)*.17;box(group,[.05,.125,.3],[.54,y,0],m.socket,.015);box(group,[.28,.07,.075],[.63,y,.015],m.gold,.012);box(group,[.15,.105,.25],[-.56,y,0],m.socket,.025);
+  const y=(i-1.5)*.13;
+  box(group,[.012,.098,.17],[.226,y,0],m.socket,.004);
+  box(group,[.045,.055,.012],[.249,y,-.057],m.solder,.003);
+  box(group,[.055,.075,.008],[-.18,y,.143],m.socket,.003);
+  box(group,[.026,.045,.009],[-.178,y,.149],m.solder,.002);
   const wire=new THREE.MeshStandardMaterial({color:['#242832','#c3a14f','#e8e2d5','#af4b3f'][i],roughness:.38});
-  tube(group,[[-2.35,.46+y,.02],[-1.82,-.18+y,.04],[-1.16,-.22+y,.02],[-.61,y,0]],wire,.045);
+  tube(group,[[-1.65,.38+y,.01],[-1.20,-.13+y,.025],[-.65,-.14+y,.01],[-.27,y,0]],wire,.026);
  }
- print(group,'PH · 04',[.48,.12],[-.1,0,.35],'#666b71');return group;
+ return group;
 }
 export function chipModel(m){
  const group=new THREE.Group();box(group,[2.5,2.4,.14],[0,0,0],m.edge,.12);box(group,[2.5,2.4,.065],[0,0,.095],m.pcb,.11);box(group,[1.04,1.04,.16],[0,0,.25],m.chip,.06);box(group,[.95,.95,.025],[0,0,.34],m.chip,.03);
@@ -33,8 +47,14 @@ export function chipModel(m){
  }
  for(const x of [-.99,.99])for(const y of [-.93,.93]){const ring=new THREE.Mesh(new THREE.TorusGeometry(.075,.018,8,24),m.gold);ring.position.set(x,y,.15);group.add(ring);const hole=new THREE.Mesh(new THREE.CircleGeometry(.056,24),m.socket);hole.position.set(x,y,.14);group.add(hole);}
  for(let i=0;i<3;i++){box(group,[.12,.06,.07],[.66+i*.17,-.74,.17],m.solder,.01);box(group,[.1,.055,.07],[.66+i*.17,-.74,.18],m.chip,.008);}
- print(group,'PHY',[.72,.2],[0,.08,.36]);print(group,'04',[.26,.1],[0,-.19,.36]);print(group,'P H Y G I T A L',[1.45,.14],[0,-.99,.15]);
- box(group,[.4,.9,.34],[-1.26,0,.24],m.housing,.04);for(let i=0;i<4;i++)box(group,[.05,.12,.18],[-1.48,(i-1.5)*.18,.28],m.socket,.01);return group;
+ print(group,'phy',[.72,.2],[0,.08,.36]);print(group,'04',[.26,.1],[0,-.19,.36]);print(group,'phygital',[1.05,.14],[0,-.99,.15]);
+ // Matching right-angle PCB header: open shroud, four contacts and solder feet.
+ box(group,[.30,.69,.04],[-1.27,0,.17],m.housing,.008);
+ box(group,[.30,.69,.04],[-1.27,0,.47],m.housing,.008);
+ for(const y of [-.325,.325])box(group,[.30,.04,.28],[-1.27,y,.32],m.housing,.008);
+ box(group,[.035,.65,.28],[-1.105,0,.32],m.housing,.006);
+ for(let i=0;i<4;i++){const y=(i-1.5)*.13;box(group,[.19,.027,.027],[-1.22,y,.32],m.solder,.004);box(group,[.13,.045,.025],[-1.01,y,.15],m.solder,.004);}
+ return group;
 }
 export function gateModel(m,length){
  const group=new THREE.Group();box(group,[.52,length,.38],[0,length/2,0],m.chip,.045);box(group,[.68,.24,.5],[0,.12,0],m.socket,.035);
