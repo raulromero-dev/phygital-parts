@@ -31,7 +31,7 @@ Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for boundaries and data flow;
 | Ports, cable mapping, circuit checks | `src/connections.js`, `src/planning.js` |
 | Research API and streamed progress | `server/research.mjs`, `server/research-stream.mjs`, `src/research-progress.js` |
 | Request/proposal validation | `server/schema.mjs`, `src/product-data.js` |
-| Shared ship/cable loading animation | `src/loading.js`, `src/loading.css` |
+| Text progress and optional Cable Hop game | `src/loading.js`, `src/cable-game*.js`, `src/cable-game.css` |
 
 ## Keep these invariants
 
@@ -52,7 +52,8 @@ Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for boundaries and data flow;
   Keep light/dark mode, responsive layouts and reduced-motion support.
 - Chat lives in the floating right-side window. Its label is the Codex mark plus
   `codex`; no model name in the launcher. Selected part context is removable;
-  there is no default “This assembly” chip.
+  there is no default “This assembly” chip. Loading shows actual action text;
+  Cable Hop is opt-in and never changes assembly or research state.
 - First prompts open a dedicated `/projects/build-<uuid>` workspace and Codex
   window. Validated draft parts appear progressively; actual provider events
   drive progress. Cancel/error retain drafts; reload marks unfinished builds

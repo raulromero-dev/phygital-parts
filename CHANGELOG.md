@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-15 · Text activity and Cable Hop
+
+Replaced the decorative spacecraft loader with concise action text. Added an
+optional 3D cable-jumping game inside Codex: detailed four-wire plug, metallic
+header obstacles, gold PCB contacts and a chip docking target. Includes touch
+and keyboard controls, pause/resume, replay, local best score, background-build
+status and graphics cleanup. Removed obsolete three-step loader styles.
+
+Validation: flight physics, collision, pause, scoring and a complete six-gate
+run; browser checks for desktop/mobile, themes, controls and text progress.
+
 ## 2026-11-14 · Progressive projects and source models
 
 First prompts open isolated project URLs with the Codex window showing real

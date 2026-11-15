@@ -1,17 +1,6 @@
-.cable-escape{--escape-accent:#257c70;--escape-pin:#aa8b48;display:flex;flex-direction:column;align-items:center;gap:7px;color:var(--mono-ink);max-width:100%}
-.cable-escape-scene{display:block;width:240px;max-width:100%;height:auto;overflow:hidden}
-.cable-escape-label{font-size:12px;line-height:1.5;color:var(--mono-muted)}
-.escape-ship{animation:escape-flight 3.6s ease-in-out infinite;transform-origin:180px 50px}
-.escape-cable{animation:escape-chase 3.6s ease-in-out infinite;transform-origin:100px 45px}
-.escape-thrust{animation:escape-engine .6s ease-in-out infinite alternate;transform-origin:158px 50px}
-.escape-stars{animation:escape-drift 3.6s linear infinite}
-.cable-escape--compact{align-items:flex-start;gap:0}
-.cable-escape--compact .cable-escape-scene{width:164px}
-.cable-escape--compact .cable-escape-label{font-size:11px}
-.model-loading:has(.cable-escape){border:1px solid var(--mono-border);border-radius:14px;padding:14px 22px 19px;box-shadow:0 8px 28px #00000008;pointer-events:none}
-:root[data-theme="dark"] .cable-escape{--escape-accent:#65b8a9;--escape-pin:#cab476}
-@keyframes escape-flight{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(9px,-18px) rotate(-12deg)}48%{transform:translate(19px,12px) rotate(9deg)}74%{transform:translate(-2px,16px) rotate(-4deg)}}
-@keyframes escape-chase{0%,100%{transform:translate(0,0) rotate(0)}25%{transform:translate(15px,-5px) rotate(-9deg)}52%{transform:translate(8px,-8px) rotate(7deg)}78%{transform:translate(14px,6px) rotate(5deg)}}
-@keyframes escape-engine{from{opacity:.4;transform:scaleX(.65)}to{opacity:1;transform:scaleX(1)}}
-@keyframes escape-drift{from{transform:translateX(6px);opacity:.18}to{transform:translateX(-20px);opacity:.05}}
-@media(prefers-reduced-motion:reduce){.cable-escape *{animation:none!important}}
+.loading-action{display:flex;align-items:center;min-height:24px;color:var(--mono-muted);font-size:12px;line-height:1.6}
+.loading-label{animation:action-breathe 2.8s ease-in-out infinite}
+.loading-action--compact{font-size:12px}
+.model-loading:has(.loading-action){border:1px solid var(--mono-border);border-radius:12px;padding:12px 18px;background:var(--mono-paper);box-shadow:0 8px 28px #00000008;pointer-events:none}
+@keyframes action-breathe{0%,100%{opacity:.65}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){.loading-label{animation:none}}

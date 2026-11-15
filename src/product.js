@@ -63,7 +63,7 @@ export function mountProduct(app){
   app.dialog('Researching your parts',`<div class="research-progress">${loadingIndicator('Finding parts…')}<div class="research-actions"><span id="research-elapsed">0s</span><button class="text-button" id="cancel-research">Cancel</button></div></div>`);
   const progressRoot=$('.research-progress'),cancel=()=>current.abort();$('#cancel-research').onclick=cancel;$('#dialog').addEventListener('close',cancel,{once:true});
   const timer=setInterval(()=>{const el=progressRoot.querySelector('#research-elapsed');if(el)el.textContent=`${Math.floor((Date.now()-started)/1000)}s`;},1000);
-  const update=({phase})=>{if(!current.signal.aborted)progressRoot.querySelector('.cable-escape-label').textContent=RESEARCH_PHASES[phase];};
+  const update=({phase})=>{if(!current.signal.aborted)progressRoot.querySelector('.loading-label').textContent=RESEARCH_PHASES[phase];};
   try{
    const response=await fetch('/api/research',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',Authorization:'Bearer '+apiKey},body:JSON.stringify({...request,context:context(),catalog:library.map(p=>({id:p.id,name:p.name,dimensions:p.dimensions,interface:p.interface,ports:PORTS[p.id]||[]}))}),signal:current.signal});
    const data=await readResearchResponse(response,update);if(current.signal.aborted)return;researchResult=data;showProposal(data,false);

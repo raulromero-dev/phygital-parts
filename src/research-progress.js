@@ -1,4 +1,4 @@
-export const RESEARCH_PHASES={research:'Researching your idea…',searching:'Searching component sources…',drafting:'Preparing your assembly proposal…',checking:'Checking the proposal…'};
+export const RESEARCH_PHASES={research:'Finding parts…',searching:'Searching sources…',drafting:'Planning the assembly…',checking:'Validating the assembly…'};
 
 export async function readResearchResponse(response,onProgress,onPart=()=>{}){
  if(!response.headers.get('content-type')?.includes('application/x-ndjson')){

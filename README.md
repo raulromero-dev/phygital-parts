@@ -56,9 +56,9 @@ A first prompt opens its own project URL with the floating Codex window open.
 Validated draft parts appear progressively, followed by source CAD or an
 image-derived model. Codex shows real progress, elapsed time and Stop.
 Canceled or interrupted builds retain their draft parts.
-Stages come from provider events; no percentage is invented. A small spacecraft
-dodges a four-pin cable during research, model loading and chat replies, with a
-static version for reduced motion.
+Stages come from provider events; no percentage is invented. Loading shows quiet
+action text. The optional Cable Hop game opens from Codex while work continues
+in the background.
 
 ## For agents and contributors
 
@@ -259,3 +259,13 @@ Each component retains its model evidence under **Source & evidence**. Missing,
 large or unsupported CAD can fall back to image reconstruction or a labeled
 envelope. This flow does not filter source CAD by redistribution-license status.
 OpenCascade runtime notices are in `public/third-party/`.
+
+### Cable Hop
+
+Codex progress uses text describing real research and modelling actions. The
+optional **Cable Hop** button in the Codex header (also available during builds)
+opens a separate 3D minigame. Tap or press Space to lift a four-wire connector,
+clear six header gaps and dock into a chip. P pauses; Escape closes. Builds
+continue in the background. The game needs no key or AI requests, keeps
+only the best local score, pauses when hidden, and disposes its graphics on close.
+The blue PCB, connector, metal pins and wire models are original game art.
