@@ -7,7 +7,8 @@ export const WATCH_SOURCES={
  hardware:'https://wiki.seeedstudio.com/get_start_round_display/',
  firmware:'https://github.com/Seeed-Studio/Seeed_Arduino_RoundDisplay',
  case:'https://files.seeedstudio.com/wiki/round_display_for_xiao/Round-Display-shell-3D-Model.stl',
- battery:'https://www.adafruit.com/product/1578'
+ battery:'https://www.lithium-polymer-battery.net/iec62133-certified-lpr553535-3-7v-600mah-2-22wh-round-lithium-polymer-battery-with-pcm-wires-jst-phr-2/',
+ batteryDrawing:'https://www.lithium-polymer-battery.net/wp-content/uploads/2024/02/LPR553535-600mAh.pdf'
 };
 export const WATCH_SIGNALS=[
  ['d0','Battery measurement · switchable','analog',0,7],
@@ -35,6 +36,10 @@ export const WATCH_PORTS={
   {id:'positive',label:'Pack + · meter polarity',signal:'power',rail:'cell',group:'JST-PH 2.0 · needs adapter',anchor:[.25,0,-1]},
   {id:'negative',label:'Pack − · meter polarity',signal:'ground',rail:'0',group:'JST-PH 2.0 · needs adapter',anchor:[-.25,0,-1]}
  ],
+ 'watch-round-battery':[
+  {id:'positive',label:'Pack + · meter polarity',signal:'power',rail:'cell',group:'JST-PHR-2 · needs adapter',anchor:[.18,0,-1]},
+  {id:'negative',label:'Pack − · meter polarity',signal:'ground',rail:'0',group:'JST-PHR-2 · needs adapter',anchor:[-.18,0,-1]}
+ ],
  'watch-antenna':[{id:'rf',label:'Included antenna · U.FL',signal:'rf',group:'Coax lead · measure length',anchor:[-1,0,0]}]
 };
 const base={owned:false,integrated:false,quantity:1,sources:[],photo:'Smartwatch starter · manufacturer references',tags:['Smartwatch'],category:'Candidate'};
@@ -53,7 +58,15 @@ export const WATCH_PARTS=[
   modelNote:'Existing battery visualization resized to the vendor envelope; not exact PID 1578 CAD.',
   placement:'Below the electronics, with insulation and pouch clearance. The 102 mm lead needs routing space.',
   electrical:'Adafruit permits charging at 500 mA or less. Verify actual Round Display current, polarity and a PH2.0-to-1.25 mm adapter before connecting. No direct plug fit is implied.',
-  purchaseLinks:[['Buy at Adafruit',WATCH_SOURCES.battery]],links:[['Battery specifications',WATCH_SOURCES.battery]]},
+  purchaseLinks:[['Buy at Adafruit','https://www.adafruit.com/product/1578']],links:[['Battery specifications','https://www.adafruit.com/product/1578']]},
+ {...base,id:'watch-round-battery',name:'LiPol LPR553535 · round 600 mAh LiPo',short:'Round 600 mAh LiPo',kind:'battery',color:'#c9b469',dimensions:[35,5.5,32],confidence:'partial',
+  interface:'3.7 V · PCM protection · JST PHR-2',
+  summary:'Round watch battery candidate. Request stock and sample pricing from LiPol; the supplier lists a five-piece minimum for stocked cells.',
+  dimensionNote:'Manufacturer drawing: Ø35 mm, 32 mm across the flattened side, 5.5 mm maximum thickness. 50 ± 3 mm lead and plug need separate routing clearance.',
+  modelNote:'Blender planning model based on the manufacturer drawing. Foil, seam and protection-board details are approximate; not manufacturer CAD.',
+  placement:'Centred below the watch electronics. Keep the flat lead edge accessible and leave insulation and pouch clearance.',
+  electrical:'HOLD: datasheet maximum charge current is 300 mA (standard 120 mA); the Round Display lists approximately 485 mA. Reduce and verify the charger current or select a suitable charging path before connecting. PHR-2 also needs a verified adapter to the 1.25 mm socket.',
+  purchaseLinks:[['LiPol · request samples / quote',WATCH_SOURCES.battery]],links:[['Manufacturer drawing & charge limits',WATCH_SOURCES.batteryDrawing]]},
  {...base,id:'watch-antenna',modelId:'strip',name:'XIAO ESP32-S3 included antenna',short:'Included antenna',kind:'strip',color:'#aa7945',dimensions:[45,1,10],confidence:'estimate',
   interface:'2.4 GHz · U.FL coax',summary:'The XIAO product includes an antenna. This reserved envelope needs measurement against the shipped version.',
   dimensionNote:'45 × 10 × 1 mm is a planning allowance, not a vendor dimension. Measure antenna and lead.',

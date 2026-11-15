@@ -1,5 +1,6 @@
 import { EXTRA_PARTS } from './options.js';
 import { WATCH_PARTS } from './smartwatch.js';
+import { AIR_SENSOR } from './air-monitor.js';
 import { seedConnections } from './connections.js';
 // Sources describe the photographed parts and chip specifications separately. A chip
 // datasheet must never silently certify an unknown seller's breakout board.
@@ -30,7 +31,7 @@ export const CATALOG = [
   { id:'grove-tail', name:'Grove cable with exposed ends', short:'Grove pigtail', category:'Optional', kind:'connector', color:'#b0a25a', owned:true, integrated:false, dimensions:[10,5,8], confidence:'estimate', dimensionNote:'Connector proxy only. Measure free cable length, strip length and solder clearance.', interface:'4-pin Grove-style → exposed conductors', quantity:1, summary:'Cut or stripped cable ends visible in the bench photo. Useful for adapting a module after tracing every conductor.', placement:'Insulate exposed conductors and add strain relief after soldering.', electrical:'Meter continuity from connector contacts to each loose end. Physical pin order is unverified.', sources:[], photo:'10.38.10 AM · bench photo', tags:['Cable','Exposed ends'] },
   { id:'jumper', name:'Individual jumper leads', short:'Jumper leads', category:'Optional', kind:'connector', color:'#c17449', owned:true, integrated:false, dimensions:[3,3,12], confidence:'estimate', dimensionNote:'One end connector proxy; cable length and exact end types need inspection.', interface:'Single conductor · header-style ends', quantity:1, summary:'Orange jumper leads visible in the bench photo, with exposed male pins on several ends. Count and all end types need inspection.', placement:'For prototyping; provide retention and avoid loose exposed pins near the battery.', electrical:'Each lead is a conductor, not a voltage converter. Verify continuity and socket fit.', sources:[], photo:'10.38.10 AM · bench photo', tags:['Cable','Count pending'] },
 ];
-CATALOG.push(...EXTRA_PARTS,...WATCH_PARTS);
+CATALOG.push(...EXTRA_PARTS,...WATCH_PARTS,AIR_SENSOR);
 // A public model library does not imply ownership or a specific user's project.
 for(const p of CATALOG){p.owned=false;p.sources=(p.sources||[]).filter(id=>id!=='hardware');p.photo='Reference model library · verify product revision';}
 const genericDescriptions={

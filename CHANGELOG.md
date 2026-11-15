@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-11-14 · Codex for Raul · main · prebuilt examples and simpler homepage
+
+Changed the smartwatch starter to a LiPol LPR553535 round 600 mAh candidate
+with a dedicated Blender planning mesh, source drawing and sample-order link.
+Flagged its 300 mA charge ceiling against the board’s approximately 485 mA
+setting; kept battery wiring on hold. Untouched saved starters update on reload;
+edited or wired Adafruit battery layouts retain the original part.
+Added an outline board wordmark, a blue/green headline board that spins once
+on arrival, and very subtle animated circuit traces with reduced-motion support.
+Removed Start empty, the extra tagline, model label, separate sample link and
+prompt resize handle. Custom builds require a non-empty prompt.
+All four example chips now load prebuilt layouts and mapped connections locally.
+The air monitor reuses Sensirion SCD4x CAD plus Seeed Grove PCB data; wearable
+haptics reuse the reviewed four-channel hub plan.
+
+Connected phygitalstudio.app to the Vercel project.
+
+Validation: production build and all 54 tests pass, including all four example
+layouts, SCD41 netlist, haptic channel separation and saved-battery migration.
+Browser checked all four examples, selectable cable mappings, required prompt,
+round battery and mobile dark-mode homepage.
+
 ## 2026-11-14 · Codex for Raul · main · smartwatch starter
 
 Added a no-key smartwatch template with Seeed XIAO ESP32-S3, Round Display,

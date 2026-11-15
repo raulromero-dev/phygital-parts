@@ -1,16 +1,24 @@
 # Phygital Parts
 
+Live at [phygitalstudio.app](https://phygitalstudio.app/).
+
 A standalone hardware workbench for discovering components, visualizing their
 fit, planning real cables, and deciding what to buy. Start with a description,
 a reference photo plus a prompt, or public links to a project or product.
 
-The homepage also offers a **Smartwatch template** without an API key: a Seeed
-XIAO ESP32-S3, Round Display, included antenna allowance and Adafruit PID 1578
-battery candidate. It maps the 14 direct header contacts and antenna coax.
-The battery remains unconnected pending a verified connector adapter. Published
+The homepage offers four **prebuilt examples** without an API key: thermal camera,
+air monitor, wearable haptics and smartwatch. Each opens a populated 3D layout
+with proposed cable mappings, purchase links and review notes.
+
+The smartwatch uses a Seeed
+XIAO ESP32-S3, Round Display, included antenna allowance and LiPol LPR553535
+round 600 mAh battery candidate. It maps the 14 direct header contacts and antenna coax.
+The battery remains unconnected: its 300 mA charge limit is below the board’s
+approximately 485 mA setting, and its PHR-2 plug requires an adapter. LiPol lists
+a five-piece minimum for stocked samples; confirm availability and pricing. Published
 PCB data and the existing XIAO CAD are reused; thickness, antenna geometry and
-the proposed enclosure are estimates. Open the template's build notes for
-manufacturer purchase links, pinouts, open-source examples and printable case.
+the proposed enclosure are estimates. Inspect each part for manufacturer purchase links and pinouts; the project
+includes open-source examples and a printable case reference.
 
 This repository is independent of the original Phygital sensor firmware. It
 contains the product experience and a reusable reference-model library, not the
@@ -18,7 +26,7 @@ surveillance device's firmware or detection rules.
 
 ## Use
 
-1. Describe a project on the homepage, or open an empty workspace or sample.
+1. Describe a project on the homepage, or choose one of the four prebuilt examples.
 2. Connect your own OpenAI API key to use **GPT-6 Astra**. Research uses the
    Responses API, image input, web search and structured output.
 3. Review the proposed parts, sources, unknowns and conductors. Select the parts
@@ -32,7 +40,13 @@ surveillance device's firmware or detection rules.
    project between browsers, GLB for Blender, or CSV for the cable plan.
 
 The interface supports light/dark mode and Color/Mono component rendering.
-New projects start empty. The pocket thermal camera is an optional example.
+An outline board logo, a one-turn entrance animation and very faint circuit
+traces decorate the homepage; reduced-motion preferences disable animations.
+Custom builds require a typed description; there is no Start empty shortcut.
+The four examples load locally without an AI call. The air monitor reuses
+Sensirion sensor CAD and Seeed PCB data; its USB-C supply, firmware, ventilation
+and peak-current budget need review. Haptics use four separate multiplexer
+channels with the existing power-budget checks.
 Known exact parts reuse the existing CAD/model library. Unrecognized parts use
 clearly labeled, dimensioned parametric envelopes; they do not magically acquire
 manufacturer geometry. Research suggestions and pinouts need review.

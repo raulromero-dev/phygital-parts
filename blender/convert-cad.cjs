@@ -7,7 +7,7 @@ const occtImport = require('occt-import-js');
 (async () => {
   const occt = await occtImport();
   const requested=new Set(process.argv.slice(2));
-  for (const [id, file] of [['xiao','xiao-esp32s3.step'],['thermal-sensor','MLX90640_41_FOV_55_asm.stp'],['oled-938','oled-938.step'],['mosfet-5648','mosfet-5648.step'],['lcd-27579','lcd-27579.stp']]) {
+  for (const [id, file] of [['xiao','xiao-esp32s3.step'],['thermal-sensor','MLX90640_41_FOV_55_asm.stp'],['oled-938','oled-938.step'],['mosfet-5648','mosfet-5648.step'],['lcd-27579','lcd-27579.stp'],['scd4x','scd41/scd4x.step']]) {
     if(requested.size&&!requested.has(id))continue;
     const result = occt.ReadStepFile(fs.readFileSync(path.join(__dirname,'vendor',file)), {
       linearUnit: 'millimeter', linearDeflectionType:'absolute_value', linearDeflection:.015, angularDeflection:.15,

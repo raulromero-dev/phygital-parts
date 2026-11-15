@@ -65,8 +65,8 @@ test('smartwatch starter survives export/import with its complete header map',as
 });
 test('watch battery stays unconnected and on hold until its adapter is reviewed',async()=>{
  const {smartwatchTemplate}=await import('../src/templates.js');const s=smartwatchTemplate();
- assert.equal(s.decisions['watch-battery'],'Hold');assert.equal(s.connections.some(c=>(c.from+c.to).includes('watch-battery:')),false);
- assert.ok(checks(s).some(c=>c.title==='Watch battery needs an adapter'));assert.ok(checks(s).some(c=>c.title==='Watch pin allocation'));
+ assert.equal(s.decisions['watch-round-battery'],'Hold');assert.equal(s.connections.some(c=>(c.from+c.to).includes('watch-round-battery:')),false);
+ assert.ok(checks(s).some(c=>c.title==='Round battery charging mismatch'));assert.ok(checks(s).some(c=>c.title==='Watch pin allocation'));
 });
 test('watch header pin assignments agree with original Seeed v1.1 board nets',async()=>{
  const {readFileSync}=await import('node:fs');const {WATCH_SIGNALS}=await import('../src/smartwatch.js');
@@ -77,4 +77,49 @@ test('watch header pin assignments agree with original Seeed v1.1 board nets',as
 test('watch components can be duplicated and retain their visualization and contacts',async()=>{
  const {smartwatchTemplate}=await import('../src/templates.js');const s=smartwatchTemplate();const id=libraryPart(s,'watch-display');const clean=validateState(s);const copy=clean.custom.find(p=>p.id===id);
  assert.equal(copy.modelId,'watch-display');assert.equal(copy.ports.length,16);assert.match(copy.purchaseLinks[0][1],/seeedstudio/);
+});
+
+test('round battery starter uses a dedicated model and an explicit charging warning',async()=>{
+ const {smartwatchTemplate}=await import('../src/templates.js');const {PARTS}=await import('../src/catalog.js');const s=validateState(smartwatchTemplate());const p=PARTS['watch-round-battery'];
+ assert.deepEqual(s.instances.find(i=>i.id===p.id).dimensions,[35,5.5,32]);assert.equal(p.modelId,undefined);assert.match(p.electrical,/300 mA/);assert.match(p.electrical,/485 mA/);
+ assert.equal(checks(s).some(c=>c.level==='warn'&&c.title==='Round battery charging mismatch'),true);assert.equal(s.connections.some(c=>/watch-round-battery:/.test(c.from+c.to)),false);
+});
+test('refreshing an untouched watch starter upgrades its battery without overwriting edits',async()=>{
+ const {smartwatchTemplate,upgradeWatchBattery}=await import('../src/templates.js');
+ const old=()=>{const s=smartwatchTemplate();const p=s.instances.find(i=>i.id==='watch-round-battery');Object.assign(p,{id:'watch-battery',dimensions:[29,4.75,36],position:[0,3.375,4]});delete s.decisions['watch-round-battery'];s.decisions['watch-battery']='Hold';return s;};
+ const s=old();assert.equal(upgradeWatchBattery(s),true);assert.ok(validateState(s).instances.some(p=>p.id==='watch-round-battery'));assert.equal(upgradeWatchBattery(s),false);
+ const moved=old();moved.instances[0].position[0]=4;assert.equal(upgradeWatchBattery(moved),false);
+ const wired=old();wired.connections.push({from:'watch-battery:positive',to:'watch-display:bat+'});assert.equal(upgradeWatchBattery(wired),false);
+ const approved=old();approved.decisions['watch-battery']='Approve';assert.equal(upgradeWatchBattery(approved),false);
+});
+
+import { EXAMPLES, exampleTemplate } from '../src/templates.js';
+import { endpoint, activeConnections } from '../src/connections.js';
+import { readFileSync } from 'node:fs';
+test('all four prebuilt examples round-trip with active mapped connections and no envelope collisions',()=>{
+ assert.deepEqual(EXAMPLES.map(e=>e.id),['thermal-camera','air-monitor','wearable-haptics','smartwatch']);
+ for(const example of EXAMPLES){
+  const state=validateState(JSON.parse(JSON.stringify(exampleTemplate(example.id))));
+  assert.ok(state.instances.length>=4);assert.ok(state.connections.length>=5);
+  assert.equal(activeConnections(state).length,state.connections.length);
+  assert.equal(checks(state).filter(c=>c.type==='Fit'&&c.level==='warn').length,0,example.id);
+  for(const c of state.connections){assert.ok(endpoint(state,c.from));assert.ok(endpoint(state,c.to));assert.equal(c.status,'Planned');}
+ }
+ assert.throws(()=>exampleTemplate('missing'));
+});
+test('air monitor maps the manufacturer Grove netlist and has no invented battery path',()=>{
+ const state=exampleTemplate('air-monitor'),board=readFileSync(new URL('../blender/vendor/scd41/scd41.brd',import.meta.url),'utf8');
+ for(const [pin,contact]of [['scl',1],['sda',2],['vcc',3],['gnd',4]]){
+  const net=[...board.matchAll(/<signal name="([^"]+)"[^>]*>([\s\S]*?)<\/signal>/g)].find(m=>m[2].includes(`<contactref element="J1" pad="${contact}"/>`));
+  assert.equal(net[1].toLowerCase(),pin);
+  assert.ok(state.connections.some(c=>c.from==='expansion:i2c1-'+pin&&c.to==='grove-scd41:'+pin));
+ }
+ assert.equal(state.instances.some(p=>p.id==='battery'),false);
+});
+test('wearable haptics preserve four independent channels and power-budget review',()=>{
+ const state=exampleTemplate('wearable-haptics');
+ for(let n=1;n<=4;n++)for(const pin of ['scl','sda','vcc','gnd'])assert.ok(state.connections.some(c=>c.from===`haptic-hub:ch${n-1}-${pin}`&&c.to===`grove-haptic-${n}:${pin}`));
+ assert.ok(checks(state).some(c=>/power and fit check/.test(c.title)));
+ const a=exampleTemplate('air-monitor');a.instances[0].position[0]=999;
+ assert.notEqual(exampleTemplate('air-monitor').instances[0].position[0],999);
 });

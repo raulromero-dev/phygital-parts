@@ -8,7 +8,7 @@ body[data-route="home"] .topbar{border-bottom:0;background:var(--mono-paper);hei
 .home-intro>p{font-size:15px;line-height:1.65;color:var(--mono-muted);margin-bottom:30px}
 .idea-composer{max-width:700px;margin:0 auto;text-align:left;background:var(--mono-paper);border:1px solid var(--mono-border-strong);border-radius:16px;padding:16px;box-shadow:0 8px 28px #00000008;transition:border-color .2s}
 .idea-composer:focus-within{border-color:var(--mono-subtle)}
-.idea-composer>textarea{width:100%;border:0;resize:vertical;outline:none!important;box-shadow:none!important;min-height:108px;max-height:300px;padding:5px 5px 12px;line-height:1.7;font-size:14px;background:transparent;color:var(--mono-ink)}
+.idea-composer>textarea{width:100%;border:0;resize:none;outline:none!important;box-shadow:none!important;min-height:108px;max-height:300px;padding:5px 5px 12px;line-height:1.7;font-size:14px;background:transparent;color:var(--mono-ink)}
 .idea-composer textarea::placeholder{color:var(--mono-subtle)}
 .composer-actions,.composer-actions>div{display:flex;align-items:center;gap:12px}.composer-actions{justify-content:space-between;margin-top:8px}
 .attach-button{color:var(--mono-muted);font-size:12px;padding:8px 5px}.attach-button:hover{color:var(--mono-ink)}
@@ -34,10 +34,22 @@ body[data-route="home"] .topbar{border-bottom:0;background:var(--mono-paper);hei
 .inspector-title{flex-wrap:wrap;gap:10px}.inspector-title h2{flex:1;min-width:0}.inspector-title>.purchase-panel{flex:0 0 100%;width:100%;margin:8px 0 0}
 .canvas-empty{position:absolute;z-index:2;left:50%;top:46%;transform:translate(-50%,-50%);width:calc(100% - 50px);text-align:center;padding:30px 15px;background:color-mix(in srgb,var(--mono-canvas) 94%,transparent);border-radius:12px}.canvas-empty>span{font-size:9px;letter-spacing:.13em;color:var(--mono-subtle)}.canvas-empty h2{font-size:26px;font-weight:500;letter-spacing:-.04em;margin:16px 0 12px}.canvas-empty p{font-size:12px;color:var(--mono-muted);line-height:1.7}.canvas-empty button{margin-top:20px}
 
-/* The board illustration carries the only homepage color accent. */
-.idea-examples{margin-top:20px}.home-intro h1{margin-top:10px}.home-secondary{margin-top:26px}
+/* One shared board mark for the wordmark and headline. */
+.idea-examples{margin-top:20px}.home-intro h1{margin-top:10px;margin-bottom:40px}.home-secondary{margin-top:26px}
 
-.hero-board{display:inline-block;width:.88em;height:.74em;margin-left:.18em;vertical-align:-.025em;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;transform:rotate(-7deg);color:#f47752}
+.hero-board{display:inline-block;width:.88em;height:.74em;margin-left:.18em;vertical-align:-.025em;transform:rotate(-7deg)}
 
-.home-secondary button:disabled{opacity:.4;cursor:not-allowed}
+.start-building:disabled{opacity:.4;cursor:not-allowed}
 .watch-template{display:flex;align-items:center;gap:24px;margin:10px 0 24px}.watch-template>svg{width:72px;flex-shrink:0;stroke:var(--mono-ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}.watch-template h3{font-size:22px;letter-spacing:-.04em;font-weight:500;margin:0 0 12px}.watch-template p{font-size:12px;line-height:1.7;color:var(--mono-muted)}.template-parts{border:1px solid var(--mono-border);border-radius:8px;overflow:hidden;margin:20px 0}.template-parts a{display:flex;justify-content:space-between;gap:10px;padding:14px;font-size:12px;line-height:1.5}.template-parts a+a{border-top:1px solid var(--mono-border)}.template-parts a:hover{background:var(--mono-raised)}.template-parts span{white-space:nowrap;color:var(--mono-subtle);font-size:11px}
+
+.brand .brand-board{display:block;width:32px;height:27px;flex:0 0 32px;transform:rotate(-7deg);stroke:currentColor}
+
+/* Decorative only: quiet traces stay behind the form and ignore pointer input. */
+.product-home{position:relative;isolation:isolate}
+.circuit-backdrop{position:fixed;inset:76px 0 0;width:100%;height:calc(100% - 76px);z-index:-1;pointer-events:none;color:var(--mono-ink);overflow:hidden}
+.circuit-traces{opacity:.035;stroke-width:1;fill:none}
+.circuit-signals{opacity:.065;stroke-width:1.3;fill:none;stroke-dasharray:8 110;animation:circuit-flow 32s linear infinite}
+body[data-route="home"] .hero-board{animation:board-arrival 1.35s cubic-bezier(.2,.7,.2,1) both;transform-origin:50% 50%}
+@keyframes board-arrival{from{transform:rotate(-367deg)}to{transform:rotate(-7deg)}}
+@keyframes circuit-flow{to{stroke-dashoffset:-472}}
+@media(prefers-reduced-motion:reduce){body[data-route="home"] .hero-board,.circuit-signals{animation:none}}

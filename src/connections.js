@@ -1,5 +1,6 @@
 import { CROWPANEL_PORTS, CROWPANEL_INTERNALS } from './crowpanel.js';
 import { WATCH_PORTS } from './smartwatch.js';
+import { AIR_PORTS } from './air-monitor.js';
 import carrierContacts from './carrier-contacts.js';
 import { PLUG_MOTOR_IDS } from './options.js';
 // Header order follows Seeed's CAD; unknown seller connector order stays explicit.
@@ -25,6 +26,7 @@ export const PORTS={
 };
 PORTS['crowpanel-advance-28']=CROWPANEL_PORTS;
 Object.assign(PORTS,WATCH_PORTS);
+PORTS['grove-scd41']=AIR_PORTS;
 PORTS.grove=['A','B'].flatMap((end,e)=>Array.from({length:4},(_,n)=>port(`${end}${n+1}`,`${end} contact ${n+1} · trace function`,'unknown',`Cable end ${end}`,[(n-1.5)/2,0,e?1:-1])));
 PORTS['grove-tail']=['A','wire'].flatMap((end,e)=>Array.from({length:4},(_,n)=>port(`${end}${n+1}`,`${end} ${n+1} · trace function`,'unknown',e?'Exposed conductors':'Grove contacts',[(n-1.5)/2,0,e?1:-1])));
 PORTS.jumper=[port('a','End A','unknown','Jumper',[0,0,-1]),port('b','End B','unknown','Jumper',[0,0,1])];
