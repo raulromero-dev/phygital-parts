@@ -96,8 +96,8 @@ export function mountProduct(app){
   }
  }
  function reviewResearch(){if(researchResult)showProposal(researchResult,false);else findParts('ai');}
- $('#find-parts').onclick=()=>findParts();$('#empty-find').onclick=()=>findParts();const assistant=mountAssistant({...app,getKey:()=>apiKey,ensureKey:next=>apiKey?next():connect(next)});
- $('#project-agent').onclick=assistant.open;mountMobileMenu(assistant.open);
+ $('#find-parts').onclick=()=>findParts();$('#empty-find').onclick=()=>findParts();mountAssistant({...app,getKey:()=>apiKey,ensureKey:next=>apiKey?next():connect(next)});
+ mountMobileMenu();
  app.register({findParts,showHome,showWorkspace,reviewResearch});
  if(app.route)showWorkspace();else showHome();
 }

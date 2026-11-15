@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-14 · Codex for Raul · main · one chat entry point
+
+Removed the sidebar and mobile-menu assistant entries. The right-side floating
+Ask codex button is now the only chat launcher. Part search retains its own
+Ask codex research tab. Production build passes.
+
 ## 2026-11-14 · Codex for Raul · main · separate starters and floating assistant
 
 Added original Phygital compact, bench and wide layouts, with project-specific

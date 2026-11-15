@@ -68,15 +68,14 @@ export function mountAssistant(app){
  return {open,minimize};
 }
 
-export function mountMobileMenu(openAssistant){
+export function mountMobileMenu(){
  const bar=document.querySelector('.topbar'),menu=document.createElement('details');menu.className='mobile-menu';
- menu.innerHTML='<summary aria-label="Project menu" title="Project menu">⋯</summary><div class="mobile-menu-content"><button id="mobile-ask-codex">Ask codex</button></div>';
+ menu.innerHTML='<summary aria-label="Project menu" title="Project menu">⋯</summary><div class="mobile-menu-content"></div>';
  bar.append(menu);const content=menu.querySelector('.mobile-menu-content');
  const entries=['connect-ai','theme-toggle','snapshots-btn','export-btn'].map(id=>{const node=document.getElementById(id),slot=document.createComment(id+' desktop position');node.before(slot);return {node,slot};});
  const query=matchMedia('(max-width:650px)');
  function arrange(){for(const {node,slot}of entries)if(query.matches)content.append(node);else slot.after(node);menu.open=false;}
  query.addEventListener('change',arrange);arrange();
- document.getElementById('mobile-ask-codex').onclick=openAssistant;
  menu.addEventListener('click',event=>{if(event.target.closest('button')&&event.target.closest('button').id!=='theme-toggle')menu.open=false;});
  document.addEventListener('click',event=>{if(!menu.contains(event.target))menu.open=false;});
  document.addEventListener('keydown',event=>{if(event.key==='Escape')menu.open=false;});
