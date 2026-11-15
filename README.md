@@ -20,6 +20,26 @@ snapshots and chat histories stay separate. The Phygital route retains the
 original project inventory, notes and source context, with links to its firmware
 repository and original workbench. Existing root-page projects remain available.
 
+### Saving and returning
+
+**My projects** lists account projects and older browser saves. Sign in with
+Google to return from any device. New prompted builds save to your account while
+signed in. Use **Projects → Save to account** to copy an existing browser project;
+its original stays local. Account edits and the last 40 chat messages autosave.
+
+Without sign-in, projects remain in this browser. **Save a copy** and **Import
+project** create independent projects; they never replace the source. Copies and
+imports go to your account when signed in. The sidebar name is editable, and
+layout snapshots remain browser-local inside Projects.
+
+**Export → Project file** creates a portable JSON backup of the assembly, cables,
+custom parts, notes and decisions (no chat or keys). Clearing site data removes
+browser copies, not account copies. A cloud URL requires its owner's sign-in;
+it does not make the project public. Save failures and conflicts are visible;
+conflicts preserve your draft and offer Save a copy instead of overwriting.
+
+See [account setup](docs/ACCOUNTS.md) to configure a fork and run database checks.
+
 The smart ring reuses SenseRing's four original CAD meshes: sensor board,
 curved battery, inner shell and outer shell. It is a custom fabrication reference,
 not a plug-in kit. Battery availability and curved clearances need review.
@@ -155,8 +175,8 @@ npm run build
   sent to OpenAI when research is requested. Adjustments send assembly details,
   selected-part context and the last eight chat messages. Requests set `store: false`; this
   does not override OpenAI's account-level retention or abuse-monitoring policy.
-- Projects, notes and the last 40 chat messages stay in browser storage unless
-  exported or included in an explicit request. Pending proposals are not restored
+- Browser projects and their last 40 chat messages stay local. Account projects
+  and chat sync to Supabase under the signed-in owner, with account-scoped local backups. Pending proposals are not restored
   after reload. Chat history is anchored above the composer with newest messages
   at the bottom. Images and credentials are not saved in projects or chat history.
 - Supports one PNG/JPG/WebP up to 2 MB, five public links, 20 returned parts,
@@ -197,7 +217,8 @@ part of this repository.
 - `src/main.js`: workspace, component inspector, wiring editor, notes and export.
 - `src/routes.js`, `templates.js`: isolated starter URLs and prebuilt assemblies.
 - `src/assistant.js`, `adjustments.js`: floating chat, part context, local history
-  and validated, undoable adjustment proposals.
+  and reviewed, undoable part additions/removals, cable maps and placement proposals.
+  Questions show selectable answers plus Other; answers preserve selected-part context.
 - `src/viewer.js`, `proxy.js`: Three.js scene, source model reuse and approximate
   geometry for custom components.
 - `src/engine.js`, `connections.js`: fit checks, project validation and pin maps.

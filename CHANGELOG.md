@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-11-15 · Accounts, projects and actionable Codex chat
+
+Added My projects on the home page and a Projects menu inside assemblies.
+Older autosaves are discovered automatically; independent named copies and
+imports receive their own local URLs. Imports no longer replace the open
+assembly. Preserved modification times and made local-save status explicit.
+Added Google sign-in and a dedicated Supabase project store with ownership RLS,
+verified-email claims for privately prepared projects, account-scoped backups,
+serialized saves and revision conflicts. New signed-in builds save to accounts;
+existing browser projects can be copied to them. JSON exports and local snapshots
+remain available. Added deployment/setup guidance and a privacy page.
+
+Codex can now add/duplicate/remove known components, map/remove exact cable
+conductors, and apply the reviewed proposal as one undoable edit. Questions have
+selectable options and Other, persist in chat, and retain selected-part context.
+Fixed decimal placement inputs and made haptic power checks reflect the actual
+module count. Validation covers data isolation, conflict handling, invalid
+wiring, source CAD reuse, question choices and preservation of older local saves.
+
 ## 2026-11-15 · Compact Cable Hop connector
 
 Changed arcade labels to sentence case. Replaced the oversized plug with a

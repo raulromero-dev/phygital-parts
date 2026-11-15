@@ -56,16 +56,18 @@ export function planningIssues(s){
  if(DRIVER_IDS.some(has))out.push({title:'Motor power design is incomplete',detail:'Four independent driver channels are planned, but the 3 V regulator, input, solderless distribution and combined stall-current budget are unresolved. The supply box remains outside the enclosure. Do not connect it to the battery or GPIO power.',ids:['motor-rail',...DRIVER_IDS]});
  if(s.instances.some(i=>i.id==='lcd-27579'&&i.dimensions[1]<10))out.push({title:'LCD depth is below the manufacturer CAD envelope',detail:'The earlier proxy reserved 8 mm; Waveshare CAD is 10 mm including rear socket and standoffs. Use Dimensions → Reset dimensions to restore it. Saved custom dimensions were preserved.',ids:['lcd-27579']});
  if(screens.some(p=>p.protocol==='spi'))out.push({title:'SPI display assignments need review',detail:'Display only: D10 MOSI, D8 SCLK, D0 CS, D2 DC, D6 reset, D7 backlight, 3V3 and GND. Disable microSD/remove its card; leave UART unused. Touch is not mapped. 27579 manufacturer CAD depth is 10 mm; 18366 depth remains provisional. Check lid clearance, cable bends and the combined power budget.',ids:screens.filter(p=>p.protocol==='spi').map(p=>p.id)});
- if(PLUG_MOTOR_IDS.some(has)){
-  out.push({title:'Plug-in haptics need a power and fit check',detail:'Four Grove Haptic Motor modules are connector-ready, but up to 750 mW each means 3 W combined (about 0.91 A at 3.3 V), before the ESP32, display and camera. Carrier rail capacity is unverified. Verify the hub/module dimensions, their placement and cable clearance.',ids:['haptic-hub',...PLUG_MOTOR_IDS]});
-  out.push({title:'Select one haptic channel at a time',detail:'All four motors use 0x5A. Use TCA9548A 0x70 channels 0–3, one enabled at a time, at the module’s documented 100 kHz. Disable all haptic branches before restoring the camera bus’s faster clock. This requires firmware work; the planner does not change firmware.',ids:['haptic-hub',...PLUG_MOTOR_IDS]});
+ const plugIds=s.instances.filter(i=>PLUG_MOTOR_IDS.includes(i.id)||PLUG_MOTOR_IDS.includes(s.custom?.find(p=>p.id===i.id)?.modelId)).map(i=>i.id);
+ if(plugIds.length){
+  out.push({title:'Plug-in haptics need a power and fit check',detail:`${plugIds.length} Grove Haptic Motor module${plugIds.length===1?'':'s'}: up to 750 mW each, ${plugIds.length*.75} W combined (about ${(plugIds.length*.75/3.3).toFixed(2)} A at 3.3 V), before the controller, display and camera. Supply capacity is unverified. Check module dimensions, mounting and cable clearance.`,ids:['haptic-hub',...plugIds]});
+  out.push({title:'Select one haptic channel at a time',detail:'These modules use 0x5A. Give each motor its own TCA9548A 0x70 channel, one enabled at a time, at the module’s documented 100 kHz. Disable haptic branches before using a faster camera clock. Firmware must implement this routing.',ids:['haptic-hub',...plugIds]});
   // Validate actual edited routes, not just the presence of a hub in the scene.
-  const branches=new Set();let bad=!has('haptic-hub');
-  for(const id of PLUG_MOTOR_IDS.filter(has)){
+  const hubIds=s.instances.filter(i=>i.id==='haptic-hub'||s.custom?.find(p=>p.id===i.id)?.modelId==='haptic-hub').map(i=>i.id);
+  const branches=new Set();let bad=!hubIds.length;
+  for(const id of plugIds){
    const channelPins=['sda','scl'].map(pin=>s.connections.filter(c=>[c.from,c.to].includes(id+':'+pin)).map(c=>c.from===id+':'+pin?c.to:c.from));
-   const match=channelPins.map((refs,i)=>refs.length===1?refs[0].match(new RegExp('^haptic-hub:ch([0-7])-'+['sda','scl'][i]+'$')):null);
-   if(!match[0]||!match[1]||match[0][1]!==match[1][1]||branches.has(match[0]?.[1]))bad=true;
-   else branches.add(match[0][1]);
+   const match=channelPins.map((refs,i)=>refs.length===1?refs[0].match(new RegExp('^('+hubIds.join('|')+'):ch([0-7])-'+['sda','scl'][i]+'$')):null);
+   if(!match[0]||!match[1]||match[0][1]!==match[1][1]||match[0][2]!==match[1][2]||branches.has(match[0]?.[1]+':'+match[0]?.[2]))bad=true;
+   else branches.add(match[0][1]+':'+match[0][2]);
   }
   if(bad)out.push({title:'Haptic channel mapping is incomplete or shared',detail:'Give every motor its own hub channel, with SDA and SCL on that same channel. A passive splitter or a direct shared bus cannot independently address these fixed-address modules.',ids:['haptic-hub',...PLUG_MOTOR_IDS]});
  }

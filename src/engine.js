@@ -114,6 +114,7 @@ export function validateState(v) {
   const clean=defaultState();
   Object.assign(clean,{name:v.name,instances:v.instances.map(i=>({id:i.id,position:[...i.position],rotation:[...i.rotation],dimensions:[...i.dimensions]})),enclosure:[...v.enclosure],enclosureVisible:v.enclosureVisible!==false,lockCore:v.lockCore!==false,assumptions:{...v.assumptions},notes:v.notes.map(n=>({text:n.text,part:n.part,at:n.at})),custom:custom.map(normalizeCustom),decisions:{}});
   clean.preset=str(v.preset,30)?v.preset:'blank';
+  if(typeof v.updatedAt==='string'&&Number.isFinite(Date.parse(v.updatedAt)))clean.updatedAt=new Date(v.updatedAt).toISOString();
   clean.brief=str(v.brief,8000)?v.brief:'';
   if(v.build&&['running','complete','interrupted','error'].includes(v.build.status))clean.build={status:v.build.status};
   clean.projectLinks=Array.isArray(v.projectLinks)?v.projectLinks.filter(safeUrl).slice(0,5):[];

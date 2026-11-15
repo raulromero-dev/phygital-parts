@@ -22,8 +22,8 @@ The original surveillance-detector firmware lives in a different repository,
 - For implementation, read the checkout's `AGENTS.md` and `docs/ADDING_PARTS.md`.
   Run locally and change the catalog, model and contact data together.
 
-The live app has no general-purpose automation API or account-based project
-storage. Use available browser tools for its UI, or a local checkout for code and
+The live app has Google sign-in and private account projects, plus browser-local
+saves. It has no general-purpose automation API. Use available browser tools for its UI, or a local checkout for code and
 state operations. Do not claim an assembly was saved or imported without observing
 that result. API keys belong in the app's connection field, never in chat or files.
 
@@ -54,13 +54,15 @@ smart ring and makeup cyberdeck. The original device remains at
 `/projects/phygital?layout=compact`, with `bench` and `wide` variants.
 
 Submitting a brief opens a dedicated project with live Codex progress and draft
-parts appearing as they are validated. Stop preserves drafts. Project URLs and
-chat history are browser-local; keys stay in tab memory.
+parts appearing as they are validated. Stop preserves drafts. Signed-in builds save to the account; signed-out builds stay local. My projects
+lets users return to either. Copy older local projects with Save to account.
+Cloud URLs require the owner’s sign-in; keys stay in tab memory.
 
 Use **Find parts** for the catalog, codex research or a pasted product URL.
 Purchase actions are separate from adding a part. Review proposed additions to existing projects before applying them.
 Review generated drafts and connections before physical assembly. Select a part before using the floating
-**codex** chat to request placement/dimension adjustments. Inspect and apply the
+**codex** chat to add or duplicate parts, map cables and request placement adjustments.
+Answer selectable questions or choose Other for a custom response. Inspect and apply the
 proposal; undo remains available. Export JSON for reuse and CSV for cable maps.
 
 Research and chat use a visitor-provided OpenAI key and incur that account's API

@@ -26,8 +26,7 @@ flowchart LR
   M --> G
 ```
 
-The frontend is plain JavaScript with Vite, Three.js and CSS. No React router,
-database, account system or shared conversation backend is involved. Vercel's
+The frontend is plain JavaScript with Vite, Three.js and CSS. Supabase provides Google authentication and private project/chat storage; no React router is involved. Vercel's
 Node functions wrap the same handlers used by `server/dev.mjs` locally.
 
 ## State and geometry
@@ -72,9 +71,13 @@ errors before streaming retain their HTTP status and JSON error body. Client
 cancellation aborts the upstream request. The client rejects interrupted streams.
 
 `POST /api/adjust` uses a bounded assembly snapshot, selected part and the last
-eight chat messages. It returns only proposed geometry/enclosure/note changes.
+eight chat messages plus a server-owned catalog and exact port IDs. It can propose
+part additions/duplicates/removals, individual cable conductors, placements, notes
+and enclosure changes. New aliases are resolved within one atomic reviewed edit;
+physical port and power checks reject invalid wiring. A question contains 2–4
+options, with Other supplied by the UI, and cannot include assembly changes.
 Application checks the original base state and preserves undo. It cannot order
-parts, run commands, modify firmware or independently alter connection maps.
+parts, run commands or modify firmware.
 
 ## Persistence and hosting
 
@@ -82,7 +85,20 @@ Each workspace has separate browser autosave, snapshots and chat history (last
 40 messages). API keys live only in tab memory. JSON export moves projects between
 browsers; CSV exports contact-level wiring, and GLB exports planning geometry.
 
-Vercel Web Analytics is injected in production builds for standard page views.
+`saved-projects.js` discovers autosave records directly under known project keys
+instead of maintaining a second index. It ignores chat/snapshot/unrelated keys,
+keeps unreadable records, and sorts valid projects by saved modification time.
+`/projects/local-<uuid>` identifies independent copies and imports. Creation
+validates the document, writes to a new key before navigation, and never replaces
+the source. A single atomic storage write preserves the previous save on quota
+failure. Old root saves remain accessible through `/?workspace=1`. Account caches
+are excluded from anonymous discovery. `cloud-projects.js` uses Google PKCE auth
+and RLS-protected Supabase reads/RPC writes. `/projects/cloud-<uuid>` requires the
+owner identity. Serialized writes check revisions; network failures keep drafts,
+conflicts stop writes and preserve both versions. See [ACCOUNTS.md](ACCOUNTS.md).
+
+Vercel Web Analytics is injected in production for page views. OAuth callback
+pages are excluded so authorization codes and tokens cannot enter page-view URLs.
 No custom events record prompts, keys, images, project contents or chat messages.
 Local development does not load Analytics. Hosting settings live in `vercel.json`;
 forks should link their own Vercel project and configure their own public domain.
@@ -105,4 +121,5 @@ with a SHA-256 match required. STEP parsing runs in a disposable browser worker.
 
 Cancel aborts research and model requests, retains draft parts, and unlocks
 editing. Reload marks running builds interrupted and never silently re-bills.
-The generated URL has an isolated localStorage namespace, not server storage.
+Signed-out builds use an isolated localStorage namespace. Signed-in builds use
+a new private cloud project and an account-scoped local cache.

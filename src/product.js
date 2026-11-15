@@ -1,6 +1,7 @@
 import { runProjectBuild } from './project-build.js';
 import { mountAssistant, mountMobileMenu } from './assistant.js';
 import { projectUrl } from './routes.js';
+import { savedProjectsHtml } from './saved-projects.js';
 import { library, escapeHtml as esc, safeUrl, purchaseHtml, applyProposal } from './product-data.js';
 import { PORTS } from './connections.js';
 import { partFor } from './engine.js';
@@ -21,15 +22,17 @@ export function mountProduct(app){
  <form id="idea-form" class="idea-composer"><label class="sr-only" for="idea-prompt">Describe what you want to build</label><textarea id="idea-prompt" required maxlength="8000" rows="4" placeholder="Describe an idea, add a photo, or share part links…"></textarea><div id="idea-attachment" class="idea-attachment" hidden></div><div class="composer-actions"><div><button type="button" class="attach-button" id="attach-image" title="Add a reference photo">＋ Photo</button></div><div><button type="submit" class="button primary start-building" disabled>Start building <span aria-hidden="true">↗</span></button></div></div><input type="file" id="idea-image" accept="image/png,image/jpeg,image/webp" hidden></form>
 
  <div class="idea-examples" role="group" aria-label="Prebuilt examples">${EXAMPLES.map(example=>`<button data-template="${example.id}" title="Explore a prebuilt ${example.label.toLowerCase()}">${example.label} <span aria-hidden="true">↗</span></button>`).join('')}</div>
- <div class="home-secondary"><button id="continue-project" class="text-button" hidden>Continue project →</button></div>
+ <section class="home-projects" aria-labelledby="home-projects-title"><div class="home-projects-heading"><h2 id="home-projects-title">My projects</h2><button id="home-import-project" class="text-button">Import project</button></div><p class="home-projects-local">Account & browser saves</p><div id="home-project-list"></div><button id="all-saved-projects" class="text-button" hidden>View all projects →</button></section><a class="home-privacy" href="/privacy.html">Privacy</a>
 `;
  $('.topbar').after(home);
  $('.toolbar-actions').insertAdjacentHTML('afterbegin','<button class="button ai-connect" id="connect-ai">Connect key</button>');
  if(app.route?.id==='phygital')$('.project-meta').insertAdjacentHTML('afterend','<div class="project-origin"><a href="https://github.com/raulromero-dev/phygital" target="_blank" rel="noopener noreferrer">Device repository ↗</a><a href="https://phygital-studio.vercel.app/" target="_blank" rel="noopener noreferrer">Original workbench ↗</a></div>');
  $('.brand').onclick=e=>{e.preventDefault();showHome();};$('#connect-ai').onclick=()=>connect();
- function showHome(){if(app.route){location.assign('/');return;}document.body.dataset.route='home';$('#continue-project').hidden=!app.getState().instances.length&&!app.continueUrl;home.hidden=false;$('#idea-prompt').focus();}
+ function refreshProjects(){const report=app.savedProjects();$('#home-project-list').innerHTML=savedProjectsHtml({...report,projects:report.projects.slice(0,6)});$('#all-saved-projects').hidden=report.projects.length<=6;}
+ function showHome(){if(app.route){location.assign('/');return;}document.body.dataset.route='home';home.hidden=false;refreshProjects();$('#idea-prompt').focus();}
  function showWorkspace(){document.body.dataset.route='workspace';document.title=app.getState().name+' · phygital';home.hidden=true;app.resize();}
- $('#continue-project').onclick=()=>app.continueUrl?location.assign(app.continueUrl):showWorkspace();
+ $('#home-import-project').onclick=app.importProject;$('#all-saved-projects').onclick=app.projects;
+ window.addEventListener('storage',()=>{if(!home.hidden)refreshProjects();});
  $$('[data-template]').forEach(button=>button.onclick=()=>{
   const example=EXAMPLES.find(item=>item.id===button.dataset.template);
   location.assign(projectUrl(example.id));
@@ -102,6 +105,6 @@ export function mountProduct(app){
  function reviewResearch(){if(researchResult)showProposal(researchResult,false);else findParts('ai');}
  $('#find-parts').onclick=()=>findParts();$('#empty-find').onclick=()=>findParts();assistant=mountAssistant({...app,getKey:()=>apiKey,ensureKey:next=>apiKey?next():connect(next)});
  mountMobileMenu();
- app.register({findParts,showHome,showWorkspace,reviewResearch});
- if(app.route){showWorkspace();app.fit();}else showHome();
+ app.register({findParts,showHome,showWorkspace,reviewResearch,refreshProjects});
+ if(app.route||(new URLSearchParams(location.search).get('workspace')==='1'&&app.getState().instances.length)){showWorkspace();app.fit();}else showHome();
 }
