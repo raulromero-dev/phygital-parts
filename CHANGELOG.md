@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-11-14 · Codex for Raul · main · project heading
+
+Changed PROJECT to Project and matched the Parts heading typography.
+
 ## 2026-11-14 · Codex for Raul · main · research progress and agent distribution
 
 Enabled Vercel Web Analytics and added its production-only client integration.
