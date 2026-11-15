@@ -54,6 +54,9 @@ export function checks(state) {
     if(ba.intersectsOBB(bb))add('warn',`${partFor(state,ia.id).short} overlaps ${partFor(state,ib.id).short}`, 'The rotated bounding envelopes intersect. Detailed geometry, cable routing and tolerances still need a bench check.',[ia.id,ib.id],'Fit');
   }
   if(has('expansion')&&has('xiao')&&!mounted(get('expansion'),get('xiao')))add('warn','XIAO is off its mount','Carrier and XIAO no longer match the modelled socket position. Re-seat with “Attach to carrier”.',['xiao','expansion'],'Fit');
+  if(has('watch-display'))add('review','Watch pin allocation','The display, touch, RTC and microSD occupy the XIAO headers. D0/D6 can be released by the board switches; review pin use before adding a sensor or haptics.',['watch-display','xiao']);
+  if(has('watch-battery'))add('review','Watch battery needs an adapter','PH2.0 battery plug does not directly fit the Round Display 1.25 mm socket. Select and meter the adapter, verify charge current and reserve cable space. The starter leaves it unconnected.',['watch-battery','watch-display']);
+  if(has('watch-antenna'))add('review','Measure included antenna','Antenna dimensions and coax length are planning allowances. Check clearance from battery, PCB and wrist.',['watch-antenna']);
   if(has('battery'))add('review','Verify battery polarity & charging','Confirm the JST pinout, protection and ONE charging path before applying power. Cell dimensions and pouch clearance need measurement.',['battery']);
   if(has('thermal')){
     add('review','Thermal opening & breakout voltage','Keep the lens aperture open to long-wave IR. Verify the seller breakout supply and I²C pull-up rail; the bare sensor is 3.3 V.',['thermal']);

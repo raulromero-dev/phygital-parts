@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-11-14 · Codex for Raul · main · smartwatch starter
+
+Added a no-key smartwatch template with Seeed XIAO ESP32-S3, Round Display,
+included antenna allowance and a 500 mAh battery candidate. Mapped all 14
+header contacts from the published v1.1 board and the direct U.FL coax route.
+Battery remains on hold and unconnected until an adapter is selected. Added
+purchase links, open-source examples, case reference and fit/pin review notes.
+Reused existing XIAO CAD and battery/antenna meshes; generated display geometry
+from the manufacturer PCB outline and placements with approximate bodies.
+Moved the homepage orange accent to the board SVG, removed the logo dot and
+disabled Start empty. Header connections render as contacts, not cable loops.
+
+Validation: production build and 49 tests pass, including import/export and
+manufacturer net-map checks. Browser verified template creation, persisted
+assembly, clickable header mapping and mobile dark-mode layout.
+
 ## 2026-11-14 · Codex for Raul · main · standalone parts workbench
 
 Extracted the hardware studio into an independent product repository and Vercel

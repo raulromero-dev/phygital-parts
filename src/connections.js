@@ -1,4 +1,5 @@
 import { CROWPANEL_PORTS, CROWPANEL_INTERNALS } from './crowpanel.js';
+import { WATCH_PORTS } from './smartwatch.js';
 import carrierContacts from './carrier-contacts.js';
 import { PLUG_MOTOR_IDS } from './options.js';
 // Header order follows Seeed's CAD; unknown seller connector order stays explicit.
@@ -8,7 +9,7 @@ const i2c=(prefix,group,anchor=[1,0,0])=>[
  port(prefix+'sda','SDA','sda',group,anchor),port(prefix+'scl','SCL','scl',group,anchor),
  port(prefix+'vcc','VCC · verify rail','power',group,anchor,'unknown'),port(prefix+'gnd','GND','ground',group,anchor,'0')];
 export const PORTS={
- xiao:[...[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,43],[7,44],[8,7],[9,8],[10,9]].map(([d,g])=>port('d'+d,`D${d} / GPIO${g}${d===4?' · SDA':d===5?' · SCL':d===1?' · button':d===3?' · buzzer':''}`,d===4?'sda':d===5?'scl':d===6?'tx':d===7?'rx':'gpio','Headers',[d<6?-1:1,0,(d%6)/3-.8],'3.3')),
+ xiao:[...[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,43],[7,44],[8,7],[9,8],[10,9]].map(([d,g])=>port('d'+d,`D${d} / GPIO${g}${d===4?' · SDA':d===5?' · SCL':''}`,d===4?'sda':d===5?'scl':d===6?'tx':d===7?'rx':'gpio','Headers',[d<6?-1:1,0,(d%6)/3-.8],'3.3')),
   port('3v3','3V3','power','Power',[1,0,-.7],'3.3'),port('gnd','GND','ground','Power',[1,0,-.4],'0'),port('5v','5V / VBUS','power','Power',[1,0,-1],'5'),port('bat+','BAT+ pad','power','Battery pads',[-.3,-1,0],'cell'),port('bat-','BAT− pad','ground','Battery pads',[.3,-1,0],'0'),port('rf','U.FL · 2.4 GHz','rf','Antenna',[.8,1,.7]),port('usb','USB-C','usb','USB',[-.4,.6,-1])],
  expansion:[...i2c('i2c1-','Grove I²C 1',[1,0,-.5]),...i2c('i2c2-','Grove I²C 2',[1,0,.5]),port('bat+','Battery + · verify','power','Battery socket',[-.6,-.3,1],'cell'),port('bat-','Battery − · verify','ground','Battery socket',[-.6,-.3,1],'0'),port('uart-tx','TX / D6','tx','Grove UART',[.2,0,1],'3.3'),port('uart-rx','RX / D7','rx','Grove UART',[.2,0,1],'3.3'),port('uart-vcc','VCC · verify rail','power','Grove UART',[.2,0,1],'unknown'),port('uart-gnd','GND','ground','Grove UART',[.2,0,1],'0'),port('a0','A0 / D0','gpio','Analog / digital',[-1,0,.5],'3.3'),port('analog-spare','Second signal · unverified','unknown','Analog / digital',[-1,0,.5]),port('analog-vcc','VCC · verify rail','power','Analog / digital',[-1,0,.5],'unknown'),port('analog-gnd','GND','ground','Analog / digital',[-1,0,.5],'0'),port('3v3','3V3 header','power','Headers',[-1,0,0],'3.3'),port('gnd','GND header','ground','Headers',[-1,0,.3],'0')],
  thermal:i2c('','Breakout · physical pin order unverified',[.6,-.4,.7]),
@@ -23,6 +24,7 @@ export const PORTS={
  headers:Array.from({length:40},(_,n)=>port('p'+(n+1),`Pin ${n+1}`,'unknown','Unassigned header',[n/19.5-1,0,0])),
 };
 PORTS['crowpanel-advance-28']=CROWPANEL_PORTS;
+Object.assign(PORTS,WATCH_PORTS);
 PORTS.grove=['A','B'].flatMap((end,e)=>Array.from({length:4},(_,n)=>port(`${end}${n+1}`,`${end} contact ${n+1} · trace function`,'unknown',`Cable end ${end}`,[(n-1.5)/2,0,e?1:-1])));
 PORTS['grove-tail']=['A','wire'].flatMap((end,e)=>Array.from({length:4},(_,n)=>port(`${end}${n+1}`,`${end} ${n+1} · trace function`,'unknown',e?'Exposed conductors':'Grove contacts',[(n-1.5)/2,0,e?1:-1])));
 PORTS.jumper=[port('a','End A','unknown','Jumper',[0,0,-1]),port('b','End B','unknown','Jumper',[0,0,1])];
@@ -82,6 +84,8 @@ export function harnesses(state){
 }
 export function harnessFor(state,id){return harnesses(state).find(h=>h.connections.some(c=>c.id===id));}
 export function cableDescription(h){
+ if(h.type==='Board-to-board headers')return 'The XIAO seats directly in the two seven-contact sockets behind the display. These lines show the electrical map, not separate cables. Use pre-soldered XIAO headers or solder the included headers first.';
+ if(h.name==='Included antenna coax')return 'XIAO U.FL snap socket → included thin coax lead → antenna. No RP-SMA adapter. Measure the shipped antenna and lead before finalizing the case.';
  if(h.name==='Haptic hub uplink')return 'Carrier spare Grove I²C socket → standard four-wire Grove cable → TCA9548A hub upstream socket. Power and ground are shared by all branches; supply capacity still needs review.';
  if(/^Haptic [1-4]/.test(h.name))return 'TCA9548A channel socket → standard four-wire Grove cable → complete Grove Haptic Motor module. The driver and motor are already assembled. Select this channel alone to address its 0x5A motor independently.';
  if(h.connections.some(c=>[c.from,c.to].some(ref=>ref.startsWith('lcd-27579:'))))return 'LCD rear GH1.25 13-pin socket → included white plug and cable → eight individual female lead ends → eight 2.54 mm male-to-male jumper wires → spare female sockets alongside the XIAO. These plug down into the outer rows. Touch and MISO remain unconnected.';
@@ -118,12 +122,13 @@ export const INTERNALS={
  charger:[{name:'BQ24074 power path',route:'USB input → charger / managed system output; BAT connects to one protected 1S pack. Breakout not selected.',evidence:'TI + project plan'}],
 };
 INTERNALS['crowpanel-advance-28']=CROWPANEL_INTERNALS;
+INTERNALS['watch-display']=[{name:'Round display + touch',route:'SPI LCD uses D1, D3, D8 and D10. Touch uses D4/D5 plus D7 interrupt. D6 backlight is switchable.',evidence:'Seeed Round Display v1.1 schematic and usage guide'},{name:'RTC + microSD',route:'RTC shares I²C D4/D5. microSD shares SPI D8/D10 and uses D9 MISO, D2 chip select.',evidence:'Seeed hardware usage guide'},{name:'Power',route:'J1 accepts one 3.7 V LiPo via the specified 1.25 mm connector. USB from XIAO feeds the onboard charger. D0 battery sensing is switchable; leave XIAO BAT pads unused.',evidence:'Seeed v1.1 schematic; verify the purchased revision'}];
 for(let n=1;n<=4;n++)INTERNALS['mosfet-'+n]=[{name:'MOSFET + flyback diode',route:'SIG controls the low-side MOSFET. V+ feeds motor positive; switched output returns motor negative to common ground. One board gives one independent motor channel.',evidence:'Adafruit PID5648'},{name:'Installed connectors',route:'JST-PH 3-pin STEMMA input and two output screws are preassembled. The 3 V power distribution is not yet selected.',evidence:'Adafruit product and CAD'}];
 for(const id of ['oled-938','oled-326'])INTERNALS[id]=[{name:'SSD1306 + QT sockets',route:'SDA and SCL connect in parallel at both QT sockets. Default 0x3D; VIN takes the carrier 3.3 V supply. Use one external 0x3D display on this bus.',evidence:'Adafruit schematic / wiring guide'}];
 for(const id of PLUG_MOTOR_IDS)INTERNALS[id]=[{name:'DRV2605L → attached motor',route:'Grove SDA/SCL control the onboard driver at 0x5A; its outputs already connect to the motor. No loose motor wiring is required. Grove VCC/GND feed the assembled module.',evidence:'Seeed Grove Haptic Motor v0.9 Eagle CAD and wiki'}];
 INTERNALS['haptic-hub']=[{name:'TCA9548A channel switch',route:'Upstream SDA/SCL → selected CH0–CH7 data branch. Use one branch at a time for identical 0x5A motors. Power and ground stay common; switching channels does not remove motor power.',evidence:'Seeed 103020293 schematic and wiki'}];
 for(const id of ['lcd-27579','lcd-18366'])INTERNALS[id]=[{name:'SPI display controller',route:'MOSI + SCLK transfer pixels; CS selects the display, DC selects command/data, RST resets it and BL controls backlight. 3.3 V supply and logic are paired in this plan. The 2.8-inch touch controller has separate, currently unmapped contacts.',evidence:'Waveshare manufacturer interface tables'}];
-export const CABLE_TYPES=['HY2.0 4-pin harness · verify mating','Grove / 4-wire harness','JST-PH pigtail','U.FL coax / adapter','Hook-up wire','Header / jumper','Custom cable','Grove → STEMMA QT (4528)','STEMMA 3-pin → jumper (3893/3894)','Motor leads → screw terminals','Waveshare 13-pin display cable','PH2.0 8-pin display cable'];
+export const CABLE_TYPES=['Board-to-board headers','HY2.0 4-pin harness · verify mating','Grove / 4-wire harness','JST-PH pigtail','U.FL coax / adapter','Hook-up wire','Header / jumper','Custom cable','Grove → STEMMA QT (4528)','STEMMA 3-pin → jumper (3893/3894)','Motor leads → screw terminals','Waveshare 13-pin display cable','PH2.0 8-pin display cable'];
 export function portsFor(state,id){return PORTS[id]||state.custom?.find(p=>p.id===id)?.ports||[];}
 export function endpoint(state,ref){const [id,pin]=ref.split(':');const p=portsFor(state,id).find(p=>p.id===pin);return p?{...p,part:id,ref}:null;}
 export function endpointLabel(state,ref){const p=endpoint(state,ref);return p?`${p.group} · ${p.label}`:ref;}

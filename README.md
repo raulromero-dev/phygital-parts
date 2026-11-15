@@ -4,6 +4,14 @@ A standalone hardware workbench for discovering components, visualizing their
 fit, planning real cables, and deciding what to buy. Start with a description,
 a reference photo plus a prompt, or public links to a project or product.
 
+The homepage also offers a **Smartwatch template** without an API key: a Seeed
+XIAO ESP32-S3, Round Display, included antenna allowance and Adafruit PID 1578
+battery candidate. It maps the 14 direct header contacts and antenna coax.
+The battery remains unconnected pending a verified connector adapter. Published
+PCB data and the existing XIAO CAD are reused; thickness, antenna geometry and
+the proposed enclosure are estimates. Open the template's build notes for
+manufacturer purchase links, pinouts, open-source examples and printable case.
+
 This repository is independent of the original Phygital sensor firmware. It
 contains the product experience and a reusable reference-model library, not the
 surveillance device's firmware or detection rules.

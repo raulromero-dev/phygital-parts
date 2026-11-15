@@ -139,6 +139,8 @@ export class AssemblyViewer {
       const ga=this.groups.get(a.part),gb=this.groups.get(b.part);if(!ga||!gb)continue;
       const from=this.anchor(c.from),to=this.anchor(c.to),mid=from.clone().lerp(to,.5);mid.y+=8;
       const index=harnessFor(this.state,c.id)?.connections.findIndex(w=>w.id===c.id)||0;mid.y+=index*.7;
+      // Mated headers are contacts, not looping jumper cables (also in exploded view).
+      if(c.type==='Board-to-board headers')mid.copy(from).lerp(to,.5);
       // Round, smooth cable geometry is illustrative: length and gauge remain user records.
       const curve=new THREE.CatmullRomCurve3([from,mid,to]);
       const cable=new THREE.Mesh(new THREE.TubeGeometry(curve,64,/coax/i.test(c.type)?.5:.32,10,false),new THREE.MeshStandardMaterial({color:this.highlighted?.has(c.id)?(this.theme==='dark'?'#ffffff':'#111111'):(this.theme==='dark'?'#aaaaaa':'#666666'),roughness:.55,transparent:true,opacity:this.highlighted?.size&&!this.highlighted.has(c.id)?.18:.9}));

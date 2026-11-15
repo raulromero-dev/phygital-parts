@@ -53,3 +53,28 @@ test('standalone XIAO does not reserve the absent carrier peripherals',()=>{
  const issues=connectionIssues(state,{id:'test',from:'xiao:d1',to:'motor:positive',type:'Hook-up wire',bundle:'Test',length:50,color:'#666666',status:'Planned',note:''});
  assert.equal(issues.some(s=>s.includes('onboard button')),false);assert.equal(issues.some(s=>s.includes('motor')),true);
 });
+
+test('smartwatch starter survives export/import with its complete header map',async()=>{
+ const {smartwatchTemplate}=await import('../src/templates.js');const {endpoint,harnesses,cableDescription}=await import('../src/connections.js');
+ const s=validateState(JSON.parse(JSON.stringify(smartwatchTemplate())));
+ assert.equal(s.instances.length,4);assert.equal(s.connections.length,15);assert.equal(s.preset,'smartwatch');assert.equal(s.lockCore,false);
+ for(const c of s.connections){assert.ok(endpoint(s,c.from));assert.ok(endpoint(s,c.to));assert.equal(c.status,'Planned');}
+ const headers=harnesses(s).find(h=>h.type==='Board-to-board headers');assert.equal(headers.connections.length,14);assert.match(cableDescription(headers),/not separate cables/);
+ assert.match(cableDescription(harnesses(s).find(h=>h.name==='Included antenna coax')),/No RP-SMA/);
+ assert.equal(checks(s).some(c=>c.type==='Fit'&&c.level==='warn'),false);
+});
+test('watch battery stays unconnected and on hold until its adapter is reviewed',async()=>{
+ const {smartwatchTemplate}=await import('../src/templates.js');const s=smartwatchTemplate();
+ assert.equal(s.decisions['watch-battery'],'Hold');assert.equal(s.connections.some(c=>(c.from+c.to).includes('watch-battery:')),false);
+ assert.ok(checks(s).some(c=>c.title==='Watch battery needs an adapter'));assert.ok(checks(s).some(c=>c.title==='Watch pin allocation'));
+});
+test('watch header pin assignments agree with original Seeed v1.1 board nets',async()=>{
+ const {readFileSync}=await import('node:fs');const {WATCH_SIGNALS}=await import('../src/smartwatch.js');
+ const brd=readFileSync(new URL('../blender/vendor/round-display/round-display-v1.1.brd',import.meta.url),'utf8');
+ const netNames={d0:'A0/BAT',d1:'D1/LCD_CS',d2:'D2/SD_CS',d3:'D3/LCD_DC',d4:'D4/SDA',d5:'D5/SCL',d6:'D6/TX',d7:'D7/TP_INT',d8:'D8/SCK',d9:'D9/MISO',d10:'D10/MOSI','5v':'USB_5V',gnd:'GND','3v3':'XIAO_3V3'};
+ for(const [id,, ,side,pin] of WATCH_SIGNALS){const block=brd.split(`<signal name="${netNames[id]}">`)[1]?.split('</signal>')[0];assert.ok(block?.includes(`<contactref element="${side?'J4':'J5'}" pad="${pin}"`),id);}
+});
+test('watch components can be duplicated and retain their visualization and contacts',async()=>{
+ const {smartwatchTemplate}=await import('../src/templates.js');const s=smartwatchTemplate();const id=libraryPart(s,'watch-display');const clean=validateState(s);const copy=clean.custom.find(p=>p.id===id);
+ assert.equal(copy.modelId,'watch-display');assert.equal(copy.ports.length,16);assert.match(copy.purchaseLinks[0][1],/seeedstudio/);
+});
