@@ -1,3 +1,4 @@
+import { runProjectBuild } from './project-build.js';
 import { mountAssistant, mountMobileMenu } from './assistant.js';
 import { projectUrl } from './routes.js';
 import { library, escapeHtml as esc, safeUrl, purchaseHtml, applyProposal } from './product-data.js';
@@ -14,20 +15,18 @@ import './product.css';
 let apiKey='';
 export function mountProduct(app){
  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
- let image=null,controller=null,researchResult=null,lastRequest=null;
+ let image=null,controller=null,researchResult=null,lastRequest=null,assistant;
  const home=document.createElement('section');home.className='product-home';home.id='product-home';
  home.innerHTML=`${circuitBackdrop}<div class="home-intro"><h1>Find the parts.<br>Make them fit<img class="hero-board" src="/brand-board.svg" alt="" aria-hidden="true" draggable="false"></h1></div>
  <form id="idea-form" class="idea-composer"><label class="sr-only" for="idea-prompt">Describe what you want to build</label><textarea id="idea-prompt" required maxlength="8000" rows="4" placeholder="Describe an idea, add a photo, or share part links…"></textarea><div id="idea-attachment" class="idea-attachment" hidden></div><div class="composer-actions"><div><button type="button" class="attach-button" id="attach-image" title="Add a reference photo">＋ Photo</button></div><div><button type="submit" class="button primary start-building" disabled>Start building <span aria-hidden="true">↗</span></button></div></div><input type="file" id="idea-image" accept="image/png,image/jpeg,image/webp" hidden></form>
 
- <section id="idea-progress" class="idea-progress" aria-label="Build progress" hidden></section>
  <div class="idea-examples" role="group" aria-label="Prebuilt examples">${EXAMPLES.map(example=>`<button data-template="${example.id}" title="Explore a prebuilt ${example.label.toLowerCase()}">${example.label} <span aria-hidden="true">↗</span></button>`).join('')}</div>
  <div class="home-secondary"><button id="continue-project" class="text-button" hidden>Continue project →</button></div>
 `;
  $('.topbar').after(home);
  $('.toolbar-actions').insertAdjacentHTML('afterbegin','<button class="button ai-connect" id="connect-ai">Connect key</button>');
- $('.project-meta').insertAdjacentHTML('afterend','<button class="new-project text-button" id="new-project">＋ New project</button>');
- if(app.route?.id==='phygital')$('#new-project').insertAdjacentHTML('afterend','<div class="project-origin"><a href="https://github.com/raulromero-dev/phygital" target="_blank" rel="noopener noreferrer">Device repository ↗</a><a href="https://phygital-studio.vercel.app/" target="_blank" rel="noopener noreferrer">Original workbench ↗</a></div>');
- $('.brand').onclick=e=>{e.preventDefault();showHome();};$('#connect-ai').onclick=()=>connect();$('#new-project').onclick=showHome;
+ if(app.route?.id==='phygital')$('.project-meta').insertAdjacentHTML('afterend','<div class="project-origin"><a href="https://github.com/raulromero-dev/phygital" target="_blank" rel="noopener noreferrer">Device repository ↗</a><a href="https://phygital-studio.vercel.app/" target="_blank" rel="noopener noreferrer">Original workbench ↗</a></div>');
+ $('.brand').onclick=e=>{e.preventDefault();showHome();};$('#connect-ai').onclick=()=>connect();
  function showHome(){if(app.route){location.assign('/');return;}document.body.dataset.route='home';$('#continue-project').hidden=!app.getState().instances.length&&!app.continueUrl;home.hidden=false;$('#idea-prompt').focus();}
  function showWorkspace(){document.body.dataset.route='workspace';document.title=app.getState().name+' · phygital';home.hidden=true;app.resize();}
  $('#continue-project').onclick=()=>app.continueUrl?location.assign(app.continueUrl):showWorkspace();
@@ -47,51 +46,31 @@ export function mountProduct(app){
  function readLinks(value){const links=value.split(/\s+/).filter(Boolean);if(links.length>5||links.some(link=>!safeUrl(link)))throw Error('Use up to five complete http(s) links.');return links;}
  $('#idea-form').onsubmit=e=>{e.preventDefault();try{const request={mode:'project',prompt:$('#idea-prompt').value.trim(),links:readLinks([...new Set(($('#idea-prompt').value.match(/https?:\/\/[^\s<>"']+/g)||[]).map(url=>url.replace(/[.,;]+$/,'')))].join(' ')),images:image?[image]:[]};if(!request.prompt){$('#idea-prompt').focus();app.toast('Describe what you want to build.');return;}research(request);}catch(error){app.toast(error.message);}};
  function connect(after){
-  app.dialog('Connect codex',`<form id="connect-form"><p class="dialog-intro">Use your own OpenAI API key for part research and assembly proposals.</p><label for="openai-key">OpenAI API key</label><input id="openai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-…" required><p class="hint">Your key stays in this tab’s memory and is sent through this app’s server only to OpenAI when you make a request. It is never saved with your projects. OpenAI bills your API account.</p><p class="hint">Prompts, attached photos, project links and relevant assembly details are sent to OpenAI for research and requested adjustments. Only send material you want to share.</p><div class="dialog-actions">${apiKey?'<button class="button" type="button" id="disconnect-ai">Disconnect</button>':''}<button class="button primary" type="submit">${after?'Connect & continue':'Connect key'}</button></div><p><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">Get an OpenAI API key ↗</a></p></form>`);
+  app.dialog('Connect codex',`<form id="connect-form"><p class="dialog-intro">Use your own OpenAI API key for part research and assembly proposals.</p><label for="openai-key">OpenAI API key</label><input id="openai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-…" required><p class="hint">Your key stays in this tab’s memory and is sent through this app’s server only to OpenAI when you make a request. It is never saved with your projects. OpenAI bills your API account for research, image models and chat.</p><p class="hint">Prompts, attached photos, project links and relevant assembly details are sent to OpenAI for research and requested adjustments. Only send material you want to share.</p><div class="dialog-actions">${apiKey?'<button class="button" type="button" id="disconnect-ai">Disconnect</button>':''}<button class="button primary" type="submit">${after?'Connect & continue':'Connect key'}</button></div><p><a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer">Get an OpenAI API key ↗</a></p></form>`);
   $('#connect-form').onsubmit=e=>{e.preventDefault();const key=$('#openai-key').value.trim();if(!/^sk-[A-Za-z0-9_-]{16,512}$/.test(key)){app.toast('Enter a valid OpenAI API key beginning with sk-.');return;}apiKey=key;$('#openai-key').value='';$('#connect-ai').textContent='Key connected';$('#dialog').close();if(after)after();};
   $('#disconnect-ai')?.addEventListener('click',()=>{apiKey='';$('#connect-ai').textContent='Connect key';$('#dialog').close();app.toast('API key removed from this tab.');});
   $('#openai-key').focus();
  }
  function context(){const s=app.getState();return {name:s.name,enclosure:s.enclosure,parts:s.instances.map(i=>{const p=partFor(s,i.id);return {id:i.id,name:p.name,dimensions:i.dimensions,position:i.position,interface:p.interface,ports:PORTS[i.id]||p.ports||[]};}),connections:s.connections};}
- function setHomeBusy(busy){
-  $('#idea-form').setAttribute('aria-busy',String(busy));
-  $('#idea-form').querySelectorAll('input,textarea,button').forEach(el=>el.disabled=busy);
-  $('.start-building').disabled=busy||!$('#idea-prompt').value.trim();
-  $('.idea-examples').hidden=busy;$('.home-secondary').hidden=busy;
-  $('#connect-ai').disabled=busy;
- }
  async function research(request){
   if(controller)return;
+  if(request.mode==='project'){
+   const current=new AbortController();controller=current;
+   try{const data=await runProjectBuild({app:{...app,startProject:()=>{app.startProject();showWorkspace();}},assistant,request,getKey:()=>apiKey,controller:current,retry:()=>research(request),ensureKey:()=>new Promise(resolve=>{connect(()=>resolve(true));$('#dialog').addEventListener('close',()=>resolve(!!apiKey),{once:true});})});if(data)researchResult=data;}finally{controller=null;}return;
+  }
   if(!apiKey){connect(()=>research(request));return;}
   lastRequest=request;const current=new AbortController();controller=current;const started=Date.now();
-  const inline=request.mode==='project'&&document.body.dataset.route==='home';
-  const progressHtml=`${loadingIndicator('Sending your brief…')}<ol class="research-steps" aria-label="Research stages"><li data-step="0" aria-current="step">Research</li><li data-step="1">Plan</li><li data-step="2">Review</li></ol><p class="research-detail">Connecting to codex</p><div class="research-actions"><span id="research-elapsed">0s</span><button class="text-button" id="cancel-research">Cancel</button></div>`;
-  if(inline){setHomeBusy(true);$('#idea-progress').hidden=false;$('#idea-progress').innerHTML=progressHtml;}
-  else app.dialog('Researching your parts',`<div class="research-progress">${progressHtml}</div>`);
-  const progressRoot=inline?$('#idea-progress'):$('.research-progress');
-  const cancel=()=>current.abort();$('#cancel-research').onclick=cancel;
-  if(inline){$('#cancel-research').focus({preventScroll:true});progressRoot.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
-  if(!inline)$('#dialog').addEventListener('close',cancel,{once:true});
+  app.dialog('Researching your parts',`<div class="research-progress">${loadingIndicator('Finding parts…')}<div class="research-actions"><span id="research-elapsed">0s</span><button class="text-button" id="cancel-research">Cancel</button></div></div>`);
+  const progressRoot=$('.research-progress'),cancel=()=>current.abort();$('#cancel-research').onclick=cancel;$('#dialog').addEventListener('close',cancel,{once:true});
   const timer=setInterval(()=>{const el=progressRoot.querySelector('#research-elapsed');if(el)el.textContent=`${Math.floor((Date.now()-started)/1000)}s`;},1000);
-  const update=({phase,searches})=>{
-   if(current.signal.aborted)return;
-   progressRoot.querySelector('.cable-escape-label').textContent=RESEARCH_PHASES[phase];
-   progressRoot.querySelector('.research-detail').textContent=searches?`${searches} source search${searches===1?'':'es'} completed`:'Reading your brief and finding components';
-   const active=phase==='drafting'?1:phase==='checking'?2:0;
-   progressRoot.querySelectorAll('[data-step]').forEach(el=>{const n=+el.dataset.step;el.classList.toggle('complete',n<active);if(n===active)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});
-  };
+  const update=({phase})=>{if(!current.signal.aborted)progressRoot.querySelector('.cable-escape-label').textContent=RESEARCH_PHASES[phase];};
   try{
-   const response=await fetch('/api/research',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',Authorization:'Bearer '+apiKey},body:JSON.stringify({...request,context:request.mode==='project'?null:context(),catalog:library.map(p=>({id:p.id,name:p.name,dimensions:p.dimensions,interface:p.interface,ports:PORTS[p.id]||[]}))}),signal:current.signal});
-   const data=await readResearchResponse(response,update);
-   if(current.signal.aborted)return;
-   researchResult=data;
-   if(inline){progressRoot.innerHTML=`<div class="research-finished" role="status"><span>✓ Your proposal is ready</span><small>${data.proposal.parts.length} parts · ${Math.floor((Date.now()-started)/1000)}s</small><button class="button primary" id="review-proposal">Review parts ↗</button></div>`;$('#review-proposal').onclick=()=>showProposal(data,true);}
-   else showProposal(data,false);
+   const response=await fetch('/api/research',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',Authorization:'Bearer '+apiKey},body:JSON.stringify({...request,context:context(),catalog:library.map(p=>({id:p.id,name:p.name,dimensions:p.dimensions,interface:p.interface,ports:PORTS[p.id]||[]}))}),signal:current.signal});
+   const data=await readResearchResponse(response,update);if(current.signal.aborted)return;researchResult=data;showProposal(data,false);
   }catch(error){
-   if(current.signal.aborted){if(inline)progressRoot.innerHTML='<p role="status">Canceled. Your brief is ready to edit.</p>';else $('#dialog').close();}
-   else if(inline){progressRoot.innerHTML=`<p role="alert">${esc(error.message)}</p><div class="research-actions"><button class="text-button" id="reconnect">Reconnect key</button><button class="button" id="retry-research">Try again</button></div>`;$('#reconnect').onclick=()=>connect(()=>research(lastRequest));$('#retry-research').onclick=()=>research(lastRequest);}
-   else{app.dialog('Research needs another try',`<div class="research-error" role="alert"><p>${esc(error.message)}</p><p class="hint">Your assembly hasn’t changed. You can still browse the library or add a part manually.</p><div class="dialog-actions"><button class="button" id="reconnect">Reconnect key</button><button class="button primary" id="retry-research">Try again</button></div></div>`);$('#reconnect').onclick=()=>connect(()=>research(lastRequest));$('#retry-research').onclick=()=>research(lastRequest);}
-  }finally{clearInterval(timer);$('#dialog').removeEventListener('close',cancel);if(controller===current)controller=null;if(inline)setHomeBusy(false);}
+   if(current.signal.aborted)$('#dialog').close();
+   else{app.dialog('Research needs another try',`<p role="alert">${esc(error.message)}</p><button class="button" id="retry-research">Try again</button>`);$('#retry-research').onclick=()=>research(lastRequest);}
+  }finally{clearInterval(timer);$('#dialog').removeEventListener('close',cancel);if(controller===current)controller=null;}
  }
  function showProposal(data,replace){
   const p=data.proposal;
@@ -103,6 +82,7 @@ export function mountProduct(app){
   };
  }
  function findParts(tab='library'){
+  if(app.isBuilding()){app.toast('Finish or stop the build before adding parts.');return;}
   app.dialog('Find parts',`<div class="finder-tabs" role="tablist" aria-label="Part discovery"><button role="tab" aria-selected="${tab==='library'}" data-finder="library">Library</button><button role="tab" aria-selected="${tab==='ai'}" data-finder="ai">${codexMark} codex</button><button role="tab" aria-selected="${tab==='link'}" data-finder="link">Paste a link</button></div><div id="finder-content"></div>`);$('#dialog').classList.add('parts-dialog');
   $$('[data-finder]').forEach(b=>b.onclick=()=>findParts(b.dataset.finder));
   if(tab==='library'){
@@ -120,7 +100,7 @@ export function mountProduct(app){
   }
  }
  function reviewResearch(){if(researchResult)showProposal(researchResult,false);else findParts('ai');}
- $('#find-parts').onclick=()=>findParts();$('#empty-find').onclick=()=>findParts();mountAssistant({...app,getKey:()=>apiKey,ensureKey:next=>apiKey?next():connect(next)});
+ $('#find-parts').onclick=()=>findParts();$('#empty-find').onclick=()=>findParts();assistant=mountAssistant({...app,getKey:()=>apiKey,ensureKey:next=>apiKey?next():connect(next)});
  mountMobileMenu();
  app.register({findParts,showHome,showWorkspace,reviewResearch});
  if(app.route){showWorkspace();app.fit();}else showHome();

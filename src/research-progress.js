@@ -1,6 +1,6 @@
 export const RESEARCH_PHASES={research:'Researching your idea…',searching:'Searching component sources…',drafting:'Preparing your assembly proposal…',checking:'Checking the proposal…'};
 
-export async function readResearchResponse(response,onProgress){
+export async function readResearchResponse(response,onProgress,onPart=()=>{}){
  if(!response.headers.get('content-type')?.includes('application/x-ndjson')){
   const data=await response.json();if(!response.ok)throw Error(data.error||'Research could not finish.');return data;
  }
@@ -8,6 +8,7 @@ export async function readResearchResponse(response,onProgress){
  function parse(line){
   const event=JSON.parse(line);
   if(event.type==='progress'&&RESEARCH_PHASES[event.phase])onProgress({phase:event.phase,searches:Math.min(8,Math.max(0,Number(event.searches)||0))});
+  if(event.type==='part')onPart(event.part);
   if(event.type==='error')throw Error(event.error||'Research could not finish.');
   if(event.type==='result')return event.data;
  }

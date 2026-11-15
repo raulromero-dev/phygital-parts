@@ -12,9 +12,12 @@ flowchart LR
   A[Prompt, photo, public links] --> B[Product UI]
   B --> C[Research API]
   C --> D[OpenAI Responses + web search]
-  D --> E[Validated proposal]
-  E --> F[User review]
-  F --> G[Assembly state]
+  D --> E[Validated draft parts + final proposal]
+  E --> F{New project?}
+  F -->|Yes: progressive draft| G[Assembly state]
+  F -->|No: review additions| G
+  G --> N[Source CAD or Astra image model]
+  N --> G
   G --> H[Three.js models and cable routes]
   G --> I[Fit and connection checks]
   G --> J[Local storage and exports]
@@ -56,7 +59,7 @@ input and validates the final structured proposal. The configured model is in
 Clients requesting `Accept: application/x-ndjson` receive allowlisted progress
 records followed by a validated result or error. The server consumes Responses
 SSE; web-search events increment a deduplicated count, output-text events mark
-proposal preparation, and completion begins validation. Intermediate model text,
+proposal preparation, and completion begins validation. Validated complete part objects are also emitted as `type: part`. Other model text,
 queries and reasoning are not forwarded. JSON clients remain supported.
 
 ```json
@@ -83,3 +86,23 @@ Vercel Web Analytics is injected in production builds for standard page views.
 No custom events record prompts, keys, images, project contents or chat messages.
 Local development does not load Analytics. Hosting settings live in `vercel.json`;
 forks should link their own Vercel project and configure their own public domain.
+
+## Progressive project creation and model pipeline
+
+`project-build.js` opens a generated route before connecting or requesting work.
+`part-stream.mjs` tracks JSON depth and string escapes to emit only complete
+validated objects from the root parts array. Each draft uses stable identities;
+the final proposal reconciles placements and wires without losing prepared
+models. Editing is locked while building; orbit, selection and Stop remain
+available. Find-parts additions and chat adjustments retain their review step.
+
+Catalog parts reuse their known models. New parts try a public source CAD URL
+through `assets.mjs`, then a referenced image through `model.mjs` and Astra.
+No usable image means an envelope, not a claimed reconstruction. Source CAD,
+image-derived geometry and failure notes survive project serialization; images
+and credentials do not. CAD blobs are cached in memory and re-fetched on reload,
+with a SHA-256 match required. STEP parsing runs in a disposable browser worker.
+
+Cancel aborts research and model requests, retains draft parts, and unlocks
+editing. Reload marks running builds interrupted and never silently re-bills.
+The generated URL has an isolated localStorage namespace, not server storage.

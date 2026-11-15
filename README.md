@@ -52,8 +52,10 @@ Find parts cards show names, dimensions and purchasing actions first. Interface
 text and research descriptions are available in collapsed details. Research
 and link forms use brief labels instead of introductory subtitles. The homepage
 accepts part links directly in the main prompt, without a separate links field.
-First-prompt research shows
-inline stages, elapsed time and cancellation, followed by a Review parts action.
+A first prompt opens its own project URL with the floating Codex window open.
+Validated draft parts appear progressively, followed by source CAD or an
+image-derived model. Codex shows real progress, elapsed time and Stop.
+Canceled or interrupted builds retain their draft parts.
 Stages come from provider events; no percentage is invented. A small spacecraft
 dodges a four-pin cable during research, model loading and chat replies, with a
 static version for reduced motion.
@@ -116,9 +118,10 @@ All starters load locally without an AI call. The air monitor reuses
 Sensirion sensor CAD and Seeed PCB data; its USB-C supply, firmware, ventilation
 and peak-current budget need review. Haptics use four separate multiplexer
 channels with the existing power-budget checks.
-Known exact parts reuse the existing CAD/model library. Unrecognized parts use
-clearly labeled, dimensioned parametric envelopes; they do not magically acquire
-manufacturer geometry. Research suggestions and pinouts need review.
+Known exact parts reuse the existing CAD/model library. Other parts first try
+source GLB, STL or STEP (up to 2.8 MB); otherwise Astra reads a product image
+and creates a bounded visual approximation. Missing sources keep
+clearly labeled, dimensioned parametric envelopes. Research suggestions and pinouts need review.
 
 ## Local development
 
@@ -130,7 +133,7 @@ npm run dev
 ```
 
 Open the printed local URL (default `http://127.0.0.1:5179`). The local server
-runs Vite and the same `/api/research` and `/api/adjust` handlers used in production.
+runs Vite and the same `/api/research`, `/api/adjust`, `/api/model` and `/api/assets` handlers used in production.
 `npm run dev:ui` is frontend-only; use the normal dev command to exercise either API.
 
 ```sh
@@ -179,7 +182,7 @@ vercel link # select your own project when deploying a fork
 vercel deploy --prod
 ```
 
-Vercel builds `dist/` and deploys `api/research.js` and `api/adjust.js` as Node functions. No API key
+Vercel builds `dist/` and deploys the `api/` handlers as Node functions. No API key
 or database environment variable is required. Function duration is configured
 for up to 300 seconds; the hosting plan must support it. Public access is an
 intentional product setting. Custom domain registration and payments are not
@@ -188,7 +191,7 @@ part of this repository.
 ## Structure
 
 - `src/product.js`, `product.css`: prompt-first home, key connection, finder,
-  research progress and review-before-add flow.
+  progressive project builds and reviewed part additions.
 - `src/product-data.js`: safe supplier links, blank projects, duplicate parts,
   placement suggestions and applying research proposals.
 - `src/main.js`: workspace, component inspector, wiring editor, notes and export.
@@ -235,3 +238,24 @@ OpenAI implementation references:
 - https://developers.openai.com/api/docs/models/gpt-6-astra
 - https://developers.openai.com/api/docs/guides/tools-web-search
 - https://developers.openai.com/api/docs/guides/structured-outputs
+
+### Progressive models
+
+New projects use `/projects/build-<uuid>` with a separate browser autosave and
+chat history. The URL identifies local browser data; it is not a hosted share
+link. Reload preserves drafts but does not resume paid requests. Keys and
+uploaded reference images remain in tab memory.
+
+Research discovers exact CAD downloads and reference images with source pages.
+`/api/assets` downloads public HTTPS assets with pinned public IPv4 DNS, redirect,
+time and size limits. GLB previews reject external resources; STEP triangulation
+runs in a time-limited worker using occt-import-js. CAD proportions are preserved
+with uniform scaling to the research envelope; orientation and dimensions still
+need verification. Images go to Astra through `/api/model` and return up to 128
+bounded primitives, never executable code. Model requests use the visitor key,
+can incur additional API charges, and run at most two at a time.
+
+Each component retains its model evidence under **Source & evidence**. Missing,
+large or unsupported CAD can fall back to image reconstruction or a labeled
+envelope. This flow does not filter source CAD by redistribution-license status.
+OpenCascade runtime notices are in `public/third-party/`.

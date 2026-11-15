@@ -9,6 +9,12 @@
     },
     "api/adjust.js": {
       "maxDuration": 300
+    },
+    "api/model.js": {
+      "maxDuration": 300
+    },
+    "api/assets.js": {
+      "maxDuration": 60
     }
   },
   "headers": [

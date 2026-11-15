@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-14 · Progressive projects and source models
+
+First prompts open isolated project URLs with the Codex window showing real
+research and model progress. Validated parts appear as they arrive. Cancel and
+reload preserve drafts. New models prefer source CAD (GLB/STL/STEP), then
+Astra image reconstructions with bounded geometry and source attribution.
+Missing sources retain labeled planning envelopes.
+
+Renamed the repository to phygital-studio. Shortened Connections copy and
+changed the landing chip accent from green to gold. Find parts is the sole
+component entry point, including library and manual entry; removed the
+sidebar library drawer, add-component icon and New project action.
+
+Validation: streamed drafts, stable IDs, cancellation, model provenance, image
+inputs, bounded geometry, routes and public asset checks; browser verification
+uses mock API responses and actual local STEP geometry, with no paid API call.
+
+
 ## 2026-11-14 · Codex for Raul · main · links in the prompt
 
 Removed the separate homepage links field. The prompt placeholder now says

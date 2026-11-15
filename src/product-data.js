@@ -35,16 +35,17 @@ export function libraryPart(state,id){
  state.custom.push({...source,id:customId,name:source.name+' · copy',short:source.short+' · copy',modelId:source.modelId||source.id,ports:structuredClone(PORTS[id]||[]),sources:[],owned:false});
  state.instances.push({id:customId,position:nextPosition(state,source.dimensions),rotation:[0,0,0],dimensions:[...source.dimensions]});return customId;
 }
-export function applyProposal(state,proposal,keys,{replace=false}={}){
+export function applyProposal(state,proposal,keys,{replace=false,identities=new Map()}={}){
  const next=replace?emptyProject(proposal.projectName):structuredClone(state);
  if(replace){next.enclosure=[proposal.enclosure.width,proposal.enclosure.height,proposal.enclosure.depth];next.brief=proposal.summary;}
  const ids=new Map();let lastId,skippedConnections=0;
  for(const item of proposal.parts.filter(p=>keys.includes(p.key))){
   const known=PARTS[item.catalogId];
-  const id=known?libraryPart(next,known.id):'custom-'+crypto.randomUUID();
+  let id=known?libraryPart(next,known.id):(identities.get(item.key)||'custom-'+crypto.randomUUID());
+  if(known&&identities.has(item.key)&&id!==identities.get(item.key)){const stable=identities.get(item.key);next.instances.find(p=>p.id===id).id=stable;const copy=next.custom.find(p=>p.id===id);if(copy)copy.id=stable;else if(stable.startsWith('custom-'))next.custom.push({...known,id:stable,modelId:known.modelId||known.id,ports:structuredClone(PORTS[known.id]||[]),sources:[]});id=stable;}
   if(!known){
    const dimensions=[item.dimensions.width,item.dimensions.height,item.dimensions.depth];
-   const p={id,name:item.name,short:item.name,category:'Custom',kind:item.kind,color:item.color,dimensions,owned:false,quantity:1,confidence:item.dimensions.confidence,dimensionNote:item.dimensions.confidence==='sourced'?'AI-extracted dimensions; confirm the source and delivered revision.':'Estimated planning envelope. Measure the real part before ordering an enclosure.',interface:item.interface,summary:item.description,placement:item.placement,electrical:item.electrical,ports:item.ports,sources:[],links:item.sources.map(s=>[s.label,s.url]),purchaseLinks:item.purchaseLinks.map(s=>[s.label,s.url]),photo:'AI research proposal',modelNote:'Parametric planning envelope, not manufacturer CAD. Contacts are approximate.',tags:['Review dimensions']};
+   const p={id,name:item.name,short:item.name,category:'Custom',kind:item.kind,color:item.color,dimensions,owned:false,quantity:1,confidence:item.dimensions.confidence,dimensionNote:item.dimensions.confidence==='sourced'?'AI-extracted dimensions; confirm the source and delivered revision.':'Estimated planning envelope. Measure the real part before ordering an enclosure.',interface:item.interface,summary:item.description,placement:item.placement,electrical:item.electrical,ports:item.ports,sources:[],links:item.sources.map(s=>[s.label,s.url]),purchaseLinks:item.purchaseLinks.map(s=>[s.label,s.url]),model:item.model,photo:'AI research proposal',modelNote:'Parametric planning envelope, not manufacturer CAD. Contacts are approximate.',tags:['Review dimensions']};
    next.custom.push(p);next.instances.push({id,position:replace?item.position:nextPosition(next,dimensions),rotation:item.rotation,dimensions});
   }else if(replace){const instance=next.instances.find(p=>p.id===id);instance.position=[...item.position];instance.rotation=[...item.rotation];}
   ids.set(item.key,id);lastId=id;
@@ -56,5 +57,5 @@ export function applyProposal(state,proposal,keys,{replace=false}={}){
   next.connections.push({id:crypto.randomUUID(),from:a+':'+c.fromPort,to:b+':'+c.toPort,type:c.type,bundle:c.bundle,length:100,color:'#666666',status:'Planned',note:'AI proposal — verify pinout, supply and cable. '+c.note});
  }
  next.research={summary:proposal.summary,questions:[...proposal.questions,...(skippedConnections?[`${skippedConnections} proposed conductors were not added because their contacts could not be matched. Map them after reviewing the pinouts.`]:[])],sources:proposal.sources,at:new Date().toISOString()};
- return {state:next,selected:lastId,skippedConnections};
+ return {state:next,selected:lastId,skippedConnections,ids};
 }

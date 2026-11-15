@@ -32,8 +32,8 @@ that result. API keys belong in the app's connection field, never in chat or fil
 Preserve exact manufacturer names, SKUs and revisions. Distinguish owned parts
 from candidates. Give direct purchase links separately from datasheets and CAD.
 Report dimensions with their evidence and uncertainty; a photograph is not a
-measurement. Reuse exact source CAD where available, then use labeled parametric
-envelopes for unknown components. Keep original CAD and attribution intact.
+measurement. Reuse exact source CAD where available, then use product images with Astra for labeled
+visual approximations. Keep a parametric envelope when neither source is usable. Keep original CAD and attribution intact.
 
 For each proposed cable, identify both component contacts, signal/power role,
 voltage, housing family, pitch, gender and length allowance. Check pin polarity,
@@ -53,9 +53,13 @@ Examples include thermal camera, air monitor, wearable haptics, smartwatch,
 smart ring and makeup cyberdeck. The original device remains at
 `/projects/phygital?layout=compact`, with `bench` and `wide` variants.
 
+Submitting a brief opens a dedicated project with live Codex progress and draft
+parts appearing as they are validated. Stop preserves drafts. Project URLs and
+chat history are browser-local; keys stay in tab memory.
+
 Use **Find parts** for the catalog, codex research or a pasted product URL.
-Purchase actions are separate from adding a part. Review the proposed parts and
-connections before applying them. Select a part before using the floating
+Purchase actions are separate from adding a part. Review proposed additions to existing projects before applying them.
+Review generated drafts and connections before physical assembly. Select a part before using the floating
 **codex** chat to request placement/dimension adjustments. Inspect and apply the
 proposal; undo remains available. Export JSON for reuse and CSV for cable maps.
 

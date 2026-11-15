@@ -1,8 +1,9 @@
+import { partStream } from './part-stream.mjs';
 // Read Responses SSE without exposing model text, reasoning, queries or keys.
-// The browser receives only allowlisted phases and a completed-search count.
+// Emit only validated complete parts, phases and completed-search counts.
 export async function readResearchStream(body, onProgress) {
  const reader=body.getReader(),decoder=new TextDecoder(),searches=new Set();
- let buffer='',lastPhase='',lastCount=-1;
+ let buffer='',lastPhase='',lastCount=-1;const parts=partStream(part=>onProgress({type:'part',part}));
  const progress=phase=>{if(phase!==lastPhase||searches.size!==lastCount){lastPhase=phase;lastCount=searches.size;onProgress({phase,searches:searches.size});}};
  try {
   while(true){
@@ -18,7 +19,7 @@ export async function readResearchStream(body, onProgress) {
     if(event.type==='response.created'||event.type==='response.in_progress')progress('research');
     if(event.type==='response.web_search_call.in_progress'||event.type==='response.web_search_call.searching')progress('searching');
     if(event.type==='response.web_search_call.completed'){searches.add(event.item_id??event.output_index);progress('research');}
-    if(event.type==='response.output_text.delta')progress('drafting');
+    if(event.type==='response.output_text.delta'){progress('drafting');if(typeof event.delta==='string')parts(event.delta);}
     if(event.type==='response.completed'){progress('checking');return event.response;}
     if(['response.failed','response.incomplete','error'].includes(event.type))throw Error('Research did not complete');
    }

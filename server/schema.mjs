@@ -1,3 +1,4 @@
+import { modelEvidence } from '../src/model-data.js';
 const text={type:'string'};
 const list=items=>({type:'array',items});
 const obj=properties=>({type:'object',properties,required:Object.keys(properties),additionalProperties:false});
@@ -7,7 +8,7 @@ export const proposalSchema=obj({
  projectName:text,summary:text,enclosure:obj({width:{type:'number'},height:{type:'number'},depth:{type:'number'}}),
  parts:list(obj({key:text,catalogId:{type:['string','null']},name:text,kind:{type:'string',enum:['board','chip','camera','battery','screen','motor','connector','antenna','other']},
   dimensions:obj({width:{type:'number'},height:{type:'number'},depth:{type:'number'},confidence:{type:'string',enum:['sourced','estimate','unknown']}}),description:text,interface:text,electrical:text,placement:text,color:text,position:vector,rotation:vector,
-  purchaseLinks:list(link),sources:list(link),ports:list(obj({id:text,label:text,signal:{type:'string',enum:['unknown','sda','scl','power','ground','gpio','rf','motor','analog','tx','rx','usb']},rail:text,group:text,anchor:vector}))
+  model:obj({cadUrl:text,cadFormat:{type:'string',enum:['glb','stl','step','none']},cadSourceUrl:text,imageUrl:text,imageSourceUrl:text}),purchaseLinks:list(link),sources:list(link),ports:list(obj({id:text,label:text,signal:{type:'string',enum:['unknown','sda','scl','power','ground','gpio','rf','motor','analog','tx','rx','usb']},rail:text,group:text,anchor:vector}))
  })),connections:list(obj({fromPart:text,fromPort:text,toPart:text,toPort:text,type:text,bundle:text,note:text})),questions:list(text),sources:list(link)
 });
 const bounded=(n,min,max)=>Number.isFinite(n)&&n>=min&&n<=max;
@@ -20,15 +21,19 @@ export function validateProposal(p){
  const keys=new Set();
  for(const item of p.parts){
   if(!/^[a-z0-9-]{1,70}$/.test(item.key)||keys.has(item.key)||!short(item.name,100)||!item.dimensions||!['width','height','depth'].every(k=>bounded(item.dimensions[k],.1,1000))||!/^#[a-f0-9]{6}$/i.test(item.color)||!['position','rotation'].every(k=>Array.isArray(item[k])&&item[k].length===3&&item[k].every(n=>bounded(n,k==='rotation'?-360:-2000,k==='rotation'?360:2000))))throw Error('The agent returned invalid part dimensions or placement.');
-  keys.add(item.key);
+  if(!['board','chip','camera','battery','screen','motor','connector','antenna','other'].includes(item.kind)||!['sourced','estimate','unknown'].includes(item.dimensions.confidence)||item.catalogId!==null&&!short(item.catalogId,100))throw Error('Invalid part type.');
+  keys.add(item.key);if(item.model)item.model=modelEvidence(item.model);
   if(!Array.isArray(item.ports)||item.ports.length>40)throw Error('Too many contacts on a proposed part.');
   const portIds=new Set();
-  for(const port of item.ports){if(!/^[a-z0-9-]{1,60}$/.test(port.id)||portIds.has(port.id)||!Array.isArray(port.anchor)||port.anchor.length!==3||!port.anchor.every(n=>bounded(n,-1,1)))throw Error('Invalid contact geometry.');portIds.add(port.id);}
+  for(const port of item.ports){if(!short(port.label,100)||!short(port.group,150)||!short(port.rail,30)||!['unknown','sda','scl','power','ground','gpio','rf','motor','analog','tx','rx','usb'].includes(port.signal)||!/^[a-z0-9-]{1,60}$/.test(port.id)||portIds.has(port.id)||!Array.isArray(port.anchor)||port.anchor.length!==3||!port.anchor.every(n=>bounded(n,-1,1)))throw Error('Invalid contact geometry.');portIds.add(port.id);}
   for(const field of ['description','interface','electrical','placement'])if(!short(item[field]))throw Error('Part description exceeds the limit.');
   for(const field of ['purchaseLinks','sources'])item[field]=(item[field]||[]).filter(l=>short(l.label,150)&&publicUrl(l.url)).slice(0,8);
  }
  p.sources=(p.sources||[]).filter(l=>short(l.label,150)&&publicUrl(l.url)).slice(0,24);
  p.questions=(p.questions||[]).filter(q=>short(q,1000)).slice(0,12);
  for(const c of p.connections)if(!keys.has(c.fromPart)||!keys.has(c.toPart)||!Object.values(c).every(v=>short(v,1500)))throw Error('Invalid proposed connection.');
+ p.parts=p.parts.map(item=>Object.fromEntries(['key','catalogId','name','kind','dimensions','description','interface','electrical','placement','color','position','rotation','purchaseLinks','sources','ports',...(item.model?['model']:[])].map(key=>[key,item[key]])));
  return p;
 }
+
+export function validatePart(part){return validateProposal({projectName:'Draft',summary:'',enclosure:{width:120,height:50,depth:100},parts:[part],connections:[],questions:[],sources:[]}).parts[0];}

@@ -1,3 +1,4 @@
+import { loadCad, buildImageModel } from './part-models.js';
 import { buildProxy } from './proxy.js';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
@@ -73,6 +74,8 @@ export class AssemblyViewer {
   async load(part){
     if(this.cache.has(part.id))return this.cache.get(part.id);
     const promise=(async()=>{
+      if(part.visual?.type==='image')return buildImageModel(part);
+      if(part.visual?.type==='cad'){try{return await loadCad(part.visual,part.dimensions,part.color);}catch{this.callbacks.onError('Source CAD unavailable; showing a planning envelope.');return buildProxy(part);}}
       if((part.id.startsWith('custom-')&&!part.modelId)||part.id==='motor-rail')return buildProxy(part);
       try{const gltf=await new GLTFLoader().loadAsync(`${import.meta.env.BASE_URL}models/${part.modelId||part.id}.glb?detail=4`);const group=gltf.scene;
       // Photo-based preview materials; keep the supplied GLBs untouched.
@@ -96,6 +99,7 @@ export class AssemblyViewer {
       catch(error){this.callbacks.onError(`Could not load ${part.short}; showing a dimension box.`);return new THREE.Mesh(new THREE.BoxGeometry(...part.dimensions),new THREE.MeshStandardMaterial({color:part.color}));}
     })();this.cache.set(part.id,promise);return promise;
   }
+  invalidate(id){this.cache.delete(id);const group=this.groups.get(id);if(group)this.assembly.remove(group);this.groups.delete(id);this.labels.get(id)?.remove();this.labels.delete(id);this.leaders.querySelector(`[data-part="${id}"]`)?.remove();}
   async sync(state,selected){
     this.state=state;this.selected=selected;const generation=(this.generation||0)+1;this.generation=generation;
     const ids=new Set(state.instances.map(i=>i.id));for(const [id,g]of this.groups)if(!ids.has(id)){this.assembly.remove(g);this.groups.delete(id);this.labels.get(id)?.remove();this.labels.delete(id);this.leaders.querySelector(`[data-part="${id}"]`)?.remove();}
