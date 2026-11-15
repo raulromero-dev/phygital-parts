@@ -4,6 +4,7 @@ import { WATCH_SIGNALS, WATCH_SOURCES } from './smartwatch.js';
 import { AIR_SOURCES } from './air-monitor.js';
 import { addScreen, addPlugHaptics } from './planning.js';
 import { ringInstances, RING_SOURCE } from './smart-ring.js';
+import { CYBERDECK_SOURCES } from './cyberdeck.js';
 
 export const EXAMPLES=[
  {id:'phygital',label:'Phygital',selected:'thermal'},
@@ -11,7 +12,8 @@ export const EXAMPLES=[
  {id:'air-monitor',label:'Air monitor',selected:'grove-scd41'},
  {id:'wearable-haptics',label:'Wearable haptics',selected:'haptic-hub'},
  {id:'smartwatch',label:'Smartwatch',selected:'watch-display'},
- {id:'smart-ring',label:'Smart ring',selected:'ring-board'}
+ {id:'smart-ring',label:'Smart ring',selected:'ring-board'},
+ {id:'makeup-cyberdeck',label:'Makeup cyberdeck',selected:'cardputer-adv'}
 ];
 export const PHYGITAL_LAYOUTS=[
  {id:'compact',label:'Compact study',description:'Stacked battery · strip antenna'},
@@ -42,6 +44,7 @@ function includedAntenna(state,position){
 }
 export function exampleTemplate(id){
  if(id==='phygital')return phygitalTemplate();
+ if(id==='makeup-cyberdeck')return makeupCyberdeckTemplate();
  if(id==='smart-ring')return smartRingTemplate();
  if(id==='smartwatch')return smartwatchTemplate();
  if(!EXAMPLES.some(example=>example.id===id))throw Error('Unknown example.');
@@ -74,6 +77,14 @@ export function exampleTemplate(id){
   state.notes=[note('haptic-hub','Channels 0–3 correspond to front, right, back and left in the top view. Select one channel at a time. This is a distributed wearable layout, not a validated watch enclosure.'),note('battery','Battery and motor power budget remain unverified. The four module paths are planning connections, not approval to energize the carrier rail.')];
  }
  return state;
+}
+
+export function makeupCyberdeckTemplate(){
+ const state=emptyProject('Makeup cyberdeck · compact');state.preset='makeup-cyberdeck';state.enclosure=[106,96,112];state.enclosureVisible=false;
+ state.instances=[instance('cardputer-adv',[0,13.35,14.5]),instance('compact-base',[0,12,15]),instance('compact-hinge',[0,25,-20]),instance('compact-lid',[0,55.8,-34.4],[65,0,0]),instance('compact-mirror',[0,57.7,-31.5],[65,0,0])];
+ state.connections=[];state.brief='Makeup-compact cyberdeck: an integrated Cardputer-Adv in a blush clamshell cradle with a mirrored lid. Screen, keyboard and battery are internal; the case is a concept.';
+ state.notes=[note('cardputer-adv','Display, keyboard and battery are integrated. Inspect Pins & internals for their mapping; no invented external jumper cables are required.'),note('compact-base','Open-position styling study only. Validate closed clearance, port access, hinge hardware, antenna clearance and retention before fabrication.')];
+ state.projectLinks=[CYBERDECK_SOURCES.guide,CYBERDECK_SOURCES.cad,CYBERDECK_SOURCES.firmware];return state;
 }
 
 export function smartRingTemplate(){

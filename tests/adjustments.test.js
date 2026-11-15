@@ -12,8 +12,8 @@ const edit=(partId,position)=>({partId,position,rotation:null,dimensions:null,no
 const proposal=changes=>({message:'Move the selected part.',changes,enclosure:null});
 const request=()=>({prompt:'Move this sensor up by 2 mm',selectedPartId:'grove-scd41',context:{parts:exampleTemplate('air-monitor').instances}});
 test('starter routes use separate namespaces, including original layout variants',()=>{
- const paths=['phygital','smart-ring','smartwatch','thermal-camera','air-monitor','wearable-haptics'].map(id=>projectUrl(id));
- const keys=paths.map(path=>projectRoute(path).key);assert.equal(new Set(keys).size,6);
+ const paths=['phygital','smart-ring','smartwatch','thermal-camera','air-monitor','wearable-haptics','makeup-cyberdeck'].map(id=>projectUrl(id));
+ const keys=paths.map(path=>projectRoute(path).key);assert.equal(new Set(keys).size,7);
  assert.equal(projectRoute(projectUrl('phygital','bench')).key,'phygital-bench');
  assert.notEqual(projectRoute(projectUrl('phygital','wide')).key,projectRoute(projectUrl('phygital')).key);
  assert.equal(projectRoute('/examples/unknown'),null);assert.equal(projectRoute('/smart-ring'),null);assert.throws(()=>projectUrl('unknown'));

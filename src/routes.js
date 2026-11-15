@@ -1,4 +1,4 @@
-const examples=['thermal-camera','air-monitor','wearable-haptics','smartwatch','smart-ring'];
+const examples=['thermal-camera','air-monitor','wearable-haptics','smartwatch','smart-ring','makeup-cyberdeck'];
 export function projectUrl(id,variant='compact'){
  if(id==='phygital')return '/projects/phygital?layout='+(['compact','bench','wide'].includes(variant)?variant:'compact');
  if(!examples.includes(id))throw Error('Unknown starter.');

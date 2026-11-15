@@ -2,6 +2,7 @@ import { CROWPANEL_PORTS, CROWPANEL_INTERNALS } from './crowpanel.js';
 import { WATCH_PORTS } from './smartwatch.js';
 import { AIR_PORTS } from './air-monitor.js';
 import { RING_PORTS, RING_INTERNALS } from './smart-ring.js';
+import { CARDPUTER_PORTS, CARDPUTER_INTERNALS } from './cyberdeck.js';
 import carrierContacts from './carrier-contacts.js';
 import { PLUG_MOTOR_IDS } from './options.js';
 // Header order follows Seeed's CAD; unknown seller connector order stays explicit.
@@ -28,6 +29,8 @@ export const PORTS={
 PORTS['crowpanel-advance-28']=CROWPANEL_PORTS;
 Object.assign(PORTS,WATCH_PORTS);
 Object.assign(PORTS,RING_PORTS);
+PORTS['cardputer-adv']=CARDPUTER_PORTS;
+for(const id of ['compact-base','compact-lid','compact-mirror','compact-hinge'])PORTS[id]=[];
 PORTS['grove-scd41']=AIR_PORTS;
 PORTS.grove=['A','B'].flatMap((end,e)=>Array.from({length:4},(_,n)=>port(`${end}${n+1}`,`${end} contact ${n+1} · trace function`,'unknown',`Cable end ${end}`,[(n-1.5)/2,0,e?1:-1])));
 PORTS['grove-tail']=['A','wire'].flatMap((end,e)=>Array.from({length:4},(_,n)=>port(`${end}${n+1}`,`${end} ${n+1} · trace function`,'unknown',e?'Exposed conductors':'Grove contacts',[(n-1.5)/2,0,e?1:-1])));
@@ -133,6 +136,7 @@ for(const id of PLUG_MOTOR_IDS)INTERNALS[id]=[{name:'DRV2605L → attached motor
 INTERNALS['haptic-hub']=[{name:'TCA9548A channel switch',route:'Upstream SDA/SCL → selected CH0–CH7 data branch. Use one branch at a time for identical 0x5A motors. Power and ground stay common; switching channels does not remove motor power.',evidence:'Seeed 103020293 schematic and wiki'}];
 for(const id of ['lcd-27579','lcd-18366'])INTERNALS[id]=[{name:'SPI display controller',route:'MOSI + SCLK transfer pixels; CS selects the display, DC selects command/data, RST resets it and BL controls backlight. 3.3 V supply and logic are paired in this plan. The 2.8-inch touch controller has separate, currently unmapped contacts.',evidence:'Waveshare manufacturer interface tables'}];
 INTERNALS['ring-board']=RING_INTERNALS;
+INTERNALS['cardputer-adv']=CARDPUTER_INTERNALS;
 export const CABLE_TYPES=['Soldered battery tabs','Board-to-board headers','HY2.0 4-pin harness · verify mating','Grove / 4-wire harness','JST-PH pigtail','U.FL coax / adapter','Hook-up wire','Header / jumper','Custom cable','Grove → STEMMA QT (4528)','STEMMA 3-pin → jumper (3893/3894)','Motor leads → screw terminals','Waveshare 13-pin display cable','PH2.0 8-pin display cable'];
 export function portsFor(state,id){return PORTS[id]||state.custom?.find(p=>p.id===id)?.ports||[];}
 export function endpoint(state,ref){const [id,pin]=ref.split(':');const p=portsFor(state,id).find(p=>p.id===pin);return p?{...p,part:id,ref}:null;}

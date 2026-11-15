@@ -49,6 +49,9 @@ export function checks(state) {
   for(const i of items){const p=partFor(state,i.id); if(!interior.containsBox(bounds(i)))add('warn',`${p.short} extends outside`, 'Part envelope crosses the proposed interior. Adjust placement, rotation or the enclosure dimensions.',[i.id],'Fit');}
   for(let a=0;a<items.length;a++)for(let b=a+1;b<items.length;b++){
     const ia=items[a],ib=items[b];
+    // The compact cradle is hollow; the lid rim surrounds its mirror insert.
+    const compactPair=[ia.id,ib.id];
+    if((compactPair.includes('compact-base')&&compactPair.includes('cardputer-adv'))||(compactPair.includes('compact-lid')&&compactPair.includes('compact-mirror')))continue;
     // Hollow shells enclose other geometry; their bounding boxes cannot resolve clearance.
     if([ia.id,ib.id].every(id=>id.startsWith('ring-'))&&[ia.id,ib.id].some(id=>['ring-inner','ring-outer'].includes(id)))continue;
     // Touching faces are a valid seating contact, so shrink only for numerical tolerance.
@@ -66,6 +69,7 @@ export function checks(state) {
   if(has('grove-scd41'))add('review','Air sensor power & ventilation',PARTS['grove-scd41'].electrical+' Keep the inlet exposed to ambient air, away from controller heat.',['grove-scd41','expansion']);
   if(has('ring-inner')||has('ring-outer'))add('review','Ring shell clearance needs CAD review','Hollow shell envelopes intentionally surround the electronics. Inspect the original CAD for wall thickness, finger size, internal contact and manufacturing tolerances; box checks cannot validate these surfaces.',['ring-inner','ring-outer'],'Fit');
   if(has('ring-board'))add('review','Smart ring requires fabrication','This is an open hardware assembly, not a plug-in kit. Verify PCB production files, fine-pitch assembly, battery charge settings, firmware and material choice.',['ring-board','ring-battery']);
+  if(has('compact-base')||has('compact-lid'))add('review','Compact case needs mechanical review','Open-position concept only. The hollow cradle and mirror rim cannot be checked with solid boxes. Validate closed clearance, hinge sweep, retention, port openings and antenna spacing in CAD. No fabricated case or selected hinge is implied.',['compact-base','compact-lid','compact-mirror','compact-hinge'],'Fit');
   if(has('battery'))add('review','Verify battery polarity & charging','Confirm the JST pinout, protection and ONE charging path before applying power. Cell dimensions and pouch clearance need measurement.',['battery']);
   if(has('thermal')){
     add('review','Thermal opening & breakout voltage','Keep the lens aperture open to long-wave IR. Verify the seller breakout supply and I²C pull-up rail; the bare sensor is 3.3 V.',['thermal']);

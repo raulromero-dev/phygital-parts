@@ -6,14 +6,14 @@ A standalone hardware workbench for discovering components, visualizing their
 fit, planning real cables, and deciding what to buy. Start with a description,
 a reference photo plus a prompt, or public links to a project or product.
 
-The homepage offers six **prebuilt starters** without an API key: Phygital,
-thermal camera, air monitor, wearable haptics, smartwatch and smart ring.
+The homepage offers seven **prebuilt starters** without an API key: Phygital,
+thermal camera, air monitor, wearable haptics, smartwatch, smart ring and makeup cyberdeck.
 Each opens a populated 3D layout with proposed connections, sourcing links
 and review notes. Phygital includes the original compact, bench and wide layouts.
 
 Each starter has its own URL and browser-storage namespace:
 `/examples/thermal-camera`, `/examples/air-monitor`, `/examples/wearable-haptics`,
-`/examples/smartwatch`, `/examples/smart-ring`, and
+`/examples/smartwatch`, `/examples/smart-ring`, `/examples/makeup-cyberdeck`, and
 `/projects/phygital?layout=compact` (also `bench` or `wide`). Autosaves,
 snapshots and chat histories stay separate. The Phygital route retains the
 original project inventory, notes and source context, with links to its firmware
@@ -38,6 +38,18 @@ includes open-source examples and a printable case reference.
 This repository is independent of the original Phygital sensor firmware. It
 contains the product experience and a reusable reference-model library, not the
 surveillance device's firmware or detection rules.
+
+The makeup cyberdeck pairs M5Stack's current Cardputer-Adv with an original
+blush compact cradle, hinged lid and mirror insert. Manufacturer STL is reused
+under MIT; the case is an open-position fit concept. Hinge collisions remain
+visible for review. The controller, keyboard, screen and 1500 mAh battery are
+integrated, so the starter has no external conductors. See **Pins & internals**
+for the internal map and Grove expansion contacts. Source and license bundle:
+`/reference/makeup-cyberdeck/source.zip`.
+
+Find parts cards show names, dimensions and purchasing actions first. Interface
+text and research descriptions are available in collapsed details. Research
+and link forms use brief labels instead of introductory subtitles.
 
 ## Use
 
@@ -158,7 +170,7 @@ Tests cover fit and wiring regressions, generic empty projects, duplicate CAD
 reuse, source/contact persistence, malicious imports, request limits, image/link
 input, refusal, upstream errors, and a mocked successful Responses result.
 Browser checks cover the homepage, generic finder, purchase actions, custom
-parts, settings and persistence. The 62-test suite also covers separate routes,
+parts, settings and persistence. The 64-test suite also covers separate routes,
 original Phygital geometry, ring CAD assembly, adjustment validation and linked
 carrier movement. A local mock provider verified chat review, apply and undo;
 mobile checks cover the compact menu and expanded chat bounds. A successful paid GPT-6 Astra response requires

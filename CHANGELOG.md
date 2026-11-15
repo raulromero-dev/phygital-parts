@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-11-14 · Codex for Raul · main · quieter finder and makeup cyberdeck
+
+Reduced Find parts copy: moved interfaces and research-card descriptions into
+Details, shortened the search placeholder, and removed repeated form headings,
+subtitles and helper lines. Kept purchase actions and dimensions visible.
+
+Added a separate makeup-cyberdeck starter with M5Stack Cardputer-Adv manufacturer
+STL, built-in connection notes and original blush compact, mirror and hinge
+concepts. Retained MIT attribution and downloadable source files. No invented
+external keyboard/display/battery harnesses. Hinge interference and mechanical
+closure remain review items. Starter views now frame the complete assembly.
+
+Validation: 64 tests and production build; browser checks cover the new model,
+collapsible finder details and both research forms.
+
 ## 2026-11-14 · Codex for Raul · main · one chat entry point
 
 Removed the sidebar and mobile-menu assistant entries. The right-side floating

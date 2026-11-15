@@ -97,12 +97,12 @@ import { EXAMPLES, exampleTemplate } from '../src/templates.js';
 import { endpoint, activeConnections } from '../src/connections.js';
 import { readFileSync } from 'node:fs';
 test('prebuilt examples round-trip with active mapped connections and appropriate fit checks',()=>{
- assert.deepEqual(EXAMPLES.map(e=>e.id),['phygital','thermal-camera','air-monitor','wearable-haptics','smartwatch','smart-ring']);
+ assert.deepEqual(EXAMPLES.map(e=>e.id),['phygital','thermal-camera','air-monitor','wearable-haptics','smartwatch','smart-ring','makeup-cyberdeck']);
  for(const example of EXAMPLES){
   const state=validateState(JSON.parse(JSON.stringify(exampleTemplate(example.id))));
-  assert.ok(state.instances.length>=4);assert.ok(state.connections.length>=2);
+  assert.ok(state.instances.length>=4);assert.ok(example.id==='makeup-cyberdeck'?state.connections.length===0:state.connections.length>=2);
   assert.equal(activeConnections(state).length,state.connections.length);
-  if(example.id!=='phygital')assert.equal(checks(state).filter(c=>c.type==='Fit'&&c.level==='warn').length,0,example.id);
+  if(!['phygital','makeup-cyberdeck'].includes(example.id))assert.equal(checks(state).filter(c=>c.type==='Fit'&&c.level==='warn').length,0,example.id);
   for(const c of state.connections){assert.ok(endpoint(state,c.from));assert.ok(endpoint(state,c.to));assert.equal(c.status,'Planned');}
  }
  assert.throws(()=>exampleTemplate('missing'));

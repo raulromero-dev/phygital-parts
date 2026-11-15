@@ -92,7 +92,7 @@ export class AssemblyViewer {
         };
         object.material=Array.isArray(object.material)?object.material.map(referenceMaterial):referenceMaterial(object.material);
       });
-      const box=new THREE.Box3().setFromObject(group);const size=box.getSize(new THREE.Vector3());const center=box.getCenter(new THREE.Vector3());group.position.sub(center);const normalized=new THREE.Group();normalized.add(group);const ratios=part.dimensions.map((d,i)=>d/[size.x,size.y,size.z][i]);if(['xiao','oled-938','lcd-27579','crowpanel-advance-28'].includes(part.modelId||part.id)||part.modelId==='mosfet-5648')normalized.scale.setScalar(Math.min(...ratios));else normalized.scale.set(...ratios);return normalized;}
+      const box=new THREE.Box3().setFromObject(group);const size=box.getSize(new THREE.Vector3());const center=box.getCenter(new THREE.Vector3());group.position.sub(center);const normalized=new THREE.Group();normalized.add(group);const ratios=part.dimensions.map((d,i)=>d/[size.x,size.y,size.z][i]);if(['xiao','oled-938','lcd-27579','crowpanel-advance-28','cardputer-adv'].includes(part.modelId||part.id)||part.modelId==='mosfet-5648')normalized.scale.setScalar(Math.min(...ratios));else normalized.scale.set(...ratios);return normalized;}
       catch(error){this.callbacks.onError(`Could not load ${part.short}; showing a dimension box.`);return new THREE.Mesh(new THREE.BoxGeometry(...part.dimensions),new THREE.MeshStandardMaterial({color:part.color}));}
     })();this.cache.set(part.id,promise);return promise;
   }
