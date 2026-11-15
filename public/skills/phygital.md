@@ -7,7 +7,7 @@ description: Find electronic parts, compare physical fit, visualize hardware ass
 
 Turn a hardware idea into a sourced, editable assembly plan. The workbench is
 [phygitalstudio.app](https://phygitalstudio.app); its source is
-[raulromero-dev/phygital-parts](https://github.com/raulromero-dev/phygital-parts).
+[raulromero-dev/phygital-studio](https://github.com/raulromero-dev/phygital-studio).
 The original surveillance-detector firmware lives in a different repository,
 `raulromero-dev/phygital`; do not confuse it with this generic product.
 
