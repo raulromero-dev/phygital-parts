@@ -1,0 +1,6 @@
+interface:
+  display_name: "Phygital"
+  short_description: "Find hardware parts, check fit, and map connections"
+  default_prompt: "Use $phygital to turn my hardware idea into a sourced parts and assembly plan."
+policy:
+  allow_implicit_invocation: true

@@ -89,7 +89,7 @@ controller candidate, and port mapping does not mean existing firmware is ported
 
 ## Rebuild only this asset
 
-From `hardware-studio`:
+From the repository root:
 
 ```sh
 node blender/convert-crowpanel.cjs

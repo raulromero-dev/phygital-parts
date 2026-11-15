@@ -33,9 +33,9 @@ charger and strip models remain concepts until an exact product is selected.
 
 ## Rebuild
 
-`npm run models` first uses the pinned `occt-import-js` development dependency to
-convert STEP into a local ignored `blender/.cache/` mesh cache, then Blender
-imports it and builds the GLBs and editable `.blend` library. The browser needs
+Run `node blender/convert-cad.cjs` with the pinned `occt-import-js` dependency to
+convert STEP into a local ignored `blender/.cache/` mesh cache, then run
+`blender --background --python blender/generate.py`. Blender imports it and builds the GLBs and editable `.blend` library. The browser needs
 neither OpenCascade nor Blender. Source tessellation is 0.015 mm with 0.15 radian
 angular deflection. Meshes are combined by material for browser performance;
 individual CAD bodies / modeled pieces remain editable in Blender.

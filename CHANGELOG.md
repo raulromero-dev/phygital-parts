@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-11-14 · Codex for Raul · main · research progress and agent distribution
+
+Enabled Vercel Web Analytics and added its production-only client integration.
+Replaced loading indicators with a ship evading a four-pin cable, respecting
+reduced motion and both themes. First-project research stays inline, streams
+actual provider phases/search counts, supports cancellation, and presents an
+explicit review action. Project/product links are always visible in the composer.
+
+Added AGENTS, architecture, part-authoring and contribution guides, an MIT
+application license and the discoverable Phygital skill with a public download.
+Existing CAD and attribution are retained. Research stream regression coverage
+includes fragmented events, invalid/incomplete results, errors and cancellation.
+
 ## 2026-11-14 · Codex for Raul · main · quieter chat composer
 
 Removed the default “This assembly” label and its empty space from Codex chat.

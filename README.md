@@ -50,7 +50,39 @@ for the internal map and Grove expansion contacts. Source and license bundle:
 
 Find parts cards show names, dimensions and purchasing actions first. Interface
 text and research descriptions are available in collapsed details. Research
-and link forms use brief labels instead of introductory subtitles.
+and link forms use brief labels instead of introductory subtitles. The homepage
+keeps project/product links visible in the composer. First-prompt research shows
+inline stages, elapsed time and cancellation, followed by a Review parts action.
+Stages come from provider events; no percentage is invented. A small spacecraft
+dodges a four-pin cable during research, model loading and chat replies, with a
+static version for reduced motion.
+
+## For agents and contributors
+
+Start with [AGENTS.md](AGENTS.md), [architecture](docs/ARCHITECTURE.md),
+[adding parts](docs/ADDING_PARTS.md), and [CONTRIBUTING.md](CONTRIBUTING.md).
+These explain the product context, model provenance, coordinates, connection
+rules, code boundaries, local setup and validation workflows.
+
+The reusable [Phygital skill](skills/phygital/SKILL.md) helps agents discover parts,
+compare fit and plan connections. Its name and description support automatic
+skill discovery; invoke it explicitly as **`$phygital`**. Install from a checkout:
+
+```sh
+mkdir -p ~/.codex/skills
+cp -R skills/phygital ~/.codex/skills/
+```
+
+Start a new Codex session to refresh skill discovery. The same package is available
+as [a downloadable skill](https://phygitalstudio.app/skills/phygital.zip) or
+[readable instructions](https://phygitalstudio.app/skills/phygital.md). Other agents
+can load `SKILL.md` with their own skill mechanism. To update the distribution
+from source, run `npm run skill:package` (Python 3). This is a repository-distributed
+skill; it does not require a hosted tool server.
+
+Original application code, documentation and the skill are MIT licensed.
+Third-party CAD, derived assets, fonts and icons retain their existing attribution
+and terms; the application license does not relicense those files.
 
 ## Use
 
@@ -130,12 +162,19 @@ npm run build
   reads public sources; private repositories and login-only pages are not
   automatically accessible. Errors, refusal and incomplete output never add parts.
 
+## Analytics
+
+Vercel Web Analytics is enabled for the hosted project. Production builds use
+`@vercel/analytics` for standard page views; development builds do not inject it.
+No custom events include prompts, project contents, images, keys or chat messages.
+Forks must enable Web Analytics in their own Vercel project before deploying.
+
 ## Deployment
 
 The Vercel project is `phygital-parts`, separate from the original studio.
 
 ```sh
-vercel link --project phygital-parts
+vercel link # select your own project when deploying a fork
 vercel deploy --prod
 ```
 
@@ -171,7 +210,7 @@ Tests cover fit and wiring regressions, generic empty projects, duplicate CAD
 reuse, source/contact persistence, malicious imports, request limits, image/link
 input, refusal, upstream errors, and a mocked successful Responses result.
 Browser checks cover the homepage, generic finder, purchase actions, custom
-parts, settings and persistence. The 64-test suite also covers separate routes,
+parts, settings and persistence. The test suite also covers separate routes,
 original Phygital geometry, ring CAD assembly, adjustment validation and linked
 carrier movement. A local mock provider verified chat review, apply and undo;
 mobile checks cover the compact menu and expanded chat bounds. A successful paid GPT-6 Astra response requires

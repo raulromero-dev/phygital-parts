@@ -1,4 +1,5 @@
 import { codexMark } from './brand.js';
+import { loadingIndicator } from './loading.js';
 import { escapeHtml as esc } from './product-data.js';
 import { partFor, checks } from './engine.js';
 import { portsFor } from './connections.js';
@@ -36,7 +37,7 @@ export function mountAssistant(app){
  function renderMessages(){
   const log=$('#chat-messages');
   log.innerHTML=messages.length?messages.map(message=>`<article class="chat-message ${message.role}">${message.partName?`<small>↳ ${esc(message.partName)}</small>`:''}<p>${esc(message.text)}</p>${message.proposal?`<div class="chat-proposal"><ul>${describe(message.proposal,message.state).map(line=>`<li>${esc(line)}</li>`).join('')}</ul>${message.checks?`<small>${esc(message.checks)}</small>`:''}<button class="button" data-chat-apply="${message.id}" ${message.applied?'disabled':''}>${message.applied?'Applied':'Apply changes'}</button></div>`:''}</article>`).join(''):'<p class="chat-empty">Move a part, adjust the fit, or ask about this assembly.</p>';
-  if(pending)log.insertAdjacentHTML('beforeend','<p class="chat-thinking">Thinking…</p>');
+  if(pending)log.insertAdjacentHTML('beforeend',`<div class="chat-thinking">${loadingIndicator('Thinking…',true)}</div>`);
   root.querySelectorAll('[data-chat-apply]').forEach(button=>button.onclick=()=>{
    const message=messages.find(m=>m.id===+button.dataset.chatApply);
    try{app.applyAdjustment(message.proposal,message.base);message.applied=true;renderMessages();app.toast('Changes applied. Undo is available.');}catch(error){app.toast(error.message);}

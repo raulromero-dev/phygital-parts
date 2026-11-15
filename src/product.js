@@ -5,6 +5,8 @@ import { PORTS } from './connections.js';
 import { partFor } from './engine.js';
 import { EXAMPLES } from './templates.js';
 import { circuitBackdrop, codexMark } from './brand.js';
+import { loadingIndicator } from './loading.js';
+import { readResearchResponse, RESEARCH_PHASES } from './research-progress.js';
 import './product.css';
 
 // Deliberately tab-memory only: credentials never enter localStorage, project
@@ -12,11 +14,12 @@ import './product.css';
 let apiKey='';
 export function mountProduct(app){
  const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
- let image=null,controller=null,elapsedTimer=null,researchResult=null,lastRequest=null;
+ let image=null,controller=null,researchResult=null,lastRequest=null;
  const home=document.createElement('section');home.className='product-home';home.id='product-home';
  home.innerHTML=`${circuitBackdrop}<div class="home-intro"><h1>Find the parts.<br>Make them fit<img class="hero-board" src="/brand-board.svg" alt="" aria-hidden="true" draggable="false"></h1></div>
- <form id="idea-form" class="idea-composer"><label class="sr-only" for="idea-prompt">Describe what you want to build</label><textarea id="idea-prompt" required maxlength="8000" rows="4" placeholder="Describe an idea, add a photo, or share a project link…"></textarea><div id="idea-attachment" class="idea-attachment" hidden></div><div id="idea-links-wrap" hidden><label for="idea-links">Project or product links</label><textarea id="idea-links" rows="2" placeholder="One project or product URL per line."></textarea></div><div class="composer-actions"><div><button type="button" class="attach-button" id="attach-image" title="Add a reference photo">＋ Photo</button><button type="button" class="attach-button" id="attach-links">↗ Links</button></div><div><button type="submit" class="button primary start-building" disabled>Start building <span aria-hidden="true">↗</span></button></div></div><input type="file" id="idea-image" accept="image/png,image/jpeg,image/webp" hidden></form>
+ <form id="idea-form" class="idea-composer"><label class="sr-only" for="idea-prompt">Describe what you want to build</label><textarea id="idea-prompt" required maxlength="8000" rows="4" placeholder="Describe an idea, add a photo, or share a project link…"></textarea><div id="idea-attachment" class="idea-attachment" hidden></div><div id="idea-links-wrap"><label class="sr-only" for="idea-links">Project or product links</label><span aria-hidden="true">↗</span><textarea id="idea-links" rows="1" placeholder="Project or product links"></textarea></div><div class="composer-actions"><div><button type="button" class="attach-button" id="attach-image" title="Add a reference photo">＋ Photo</button></div><div><button type="submit" class="button primary start-building" disabled>Start building <span aria-hidden="true">↗</span></button></div></div><input type="file" id="idea-image" accept="image/png,image/jpeg,image/webp" hidden></form>
 
+ <section id="idea-progress" class="idea-progress" aria-label="Build progress" hidden></section>
  <div class="idea-examples" role="group" aria-label="Prebuilt examples">${EXAMPLES.map(example=>`<button data-template="${example.id}" title="Explore a prebuilt ${example.label.toLowerCase()}">${example.label} <span aria-hidden="true">↗</span></button>`).join('')}</div>
  <div class="home-secondary"><button id="continue-project" class="text-button" hidden>Continue project →</button></div>
 `;
@@ -33,7 +36,6 @@ export function mountProduct(app){
   location.assign(projectUrl(example.id));
  });
  $('#idea-prompt').addEventListener('input',()=>{$('.start-building').disabled=!$('#idea-prompt').value.trim();});
- $('#attach-links').onclick=()=>{$('#idea-links-wrap').hidden=!$('#idea-links-wrap').hidden;if(!$('#idea-links-wrap').hidden)$('#idea-links').focus();};
  $('#attach-image').onclick=()=>$('#idea-image').click();
  $('#idea-image').onchange=async event=>{
   const file=event.target.files[0];if(!file)return;
@@ -51,20 +53,45 @@ export function mountProduct(app){
   $('#openai-key').focus();
  }
  function context(){const s=app.getState();return {name:s.name,enclosure:s.enclosure,parts:s.instances.map(i=>{const p=partFor(s,i.id);return {id:i.id,name:p.name,dimensions:i.dimensions,position:i.position,interface:p.interface,ports:PORTS[i.id]||p.ports||[]};}),connections:s.connections};}
+ function setHomeBusy(busy){
+  $('#idea-form').setAttribute('aria-busy',String(busy));
+  $('#idea-form').querySelectorAll('input,textarea,button').forEach(el=>el.disabled=busy);
+  $('.start-building').disabled=busy||!$('#idea-prompt').value.trim();
+  $('.idea-examples').hidden=busy;$('.home-secondary').hidden=busy;
+  $('#connect-ai').disabled=busy;
+ }
  async function research(request){
+  if(controller)return;
   if(!apiKey){connect(()=>research(request));return;}
-  lastRequest=request;controller=new AbortController();const started=Date.now();
-  app.dialog('Researching your parts',`<div class="research-progress"><span class="research-spinner" aria-hidden="true"></span><h3>From idea to assembly.</h3><p>Codex is searching sources and preparing a part proposal.</p><span id="research-elapsed" role="status" aria-live="polite">Researching…</span><button class="button" id="cancel-research">Cancel research</button></div>`);
-  const cancel=()=>{controller?.abort();};$('#cancel-research').onclick=()=>{cancel();$('#dialog').close();};$('#dialog').addEventListener('close',cancel,{once:true});
-  elapsedTimer=setInterval(()=>{const el=$('#research-elapsed');if(el)el.textContent=`Researching · ${Math.floor((Date.now()-started)/1000)}s`;},1000);
+  lastRequest=request;const current=new AbortController();controller=current;const started=Date.now();
+  const inline=request.mode==='project'&&document.body.dataset.route==='home';
+  const progressHtml=`${loadingIndicator('Sending your brief…')}<ol class="research-steps" aria-label="Research stages"><li data-step="0" aria-current="step">Research</li><li data-step="1">Plan</li><li data-step="2">Review</li></ol><p class="research-detail">Connecting to codex</p><div class="research-actions"><span id="research-elapsed">0s</span><button class="text-button" id="cancel-research">Cancel</button></div>`;
+  if(inline){setHomeBusy(true);$('#idea-progress').hidden=false;$('#idea-progress').innerHTML=progressHtml;}
+  else app.dialog('Researching your parts',`<div class="research-progress">${progressHtml}</div>`);
+  const progressRoot=inline?$('#idea-progress'):$('.research-progress');
+  const cancel=()=>current.abort();$('#cancel-research').onclick=cancel;
+  if(inline){$('#cancel-research').focus({preventScroll:true});progressRoot.scrollIntoView({block:'nearest',behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});}
+  if(!inline)$('#dialog').addEventListener('close',cancel,{once:true});
+  const timer=setInterval(()=>{const el=progressRoot.querySelector('#research-elapsed');if(el)el.textContent=`${Math.floor((Date.now()-started)/1000)}s`;},1000);
+  const update=({phase,searches})=>{
+   if(current.signal.aborted)return;
+   progressRoot.querySelector('.cable-escape-label').textContent=RESEARCH_PHASES[phase];
+   progressRoot.querySelector('.research-detail').textContent=searches?`${searches} source search${searches===1?'':'es'} completed`:'Reading your brief and finding components';
+   const active=phase==='drafting'?1:phase==='checking'?2:0;
+   progressRoot.querySelectorAll('[data-step]').forEach(el=>{const n=+el.dataset.step;el.classList.toggle('complete',n<active);if(n===active)el.setAttribute('aria-current','step');else el.removeAttribute('aria-current');});
+  };
   try{
-   const response=await fetch('/api/research',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+apiKey},body:JSON.stringify({...request,context:request.mode==='project'?null:context(),catalog:library.map(p=>({id:p.id,name:p.name,dimensions:p.dimensions,interface:p.interface,ports:PORTS[p.id]||[]}))}),signal:controller.signal});
-   const data=await response.json();if(!response.ok)throw Error(data.error||'Research could not finish.');
-   $('#dialog').removeEventListener('close',cancel);researchResult=data;showProposal(data,request.mode==='project');
+   const response=await fetch('/api/research',{method:'POST',headers:{'Content-Type':'application/json',Accept:'application/x-ndjson',Authorization:'Bearer '+apiKey},body:JSON.stringify({...request,context:request.mode==='project'?null:context(),catalog:library.map(p=>({id:p.id,name:p.name,dimensions:p.dimensions,interface:p.interface,ports:PORTS[p.id]||[]}))}),signal:current.signal});
+   const data=await readResearchResponse(response,update);
+   if(current.signal.aborted)return;
+   researchResult=data;
+   if(inline){progressRoot.innerHTML=`<div class="research-finished" role="status"><span>✓ Your proposal is ready</span><small>${data.proposal.parts.length} parts · ${Math.floor((Date.now()-started)/1000)}s</small><button class="button primary" id="review-proposal">Review parts ↗</button></div>`;$('#review-proposal').onclick=()=>showProposal(data,true);}
+   else showProposal(data,false);
   }catch(error){
-   $('#dialog').removeEventListener('close',cancel);
-   if(error.name!=='AbortError'){app.dialog('Research needs another try',`<div class="research-error" role="alert"><p>${esc(error.message)}</p><p class="hint">Your assembly hasn’t changed. You can still browse the library or add a part manually.</p><div class="dialog-actions"><button class="button" id="reconnect">Reconnect key</button><button class="button primary" id="retry-research">Try again</button></div></div>`);$('#reconnect').onclick=()=>connect(()=>research(lastRequest));$('#retry-research').onclick=()=>research(lastRequest);}
-  }finally{clearInterval(elapsedTimer);controller=null;}
+   if(current.signal.aborted){if(inline)progressRoot.innerHTML='<p role="status">Canceled. Your brief is ready to edit.</p>';else $('#dialog').close();}
+   else if(inline){progressRoot.innerHTML=`<p role="alert">${esc(error.message)}</p><div class="research-actions"><button class="text-button" id="reconnect">Reconnect key</button><button class="button" id="retry-research">Try again</button></div>`;$('#reconnect').onclick=()=>connect(()=>research(lastRequest));$('#retry-research').onclick=()=>research(lastRequest);}
+   else{app.dialog('Research needs another try',`<div class="research-error" role="alert"><p>${esc(error.message)}</p><p class="hint">Your assembly hasn’t changed. You can still browse the library or add a part manually.</p><div class="dialog-actions"><button class="button" id="reconnect">Reconnect key</button><button class="button primary" id="retry-research">Try again</button></div></div>`);$('#reconnect').onclick=()=>connect(()=>research(lastRequest));$('#retry-research').onclick=()=>research(lastRequest);}
+  }finally{clearInterval(timer);$('#dialog').removeEventListener('close',cancel);if(controller===current)controller=null;if(inline)setHomeBusy(false);}
  }
  function showProposal(data,replace){
   const p=data.proposal;
