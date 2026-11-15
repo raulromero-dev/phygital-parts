@@ -3,8 +3,8 @@ import { projectUrl } from './routes.js';
 import { library, escapeHtml as esc, safeUrl, purchaseHtml, applyProposal } from './product-data.js';
 import { PORTS } from './connections.js';
 import { partFor } from './engine.js';
-import { EXAMPLES, PHYGITAL_LAYOUTS } from './templates.js';
-import { circuitBackdrop } from './brand.js';
+import { EXAMPLES } from './templates.js';
+import { circuitBackdrop, codexMark } from './brand.js';
 import './product.css';
 
 // Deliberately tab-memory only: credentials never enter localStorage, project
@@ -30,10 +30,7 @@ export function mountProduct(app){
  $('#continue-project').onclick=()=>app.continueUrl?location.assign(app.continueUrl):showWorkspace();
  $$('[data-template]').forEach(button=>button.onclick=()=>{
   const example=EXAMPLES.find(item=>item.id===button.dataset.template);
-  if(example.id==='phygital'){
-   app.dialog('Phygital layouts',`<div class="preset-grid">${PHYGITAL_LAYOUTS.map(layout=>`<button data-original-layout="${layout.id}"><strong>${layout.label}</strong><small>${layout.description}</small></button>`).join('')}</div>`);
-   $$('[data-original-layout]').forEach(option=>option.onclick=()=>location.assign(projectUrl(example.id,option.dataset.originalLayout)));
-  }else location.assign(projectUrl(example.id));
+  location.assign(projectUrl(example.id));
  });
  $('#idea-prompt').addEventListener('input',()=>{$('.start-building').disabled=!$('#idea-prompt').value.trim();});
  $('#attach-links').onclick=()=>{$('#idea-links-wrap').hidden=!$('#idea-links-wrap').hidden;if(!$('#idea-links-wrap').hidden)$('#idea-links').focus();};
@@ -79,19 +76,19 @@ export function mountProduct(app){
   };
  }
  function findParts(tab='library'){
-  app.dialog('Find parts',`<div class="finder-tabs" role="tablist" aria-label="Part discovery"><button role="tab" aria-selected="${tab==='library'}" data-finder="library">Library</button><button role="tab" aria-selected="${tab==='ai'}" data-finder="ai">Ask codex</button><button role="tab" aria-selected="${tab==='link'}" data-finder="link">Paste a link</button></div><div id="finder-content"></div>`);$('#dialog').classList.add('parts-dialog');
+  app.dialog('Find parts',`<div class="finder-tabs" role="tablist" aria-label="Part discovery"><button role="tab" aria-selected="${tab==='library'}" data-finder="library">Library</button><button role="tab" aria-selected="${tab==='ai'}" data-finder="ai">${codexMark} codex</button><button role="tab" aria-selected="${tab==='link'}" data-finder="link">Paste a link</button></div><div id="finder-content"></div>`);$('#dialog').classList.add('parts-dialog');
   $$('[data-finder]').forEach(b=>b.onclick=()=>findParts(b.dataset.finder));
   if(tab==='library'){
    $('#finder-content').innerHTML=`<div class="finder-search"><label class="sr-only" for="catalog-search">Search part library</label><input id="catalog-search" type="search" placeholder="Search parts…"><button class="button" id="finder-custom">Add manually</button></div><div class="category-chips">${['All','Controllers','Displays','Sensors','Power','Haptics','Cables'].map((name,i)=>`<button data-category="${name}" class="${i?'':'active'}">${name}</button>`).join('')}</div><div id="catalog-results" class="catalog-results"></div>`;
    let category='All';const matches={Controllers:p=>['xiao','expansion','crowpanel-advance-28','cardputer-adv'].includes(p.id),Displays:p=>p.kind==='screen'||/lcd-|oled-|crowpanel/.test(p.id),Sensors:p=>['thermal','rf','grove-scd41'].includes(p.id),Power:p=>p.kind==='battery'||p.id==='charger',Haptics:p=>/haptic|motor|mosfet|driver/.test(p.id),Cables:p=>['connector','headers','antenna','strip'].includes(p.kind)};
    const update=()=>{
     const query=$('#catalog-search').value.toLowerCase(),parts=library.filter(p=>(category==='All'||matches[category](p))&&(p.name+' '+p.interface+' '+p.kind).toLowerCase().includes(query));
-    $('#catalog-results').innerHTML=parts.length?parts.map(p=>`<article class="catalog-card"><div class="catalog-card-top"><span class="catalog-glyph" aria-hidden="true">${{battery:'▥',motor:'◉',camera:'◎',connector:'⌁',chip:'▦'}[p.kind]||'▤'}</span><span class="catalog-label">${['xiao','lcd-27579','oled-938','mosfet-1','crowpanel-advance-28','cardputer-adv'].includes(p.id)?'Manufacturer CAD':'Planning model'}</span></div><h3>${esc(p.name)}</h3><p class="catalog-dimensions">${p.dimensions[0]} × ${p.dimensions[2]} × ${p.dimensions[1]} mm</p><details class="catalog-details"><summary>Details</summary><p>${esc(p.interface)}</p></details>${purchaseHtml(p)}<button class="button full" data-add-library="${p.id}">＋ Add to assembly</button></article>`).join(''):`<div class="catalog-empty"><h3>Not in the library yet.</h3><p>Ask codex or paste a product link.</p><button class="button primary" id="search-beyond">Ask codex ↗</button></div>`;
+    $('#catalog-results').innerHTML=parts.length?parts.map(p=>`<article class="catalog-card"><div class="catalog-card-top"><span class="catalog-glyph" aria-hidden="true">${{battery:'▥',motor:'◉',camera:'◎',connector:'⌁',chip:'▦'}[p.kind]||'▤'}</span><span class="catalog-label">${['xiao','lcd-27579','oled-938','mosfet-1','crowpanel-advance-28','cardputer-adv'].includes(p.id)?'Manufacturer CAD':'Planning model'}</span></div><h3>${esc(p.name)}</h3><p class="catalog-dimensions">${p.dimensions[0]} × ${p.dimensions[2]} × ${p.dimensions[1]} mm</p><details class="catalog-details"><summary>Details</summary><p>${esc(p.interface)}</p></details>${purchaseHtml(p)}<button class="button full" data-add-library="${p.id}">＋ Add to assembly</button></article>`).join(''):`<div class="catalog-empty"><h3>Not in the library yet.</h3><p>Describe a part or paste a link.</p><button class="button primary" id="search-beyond">${codexMark} codex</button></div>`;
     $$('[data-add-library]').forEach(b=>b.onclick=async()=>{app.addLibrary(b.dataset.addLibrary);b.textContent='✓ Added · add another';app.toast('Part added to your assembly.');});
     $('#search-beyond')?.addEventListener('click',()=>{const q=$('#catalog-search').value;findParts('ai');$('#parts-prompt').value=q;});
    };$('#catalog-search').oninput=update;$$('[data-category]').forEach(b=>b.onclick=()=>{category=b.dataset.category;$$('[data-category]').forEach(el=>el.classList.toggle('active',el===b));update();});$('#finder-custom').onclick=app.custom;update();
   }else{
-   $('#finder-content').innerHTML=`<form id="parts-research-form" class="parts-research-form">${tab==='link'?'<label for="parts-link">Product link</label><input id="parts-link" type="url" required placeholder="https://…">':''}<label for="parts-prompt">${tab==='link'?'What would you like to check?':'What are you looking for?'}</label><textarea id="parts-prompt" rows="3" maxlength="8000" ${tab==='ai'?'required':''} placeholder="e.g. A small display, no soldering"></textarea><button class="button primary" type="submit">${tab==='link'?'Research this link':'Ask codex'} ↗</button></form>`;
+   $('#finder-content').innerHTML=`<form id="parts-research-form" class="parts-research-form">${tab==='link'?'<label for="parts-link">Product link</label><input id="parts-link" type="url" required placeholder="https://…">':''}<label for="parts-prompt">${tab==='link'?'What would you like to check?':'What are you looking for?'}</label><textarea id="parts-prompt" rows="3" maxlength="8000" ${tab==='ai'?'required':''} placeholder="e.g. A small display, no soldering"></textarea><button class="button primary" type="submit">${tab==='link'?'Research this link ↗':codexMark+' codex'}</button></form>`;
    $('#parts-research-form').onsubmit=e=>{e.preventDefault();const link=$('#parts-link')?.value.trim();research({mode:tab==='link'?'link':'parts',prompt:$('#parts-prompt').value.trim()||(link?'Identify this exact part and how it could fit the current assembly.':''),links:link?[link]:[],images:[]});};
   }
  }

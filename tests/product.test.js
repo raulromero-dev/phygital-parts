@@ -97,7 +97,7 @@ import { EXAMPLES, exampleTemplate } from '../src/templates.js';
 import { endpoint, activeConnections } from '../src/connections.js';
 import { readFileSync } from 'node:fs';
 test('prebuilt examples round-trip with active mapped connections and appropriate fit checks',()=>{
- assert.deepEqual(EXAMPLES.map(e=>e.id),['phygital','thermal-camera','air-monitor','wearable-haptics','smartwatch','smart-ring','makeup-cyberdeck']);
+ assert.deepEqual(EXAMPLES.map(e=>e.id),['makeup-cyberdeck','thermal-camera','air-monitor','wearable-haptics','smartwatch','smart-ring']);
  for(const example of EXAMPLES){
   const state=validateState(JSON.parse(JSON.stringify(exampleTemplate(example.id))));
   assert.ok(state.instances.length>=4);assert.ok(example.id==='makeup-cyberdeck'?state.connections.length===0:state.connections.length>=2);

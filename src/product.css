@@ -76,3 +76,6 @@ body[data-route="home"] .codex-launcher,body[data-route="home"] .codex-chat{disp
 @media(max-width:650px){.mobile-menu{display:block}.topbar .toolbar-actions{display:none}.topbar{position:relative;z-index:21}.codex-launcher{right:14px;bottom:14px;border-radius:13px;padding:12px 15px}.codex-chat{right:10px;bottom:10px;width:calc(100vw - 20px);height:min(460px,58dvh);border-radius:16px}.codex-chat.expanded{width:calc(100vw - 20px);height:calc(100dvh - 126px)}.chat-compose{padding:10px}.idea-composer{border-radius:17px}}
 .project-origin{display:flex;flex-direction:column;gap:9px;margin:0 18px 16px;font-size:10px;color:var(--mono-subtle)}.project-origin a:hover{color:var(--mono-ink)}
 .mobile-menu-content #theme-toggle{width:100%;height:auto;min-height:38px;justify-content:flex-start}.mobile-menu-content #theme-toggle:after{white-space:nowrap;flex:1;text-align:left}
+
+/* Shared Codex symbol and label follow the active theme. */
+.codex-mark{width:18px;height:18px;display:inline-block;vertical-align:middle;flex-shrink:0}.codex-launcher,.chat-header strong{display:inline-flex;align-items:center;gap:8px}.finder-tabs button[data-finder="ai"]{display:inline-flex;align-items:center;gap:6px}.finder-tabs .codex-mark{width:15px;height:15px}

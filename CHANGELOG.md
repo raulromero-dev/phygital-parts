@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-11-14 · Codex for Raul · main · homepage and Codex branding
+
+Removed the Phygital shortcut from the homepage examples and placed Makeup
+cyberdeck first. Direct original-project URLs remain available. Replaced
+Ask codex labels with the Codex symbol and “codex” in the floating launcher,
+chat header and part finder. Retained MIT icon attribution.
+
+Validation: production build, existing 64 tests, and browser checks of homepage,
+launcher and chat header.
+
 ## 2026-11-14 · Codex for Raul · main · quieter finder and makeup cyberdeck
 
 Reduced Find parts copy: moved interfaces and research-card descriptions into

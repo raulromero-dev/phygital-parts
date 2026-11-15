@@ -6,10 +6,11 @@ A standalone hardware workbench for discovering components, visualizing their
 fit, planning real cables, and deciding what to buy. Start with a description,
 a reference photo plus a prompt, or public links to a project or product.
 
-The homepage offers seven **prebuilt starters** without an API key: Phygital,
-thermal camera, air monitor, wearable haptics, smartwatch, smart ring and makeup cyberdeck.
+The homepage offers six **prebuilt starters** without an API key: makeup cyberdeck,
+thermal camera, air monitor, wearable haptics, smartwatch and smart ring.
 Each opens a populated 3D layout with proposed connections, sourcing links
-and review notes. Phygital includes the original compact, bench and wide layouts.
+and review notes. Original Phygital compact, bench and wide layouts remain
+available through their direct project URLs.
 
 Each starter has its own URL and browser-storage namespace:
 `/examples/thermal-camera`, `/examples/air-monitor`, `/examples/wearable-haptics`,
@@ -58,14 +59,14 @@ and link forms use brief labels instead of introductory subtitles.
    Responses API, image input, web search and structured output.
 3. Review the proposed parts, sources, unknowns and conductors. Select the parts
    to add. An AI response never silently replaces the current assembly.
-4. Use **Find parts** to search the local library, ask codex, paste a product URL,
+4. Use **Find parts** to search the local library, work with codex, paste a product URL,
    or add a component manually. Purchase links are prominent on cards and in
    the part inspector. Search-result links are labeled as searches; stock and
    prices are not promised.
 5. Arrange parts in 3D, adjust dimensions, set enclosure bounds, inspect fit
    checks, and map individual contacts in **Connections**. Export JSON to move a
    project between browsers, GLB for Blender, or CSV for the cable plan.
-6. Open **Ask codex** for a floating, expandable chat. Select a part to attach
+6. Open **codex** for a floating, expandable chat. Select a part to attach
    its context, then request movement, rotation, corrected dimensions, enclosure
    changes or review notes. Review each proposal and choose **Apply changes**;
    the edit is undoable. Proposals are rejected if the assembly has changed

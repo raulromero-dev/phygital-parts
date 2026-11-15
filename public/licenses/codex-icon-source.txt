@@ -1,0 +1,4 @@
+Codex symbol from LobeHub Icons, retrieved 2026-11-14.
+https://github.com/lobehub/lobe-icons/blob/master/packages/static-svg/icons/codex.svg
+SVG artwork licensed MIT; see lobehub-icons-MIT.txt.
+Codex and OpenAI marks remain the property of OpenAI.

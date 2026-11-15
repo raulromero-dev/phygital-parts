@@ -1,3 +1,6 @@
+import codexSvg from './assets/codex.svg?raw';
+export const codexMark=codexSvg.replace('<svg ', '<svg class="codex-mark" aria-hidden="true" focusable="false" ').replace('<title>Codex</title>','');
+
 // Outline in the wordmark; the colored PCB remains the headline's small accent.
 export const boardOutline=`<svg class="brand-board" viewBox="0 0 64 52" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 8h38l7 6v28H11a4 4 0 0 1-4-4v-7m0-13v-6a4 4 0 0 1 4-4Z"/><path d="M3 18h10v13H3zM24 19h16v13H24zM20 22h4m-4 6h4m16-6h4m-4 6h4M28 15v4m8-4v4m-8 13v4m8-4v4M18 12h3m4 0h3m4 0h3m4 0h3m4 0h3M18 38h3m4 0h3m4 0h3m4 0h3m4 0h3"/><circle cx="51" cy="19" r="1.7"/><circle cx="12" cy="37" r="1.5"/></svg>`;
 

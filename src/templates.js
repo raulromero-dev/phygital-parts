@@ -7,13 +7,12 @@ import { ringInstances, RING_SOURCE } from './smart-ring.js';
 import { CYBERDECK_SOURCES } from './cyberdeck.js';
 
 export const EXAMPLES=[
- {id:'phygital',label:'Phygital',selected:'thermal'},
+ {id:'makeup-cyberdeck',label:'Makeup cyberdeck',selected:'cardputer-adv'},
  {id:'thermal-camera',label:'Thermal camera',selected:'thermal'},
  {id:'air-monitor',label:'Air monitor',selected:'grove-scd41'},
  {id:'wearable-haptics',label:'Wearable haptics',selected:'haptic-hub'},
  {id:'smartwatch',label:'Smartwatch',selected:'watch-display'},
- {id:'smart-ring',label:'Smart ring',selected:'ring-board'},
- {id:'makeup-cyberdeck',label:'Makeup cyberdeck',selected:'cardputer-adv'}
+ {id:'smart-ring',label:'Smart ring',selected:'ring-board'}
 ];
 export const PHYGITAL_LAYOUTS=[
  {id:'compact',label:'Compact study',description:'Stacked battery · strip antenna'},
