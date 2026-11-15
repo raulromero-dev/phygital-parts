@@ -6,11 +6,12 @@ export function safeUrl(value){
   try{const u=new URL(value);return ['http:','https:'].includes(u.protocol)&&!u.username&&!u.password?u.href:null;}catch{return null;}
 }
 export function linksFor(part){
+  if(part.procurementLinks?.length)return part.procurementLinks.filter(([label,url])=>safeUrl(url)).map(([label,url])=>[label,safeUrl(url)]);
   const direct=(part.purchaseLinks||part.links||[]).map(link=>Array.isArray(link)?link:[link.label,link.url]).filter(([label,url])=>safeUrl(url)&&!/(wiki|docs\.|\.pdf|datasheet|wiring|pinout|technical|guide|schematic|github\.com|\bCAD\b)/i.test(label+' '+url)).map(([label,url])=>[label.replace(/\s*·\s*\$[\d.]+(?: each)?/g,''),safeUrl(url)]);
   return direct.length?direct:[['Search Amazon','https://www.amazon.com/s?k='+encodeURIComponent(part.name)],['Search Micro Center','https://www.microcenter.com/search/search_results.aspx?Ntt='+encodeURIComponent(part.name)]];
 }
 export function purchaseHtml(part){
- return `<section class="purchase-panel"><div><strong>Buy</strong></div>${linksFor(part).map(([label,url])=>`<a class="purchase-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)} <span aria-hidden="true">↗</span></a>`).join('')}</section>`;
+ return `<section class="purchase-panel"><div><strong>${escapeHtml(part.procurementLabel||'Buy')}</strong></div>${linksFor(part).map(([label,url])=>`<a class="purchase-link" href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(label)} <span aria-hidden="true">↗</span></a>`).join('')}</section>`;
 }
 export const library=CATALOG.filter(p=>!['kit','motor-rail'].includes(p.id)&&!/^grove-haptic-[234]$|^mosfet-[234]$|^motor-[234]$/.test(p.id));
 export function emptyProject(name='Untitled project'){

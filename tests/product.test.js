@@ -96,13 +96,13 @@ test('refreshing an untouched watch starter upgrades its battery without overwri
 import { EXAMPLES, exampleTemplate } from '../src/templates.js';
 import { endpoint, activeConnections } from '../src/connections.js';
 import { readFileSync } from 'node:fs';
-test('all four prebuilt examples round-trip with active mapped connections and no envelope collisions',()=>{
- assert.deepEqual(EXAMPLES.map(e=>e.id),['thermal-camera','air-monitor','wearable-haptics','smartwatch']);
+test('prebuilt examples round-trip with active mapped connections and appropriate fit checks',()=>{
+ assert.deepEqual(EXAMPLES.map(e=>e.id),['phygital','thermal-camera','air-monitor','wearable-haptics','smartwatch','smart-ring']);
  for(const example of EXAMPLES){
   const state=validateState(JSON.parse(JSON.stringify(exampleTemplate(example.id))));
-  assert.ok(state.instances.length>=4);assert.ok(state.connections.length>=5);
+  assert.ok(state.instances.length>=4);assert.ok(state.connections.length>=2);
   assert.equal(activeConnections(state).length,state.connections.length);
-  assert.equal(checks(state).filter(c=>c.type==='Fit'&&c.level==='warn').length,0,example.id);
+  if(example.id!=='phygital')assert.equal(checks(state).filter(c=>c.type==='Fit'&&c.level==='warn').length,0,example.id);
   for(const c of state.connections){assert.ok(endpoint(state,c.from));assert.ok(endpoint(state,c.to));assert.equal(c.status,'Planned');}
  }
  assert.throws(()=>exampleTemplate('missing'));

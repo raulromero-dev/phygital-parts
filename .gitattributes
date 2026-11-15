@@ -7,3 +7,7 @@
 *.glb binary
 *.pdf binary
 *.sch binary
+
+*.stl binary
+*.f3z binary
+*.zip binary

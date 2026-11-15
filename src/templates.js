@@ -3,13 +3,32 @@ import { PARTS, defaultState } from './catalog.js';
 import { WATCH_SIGNALS, WATCH_SOURCES } from './smartwatch.js';
 import { AIR_SOURCES } from './air-monitor.js';
 import { addScreen, addPlugHaptics } from './planning.js';
+import { ringInstances, RING_SOURCE } from './smart-ring.js';
 
 export const EXAMPLES=[
+ {id:'phygital',label:'Phygital',selected:'thermal'},
  {id:'thermal-camera',label:'Thermal camera',selected:'thermal'},
  {id:'air-monitor',label:'Air monitor',selected:'grove-scd41'},
  {id:'wearable-haptics',label:'Wearable haptics',selected:'haptic-hub'},
- {id:'smartwatch',label:'Smartwatch',selected:'watch-display'}
+ {id:'smartwatch',label:'Smartwatch',selected:'watch-display'},
+ {id:'smart-ring',label:'Smart ring',selected:'ring-board'}
 ];
+export const PHYGITAL_LAYOUTS=[
+ {id:'compact',label:'Compact study',description:'Stacked battery · strip antenna'},
+ {id:'bench',label:'Bench prototype',description:'Original carrier · external antenna'},
+ {id:'wide',label:'Side by side',description:'Wider footprint · less stacking'}
+];
+export function phygitalTemplate(preset='compact'){
+ if(!PHYGITAL_LAYOUTS.some(layout=>layout.id===preset))throw Error('Unknown Phygital layout.');
+ const state=defaultState(preset==='bench'?'bench':'compact');state.preset=preset;
+ if(preset==='wide'){
+  state.name='Side-by-side study';state.enclosure=[150,38,122];
+  const positions={battery:[-36,4.5,6],expansion:[34,8,10],xiao:[34,16.5,-7],thermal:[20,15,-48],strip:[-35,19,-48]};
+  for(const [id,position]of Object.entries(positions))state.instances.find(p=>p.id===id).position=position;
+ }
+ state.brief='Original Phygital unwanted-device detection hardware layout. XIAO and expansion carrier, thermal camera, battery and antenna. Fit and wiring remain planning references.';
+ state.projectLinks=['https://github.com/raulromero-dev/phygital'];return state;
+}
 const instance=(id,position,rotation=[0,0,0])=>({id,position,rotation,dimensions:[...PARTS[id].dimensions]});
 const note=(part,text)=>({part,text,at:new Date().toISOString()});
 function retainParts(state,ids){
@@ -22,6 +41,8 @@ function includedAntenna(state,position){
  state.connections.push({id:'included-coax',from:'xiao:rf',to:'watch-antenna:rf',type:'U.FL coax / adapter',bundle:'Included antenna coax',length:0,color:'#888888',status:'Planned',note:'Included XIAO antenna plugs into U.FL. Geometry and lead length are planning allowances; measure the actual part.'});
 }
 export function exampleTemplate(id){
+ if(id==='phygital')return phygitalTemplate();
+ if(id==='smart-ring')return smartRingTemplate();
  if(id==='smartwatch')return smartwatchTemplate();
  if(!EXAMPLES.some(example=>example.id===id))throw Error('Unknown example.');
  const state=defaultState();state.preset=id;
@@ -53,6 +74,15 @@ export function exampleTemplate(id){
   state.notes=[note('haptic-hub','Channels 0–3 correspond to front, right, back and left in the top view. Select one channel at a time. This is a distributed wearable layout, not a validated watch enclosure.'),note('battery','Battery and motor power budget remain unverified. The four module paths are planning connections, not approval to energize the carrier rail.')];
  }
  return state;
+}
+
+export function smartRingTemplate(){
+ const state=emptyProject('Smart ring · SenseRing');state.preset='smart-ring';state.enclosure=[36,16,36];state.enclosureVisible=false;
+ state.instances=ringInstances();state.decisions={'ring-battery':'Hold','ring-board':'Investigate'};
+ state.connections=[['positive','bat+','#bd3030'],['negative','bat-','#333333']].map(([pin,pad,color])=>({id:'ring-'+pin,from:'ring-battery:'+pin,to:'ring-board:'+pad,type:'Soldered battery tabs',bundle:'Battery tabs · solder required',length:0,color,status:'Planned',note:'Upstream BAT+/BAT− pad mapping. Physical tab positions, charge configuration and polarity need review. No plug-in cable or completed circuit is implied.'}));
+ state.brief='Open SenseRing assembly with reused board, curved battery and shell CAD. Fine-pitch fabrication and soldering are required; this is an editable hardware reference.';
+ state.notes=[note('ring-board','Open-source reference, not a ready-made retail kit. Generate and review fabrication outputs, implement firmware and validate fit. No health or medical accuracy is claimed.'),note('ring-battery',PARTS['ring-battery'].electrical)];
+ state.projectLinks=[RING_SOURCE];return state;
 }
 
 export function smartwatchTemplate(){

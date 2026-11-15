@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-11-14 · Codex for Raul · main · separate starters and floating assistant
+
+Added original Phygital compact, bench and wide layouts, with project-specific
+inventory context and links to the original repository and workbench. Each
+starter now has a distinct URL, autosave, snapshot store and chat history.
+Added a separate SenseRing assembly using its original board, curved battery,
+inner-shell and outer-shell CAD. Retained editable sources and GPL-3.0 license,
+provided a downloadable source bundle, and identified fabrication, battery
+sourcing and curved-clearance review requirements.
+
+Added an optional floating Ask codex chat with expand/minimize controls,
+selected-part context, local history at the bottom, and reviewed adjustments
+for position, rotation, dimensions, enclosure and notes. Changes are validated,
+undoable and rejected when the assembly no longer matches the proposal.
+The visitor's API key stays in tab memory. No model labels appear in the UI.
+Grouped mobile header actions in a compact menu, made the homepage circuit
+animation visible in dark mode, and slightly increased corner radii throughout.
+
+Validation: all 62 tests and the production build pass. A local mock response
+verified selected-part context, review, apply and undo without a paid API call.
+Browser checks verified separate original/ring assemblies, persisted chat,
+mobile menu sizing and expanded chat bounds. A live response requires a visitor
+key with model access and credits.
+
 ## 2026-11-14 · Codex for Raul · main · prebuilt examples and simpler homepage
 
 Changed the smartwatch starter to a LiPol LPR553535 round 600 mAh candidate

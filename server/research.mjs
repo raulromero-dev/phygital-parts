@@ -20,12 +20,12 @@ export function prepareRequest(body){
  return {model:MODEL,instructions:SYSTEM,input:[{role:'user',content:[{type:'input_text',text},...images.map(image_url=>({type:'input_image',image_url,detail:'high'}))]}],tools:[{type:'web_search'}],include:['web_search_call.action.sources'],reasoning:{effort:'medium'},text:{format:{type:'json_schema',name:'assembly_proposal',strict:true,schema:proposalSchema}},max_output_tokens:12000,max_tool_calls:8,store:false};
 }
 export async function runResearch(body,key,fetchImpl=fetch,clientSignal){
- if(typeof key!=='string'||!/^sk-[A-Za-z0-9_-]{16,512}$/.test(key))return {status:401,body:{error:'Connect your OpenAI API key to use GPT-6 Astra.',code:'key_required'}};
+ if(typeof key!=='string'||!/^sk-[A-Za-z0-9_-]{16,512}$/.test(key))return {status:401,body:{error:'Connect your OpenAI API key to use codex.',code:'key_required'}};
  let payload;try{payload=prepareRequest(body);}catch(e){return {status:400,body:{error:e.message}};}
  try{
   const response=await fetchImpl('https://api.openai.com/v1/responses',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+key},body:JSON.stringify(payload),signal:clientSignal?AbortSignal.any([clientSignal,AbortSignal.timeout(240000)]):AbortSignal.timeout(240000)});
   if(!response.ok){
-   const errors={401:'Your API key was not accepted. Reconnect with a valid key.',403:'This API project does not have access to GPT-6 Astra.',429:'Your OpenAI project reached a rate or credit limit. Check billing and try again.',400:'OpenAI could not process this request. Try fewer parts or a smaller image.'};
+   const errors={401:'Your API key was not accepted. Reconnect with a valid key.',403:'This API project does not have access to the configured model.',429:'Your OpenAI project reached a rate or credit limit. Check billing and try again.',400:'OpenAI could not process this request. Try fewer parts or a smaller image.'};
    return {status:response.status===401?401:response.status===429?429:502,body:{error:errors[response.status]||'OpenAI is temporarily unavailable. Your project has not changed.'}};
   }
   const data=await response.json();
@@ -39,7 +39,7 @@ export async function runResearch(body,key,fetchImpl=fetch,clientSignal){
   return {status:200,body:{proposal,model:MODEL,usage:data.usage?{inputTokens:data.usage.input_tokens,outputTokens:data.usage.output_tokens}:null}};
  }catch(error){return {status:502,body:{error:error.name==='TimeoutError'?'Research took too long. Try fewer parts or a more specific request.':'The research result could not be validated. Your project is unchanged; please try again.'}};}
 }
-export async function handleNodeRequest(req,res){
+export async function handleNodeRequest(req,res,runner=runResearch){
  res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
  if(req.method==='GET'){res.statusCode=200;res.setHeader('Content-Type','application/json');res.end(JSON.stringify({model:MODEL,authentication:'visitor-api-key',ready:true}));return;}
  if(req.method!=='POST'){res.statusCode=405;res.setHeader('Allow','GET, POST');res.end();return;}
@@ -54,5 +54,5 @@ export async function handleNodeRequest(req,res){
  }catch{res.statusCode=400;res.end(JSON.stringify({error:'Invalid request. Use one image up to 2 MB.'}));return;}
  const key=(req.headers.authorization||'').replace(/^Bearer /,'');
  const abort=new AbortController();const disconnected=()=>{if(!res.writableEnded)abort.abort();};res.on('close',disconnected);
- const result=await runResearch(body,key,fetch,abort.signal);res.off('close',disconnected);if(res.destroyed)return;res.statusCode=result.status;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(result.body));
+ const result=await runner(body,key,fetch,abort.signal);res.off('close',disconnected);if(res.destroyed)return;res.statusCode=result.status;res.setHeader('Content-Type','application/json');res.end(JSON.stringify(result.body));
 }
