@@ -1,0 +1,75 @@
+[
+  {
+    "file": "xiao-esp32s3.step",
+    "author": "Seeed Studio",
+    "source": "https://files.seeedstudio.com/wiki/SeeedStudio-XIAO-ESP32S3/res/seeed-studio-xiao-esp32s3-3d_model.zip",
+    "page": "https://wiki.seeedstudio.com/xiao_esp32s3_getting_started/",
+    "originalName": "XIAO-ESP32S3 v2.step",
+    "usedFor": "xiao.glb",
+    "changes": "Tessellated at 0.015 mm / 0.15 rad; centered and rotated; colors retained. Original STEP unchanged.",
+    "sha256": "870ad45c7af5d92324cec4c6ae65fbf86e3b049d5a97ab9ffd9039ebd73455dd",
+    "retrieved": "2026-11-14"
+  },
+  {
+    "file": "MLX90640_41_FOV_55_asm.stp",
+    "author": "Melexis",
+    "source": "https://media.melexis.com/-/media/files/documents/3d-models/3d-models-mlx90640---melexis.zip?hash=431D55A71392563E0E50E31FB1570925&la=en&rev=637158254320000000&sc_lang=en",
+    "page": "https://www.melexis.com/en/documents/documentation/packages/package-3d-models",
+    "usedFor": "Sensor inside thermal.glb",
+    "changes": "55 degree assembly tessellated at 0.015 mm / 0.15 rad, centered, translated and assigned presentation materials. Seller PCB/connector modeled separately.",
+    "sha256": "b2fb63b66ada05aab5476fee9f586a770397b8ab4bd6f2c6cd1516ea6b1d9ce7",
+    "retrieved": "2026-11-14"
+  },
+  {
+    "file": "expansion-board.brd",
+    "author": "Seeed Studio",
+    "source": "https://files.seeedstudio.com/wiki/Seeeduino-XIAO-Expansion-Board/document/Seeeduino%20XIAO%20Expansion%20board_v1.0_200824.brd",
+    "page": "https://wiki.seeedstudio.com/Seeeduino-XIAO-Expansion-Board/",
+    "usedFor": "expansion.glb",
+    "changes": "Reused CAD component origins, footprint pads and mounting-bore coordinates. Custom approximate package bodies, board thickness, heights, and screen artwork; not a manufacturer 3D model.",
+    "sha256": "fa43130d0c58a59023a810174e4fb292ba2bf427ae24feb0da012a544de13e3f",
+    "retrieved": "2026-11-14"
+  },
+  {
+    "file": "oled-938.step",
+    "author": "Adafruit Industries",
+    "source": "https://raw.githubusercontent.com/adafruit/Adafruit_CAD_Parts/main/938%20Mono%20128x64%20OLED%20Stemma/938%20Mono%20128x64%20OLED%20Stemma.step",
+    "page": "https://github.com/adafruit/Adafruit_CAD_Parts",
+    "retrieved": "2026-11-14",
+    "sha256": "1b7bae7ea234213519c0a936d1ed30632ecddb50e80d06d111aaa5a57ab8ed79",
+    "usedFor": "oled-938.glb",
+    "changes": "Original STEP unchanged. Tessellated at 0.015 mm / 0.15 rad, centered and rotated from Z-up to browser Y-up; bodies retained; OLED glass assigned a dark presentation material. Proportions preserved in editable planning envelope."
+  },
+  {
+    "file": "mosfet-5648.step",
+    "author": "Adafruit Industries",
+    "source": "https://raw.githubusercontent.com/adafruit/Adafruit_CAD_Parts/main/5648%20MOSFET%20Driver/5648%20MOSFET%20Driver.step",
+    "page": "https://github.com/adafruit/Adafruit_CAD_Parts",
+    "retrieved": "2026-11-14",
+    "sha256": "017a0f65723c619ee361de6ca0c2c8308b1381b427f533429b995aa1c27a3aca",
+    "usedFor": "mosfet-5648.glb",
+    "changes": "Original STEP unchanged. Tessellated at 0.015 mm / 0.15 rad, centered and rotated from Z-up to browser Y-up; bodies retained; OLED glass assigned a dark presentation material. Proportions preserved in editable planning envelope."
+  },
+  {
+    "file": "grove-haptic.brd",
+    "author": "Seeed Studio",
+    "source": "https://files.seeedstudio.com/wiki/Grove-Haptic_Motor/res/Grove_Haptic_Motor_v0.9_Eagle.zip",
+    "page": "https://wiki.seeedstudio.com/Grove-Haptic_Motor/",
+    "originalName": "Grove - Haptic Motor v0.9.brd",
+    "usedFor": "grove-haptic.glb",
+    "changes": "Original Eagle file unchanged. Reuses component origins; excludes panel fixtures. Custom approximate PCB outline, motor, connector and package bodies/heights. Not a manufacturer 3D model.",
+    "sha256": "f10f681103245db22838aefb46d999be1aa74ef03a750a43966ddd50160c9588",
+    "retrieved": "2026-11-14"
+  },
+  {
+    "file": "lcd-27579.stp",
+    "author": "Waveshare",
+    "source": "https://files.waveshare.com/wiki/2.8inch-Capacitive-Touch-LCD/2_8inch-capacitive-touch-lcd_3D.zip",
+    "page": "https://www.waveshare.com/wiki/2.8inch_Capacitive_Touch_LCD",
+    "originalName": "2_8inch-capacitive-touch-lcd.stp",
+    "usedFor": "lcd-27579.glb",
+    "retrieved": "2026-11-14",
+    "sha256": "330baa55fd436be8afae4ea8b31179942f3b8cc4ddd0486dcab2782602df41dc",
+    "changes": "Original STEP unchanged. Tessellated at 0.015 mm / 0.15 rad, centered, converted [X,Z,-Y] to browser Y-up. Original colors retained. Native envelope 50.54 x 73.06 x 10 mm including rear GH connector and standoffs."
+  }
+]

@@ -1,0 +1,8 @@
+.git
+.vercel
+blender
+tests
+node_modules
+dist
+*.blend*
+.env*

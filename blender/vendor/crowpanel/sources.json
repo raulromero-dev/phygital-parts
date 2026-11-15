@@ -1,0 +1,44 @@
+{
+  "assets": [
+    {
+      "file": "advance-hmi2_8-20260126.stp",
+      "author": "Elecrow",
+      "source": "https://raw.githubusercontent.com/Elecrow-RD/CrowPanel-Advance-2.8-HMI-ESP32-S3-AI-Powered-IPS-Touch-Screen-320x240/master/3D%20file/advance-hmi2_8-20260126.stp",
+      "retrieved": "2026-11-14",
+      "sha256": "4cf5a8bbc244ec28cfb68e1eadfa64f7bd269d1afd070eda3403dd02548fab34",
+      "originalUnmodified": true
+    },
+    {
+      "file": "v1.2.brd",
+      "author": "Elecrow",
+      "source": "https://raw.githubusercontent.com/Elecrow-RD/CrowPanel-Advance-2.8-HMI-ESP32-S3-AI-Powered-IPS-Touch-Screen-320x240/master/Eagle_SCH%26PCB/1.2-new_button/ESP32%20Display%202.8%20inch%20V1.2.brd",
+      "retrieved": "2026-11-14",
+      "sha256": "d09cbfcbc12287d9c8769dfb2cb197778af53931692ac58ff77be86e3149beca",
+      "originalUnmodified": true
+    },
+    {
+      "file": "v1.2.sch",
+      "author": "Elecrow",
+      "source": "https://raw.githubusercontent.com/Elecrow-RD/CrowPanel-Advance-2.8-HMI-ESP32-S3-AI-Powered-IPS-Touch-Screen-320x240/master/Eagle_SCH%26PCB/1.2-new_button/ESP32%20Display%202.8%20inch%20V1.2.sch",
+      "retrieved": "2026-11-14",
+      "sha256": "f6f6f87e222e5958c92f3f269acd12d3cfbd6dae6fff1c55f7fe6a6895b896dc",
+      "originalUnmodified": true
+    },
+    {
+      "file": "v1.2.pdf",
+      "author": "Elecrow",
+      "source": "https://raw.githubusercontent.com/Elecrow-RD/CrowPanel-Advance-2.8-HMI-ESP32-S3-AI-Powered-IPS-Touch-Screen-320x240/master/Eagle_SCH%26PCB/1.2-new_button/ESP32-Display-2.8-inch-V1.2.pdf",
+      "retrieved": "2026-11-14",
+      "sha256": "b199b9652843e71811c8cbeb5bbc485e60f2cb2a213c14993db1c1d1e2c673e8",
+      "originalUnmodified": true
+    },
+    {
+      "file": "ESP32-S3-WROOM-1.STEP",
+      "author": "Espressif Systems",
+      "source": "https://www.espressif.com/sites/default/files/3dmodel/ESP32-S3-WROOM-1%203D%20Model.STEP",
+      "retrieved": "2026-11-14",
+      "sha256": "02e192087a1a2268ccbe7bf667ef04884370fc76c994484bf85654dfa7407ef6",
+      "originalUnmodified": true
+    }
+  ]
+}

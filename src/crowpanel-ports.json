@@ -1,0 +1,238 @@
+{
+  "model": "crowpanel-advance-28",
+  "browserAxes": "X width / Y thickness, +Y screen / Z length",
+  "dimensionsMm": [
+    81,
+    15.915,
+    54.36459922790527
+  ],
+  "actualGltfBoundsCenterMm": [
+    -0.003936767578125,
+    0.007500171661377,
+    -0.000144004821777
+  ],
+  "accuracy": "Pin numbers and nets verified from manufacturer Eagle v1.2. Anchors are visual docking points on the CAD socket; not measured metal terminal locations. Verify cable keying/polarity against board silkscreen.",
+  "ports": {
+    "J7": {
+      "name": "I2C",
+      "connector": "HY2.0-4P",
+      "pins": [
+        {
+          "number": 1,
+          "net": "SCL / GPIO16",
+          "normalizedAnchor": [
+            -0.0641,
+            -1.0,
+            -0.791686
+          ]
+        },
+        {
+          "number": 2,
+          "net": "SDA / GPIO15",
+          "normalizedAnchor": [
+            -0.113484,
+            -1.0,
+            -0.791686
+          ]
+        },
+        {
+          "number": 3,
+          "net": "3V3_OUT2",
+          "normalizedAnchor": [
+            -0.162866,
+            -1.0,
+            -0.791686
+          ]
+        },
+        {
+          "number": 4,
+          "net": "GND",
+          "normalizedAnchor": [
+            -0.212248,
+            -1.0,
+            -0.791686
+          ]
+        }
+      ],
+      "normalizedCenter": [
+        -0.138174,
+        -1.0,
+        -0.791686
+      ],
+      "centerMm": [
+        -5.6,
+        -7.95,
+        -21.52
+      ]
+    },
+    "J6": {
+      "name": "UART1",
+      "connector": "HY2.0-4P",
+      "pins": [
+        {
+          "number": 1,
+          "net": "RX / GPIO18",
+          "normalizedAnchor": [
+            -0.227804,
+            -1.0,
+            0.806412
+          ]
+        },
+        {
+          "number": 2,
+          "net": "TX / GPIO17",
+          "normalizedAnchor": [
+            -0.178422,
+            -1.0,
+            0.806412
+          ]
+        },
+        {
+          "number": 3,
+          "net": "3V3_OUT1",
+          "normalizedAnchor": [
+            -0.129038,
+            -1.0,
+            0.806412
+          ]
+        },
+        {
+          "number": 4,
+          "net": "GND",
+          "normalizedAnchor": [
+            -0.079656,
+            -1.0,
+            0.806412
+          ]
+        }
+      ],
+      "normalizedCenter": [
+        -0.15373,
+        -1.0,
+        0.806412
+      ],
+      "centerMm": [
+        -6.23,
+        -7.95,
+        21.92
+      ]
+    },
+    "J10": {
+      "name": "Battery",
+      "connector": "PH2.0-2P",
+      "pins": [
+        {
+          "number": 1,
+          "net": "VBAT (3.7\u20134.2 V)",
+          "normalizedAnchor": [
+            0.696394,
+            -0.409362,
+            -0.881266
+          ]
+        },
+        {
+          "number": 2,
+          "net": "GND",
+          "normalizedAnchor": [
+            0.64701,
+            -0.409362,
+            -0.881266
+          ]
+        }
+      ],
+      "normalizedCenter": [
+        0.671702,
+        -0.409362,
+        -0.881266
+      ],
+      "centerMm": [
+        27.2,
+        -3.25,
+        -23.955
+      ]
+    },
+    "J5": {
+      "name": "UART0 / power input",
+      "connector": "XH2.54-4P (manufacturer name; CAD pitch 2.5 mm)",
+      "pins": [
+        {
+          "number": 1,
+          "net": "RX / GPIO44",
+          "normalizedAnchor": [
+            0.416888,
+            -0.9623,
+            -0.80309
+          ]
+        },
+        {
+          "number": 2,
+          "net": "TX / GPIO43",
+          "normalizedAnchor": [
+            0.355158,
+            -0.9623,
+            -0.80309
+          ]
+        },
+        {
+          "number": 3,
+          "net": "+5V_IN",
+          "normalizedAnchor": [
+            0.29343,
+            -0.9623,
+            -0.80309
+          ]
+        },
+        {
+          "number": 4,
+          "net": "GND",
+          "normalizedAnchor": [
+            0.231702,
+            -0.9623,
+            -0.80309
+          ]
+        }
+      ],
+      "normalizedCenter": [
+        0.324294,
+        -0.9623,
+        -0.80309
+      ],
+      "centerMm": [
+        13.13,
+        -7.65,
+        -21.83
+      ]
+    },
+    "J3": {
+      "name": "USB-C UART0 (CH340K)",
+      "connector": "USB-C",
+      "pins": [],
+      "normalizedCenter": [
+        1.000098,
+        -0.196984,
+        -0.37248
+      ],
+      "centerMm": [
+        40.5,
+        -1.56,
+        -10.125
+      ]
+    },
+    "J4": {
+      "name": "USB-C OTG (ESP32 native USB)",
+      "connector": "USB-C",
+      "pins": [],
+      "normalizedCenter": [
+        1.000098,
+        -0.196984,
+        0.385366
+      ],
+      "centerMm": [
+        40.5,
+        -1.56,
+        10.475
+      ]
+    }
+  },
+  "normalization": "Anchors use half-envelope units [-1,1]: local coordinate = normalizedAnchor * dimensionsMm / 2. Subtract actualGltfBoundsCenterMm before normalizing."
+}

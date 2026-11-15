@@ -1,0 +1,9 @@
+# Manufacturer CAD is retained byte-for-byte; avoid text conversion and huge diffs.
+*.stp binary
+*.step binary
+*.STP binary
+*.STEP binary
+*.brd binary
+*.glb binary
+*.pdf binary
+*.sch binary

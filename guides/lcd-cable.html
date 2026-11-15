@@ -1,0 +1,38 @@
+<div id="lcd-cable-guide">
+  <style>
+    #lcd-cable-guide{color:var(--foreground);--edge:color-mix(in srgb,var(--foreground) 45%,var(--background));--rule:color-mix(in srgb,var(--foreground) 20%,var(--background));--face:color-mix(in srgb,var(--foreground) 6%,var(--background));display:grid;gap:calc(var(--font-size-base)*1)}
+    #lcd-cable-guide .guide-controls{display:flex;flex-wrap:wrap;align-items:center;gap:calc(var(--font-size-base)*.5)}
+    #lcd-cable-guide .guide-scene{display:block;width:100%;overflow:visible}
+    #lcd-cable-guide .guide-scene text{font-family:inherit;font-size:var(--font-size-base);fill:var(--foreground);font-weight:400}
+    #lcd-cable-guide .guide-scene .small{font-size:calc(var(--font-size-base)*.86);fill:var(--muted-foreground)}
+    #lcd-cable-guide .guide-scene .outline{fill:var(--background);stroke:var(--edge);stroke-width:1}
+    #lcd-cable-guide .guide-scene .body{fill:var(--face);stroke:var(--edge);stroke-width:1}
+    #lcd-cable-guide .guide-scene .dark{fill:var(--foreground);stroke:var(--foreground);stroke-width:1}
+    #lcd-cable-guide .guide-scene .metal{fill:var(--background);stroke:var(--foreground);stroke-width:1.5}
+    #lcd-cable-guide .guide-scene .wire{fill:none;stroke:var(--rule);stroke-width:2;stroke-linecap:round}
+    #lcd-cable-guide .guide-scene .active-wire{fill:none;stroke:var(--foreground);stroke-width:3;stroke-linecap:round}
+    #lcd-cable-guide .guide-scene .leader{fill:none;stroke:var(--edge);stroke-width:1}
+    #lcd-cable-guide .guide-scene .contact{fill:var(--background);stroke:var(--edge);stroke-width:1}
+    #lcd-cable-guide .guide-scene .on{fill:var(--foreground);stroke:var(--foreground)}
+    #lcd-cable-guide .guide-scene .inverse{fill:var(--background)}
+    #lcd-cable-guide .guide-selected{min-height:calc(var(--font-size-base)*1.5)}
+    #lcd-cable-guide [hidden]{display:none!important}
+  </style>
+  <div class="guide-controls" role="group" aria-label="Cable detail">
+    <button type="button" class="btn" data-guide-view="cable" aria-pressed="true">The whole cable</button>
+    <button type="button" class="btn" data-guide-view="join" aria-pressed="false">Zoom into the plugs</button>
+    <button type="button" class="btn" data-guide-view="board" aria-pressed="false">Which board sockets?</button>
+  </div>
+  <div class="guide-controls" data-wire-control hidden>
+    <label class="form-label" for="lcd-wire-choice">Follow one wire</label>
+    <select class="form-select" id="lcd-wire-choice" aria-label="Follow one wire">
+      <option value="0">1 · VCC → 3V3</option><option value="1">2 · GND → GND</option>
+      <option value="2">4 · MOSI → D10</option><option value="3">5 · SCLK → D8</option>
+      <option value="4">6 · LCD_CS → D0</option><option value="5">7 · LCD_DC → D2</option>
+      <option value="6">8 · LCD_RST → D6</option><option value="7">9 · LCD_BL → D7</option>
+    </select>
+    <button type="button" class="btn" data-mate hidden>Insert the jumper</button>
+  </div>
+  <svg class="guide-scene" role="img" aria-label="Detailed LCD cable connection illustration"></svg>
+  <div class="guide-selected text-small" aria-live="polite"></div>
+</div>

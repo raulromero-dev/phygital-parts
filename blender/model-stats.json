@@ -1,0 +1,146 @@
+[
+  {
+    "id": "expansion",
+    "editablePieces": 778,
+    "drawMeshes": 8,
+    "triangles": 223644
+  },
+  {
+    "id": "xiao",
+    "editablePieces": 37,
+    "drawMeshes": 1,
+    "triangles": 48670
+  },
+  {
+    "id": "thermal",
+    "editablePieces": 68,
+    "drawMeshes": 5,
+    "triangles": 76046
+  },
+  {
+    "id": "battery",
+    "editablePieces": 37,
+    "drawMeshes": 7,
+    "triangles": 15996
+  },
+  {
+    "id": "rod",
+    "editablePieces": 46,
+    "drawMeshes": 5,
+    "triangles": 12500
+  },
+  {
+    "id": "strip",
+    "editablePieces": 13,
+    "drawMeshes": 4,
+    "triangles": 4372
+  },
+  {
+    "id": "rf",
+    "editablePieces": 48,
+    "drawMeshes": 5,
+    "triangles": 18464
+  },
+  {
+    "id": "motor",
+    "editablePieces": 7,
+    "drawMeshes": 3,
+    "triangles": 3664
+  },
+  {
+    "id": "jst",
+    "editablePieces": 14,
+    "drawMeshes": 5,
+    "triangles": 5136
+  },
+  {
+    "id": "headers",
+    "editablePieces": 80,
+    "drawMeshes": 2,
+    "triangles": 24000
+  },
+  {
+    "id": "driver",
+    "editablePieces": 47,
+    "drawMeshes": 5,
+    "triangles": 16700
+  },
+  {
+    "id": "charger",
+    "editablePieces": 104,
+    "drawMeshes": 5,
+    "triangles": 33590
+  },
+  {
+    "id": "grove",
+    "editablePieces": 20,
+    "drawMeshes": 5,
+    "triangles": 7872
+  },
+  {
+    "id": "grove-tail",
+    "editablePieces": 24,
+    "drawMeshes": 5,
+    "triangles": 8240
+  },
+  {
+    "id": "jumper",
+    "editablePieces": 4,
+    "drawMeshes": 3,
+    "triangles": 1668
+  },
+  {
+    "id": "oled-938",
+    "editablePieces": 29,
+    "drawMeshes": 1,
+    "triangles": 26244
+  },
+  {
+    "id": "oled-326",
+    "editablePieces": 63,
+    "drawMeshes": 8,
+    "triangles": 21632
+  },
+  {
+    "id": "oled-az",
+    "editablePieces": 39,
+    "drawMeshes": 8,
+    "triangles": 14432
+  },
+  {
+    "id": "oled-uctronics",
+    "editablePieces": 39,
+    "drawMeshes": 8,
+    "triangles": 14432
+  },
+  {
+    "id": "mosfet-5648",
+    "editablePieces": 23,
+    "drawMeshes": 1,
+    "triangles": 18826
+  },
+  {
+    "id": "lcd-27579",
+    "editablePieces": 122,
+    "drawMeshes": 1,
+    "triangles": 313843
+  },
+  {
+    "id": "lcd-18366",
+    "editablePieces": 70,
+    "drawMeshes": 7,
+    "triangles": 20824
+  },
+  {
+    "id": "grove-haptic",
+    "editablePieces": 84,
+    "drawMeshes": 5,
+    "triangles": 25872
+  },
+  {
+    "id": "grove-mux",
+    "editablePieces": 186,
+    "drawMeshes": 5,
+    "triangles": 59248
+  }
+]
