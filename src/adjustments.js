@@ -1,3 +1,4 @@
+import { cleanSourcing } from './sourcing.js';
 import { validateState, moveInstance, partFor } from './engine.js';
 import { PARTS } from './catalog.js';
 import { libraryPart } from './product-data.js';
@@ -21,7 +22,7 @@ export function validateAdjustment(value,ids){
   if(!change||typeof change.partId!=='string'||!available.includes(change.partId)||seen.has(change.partId)||!(change.position===null||vector(change.position,-2000,2000))||!(change.rotation===null||vector(change.rotation,-360,360))||!(change.dimensions===null||vector(change.dimensions,.1,1000))||!(change.note===null||(typeof change.note==='string'&&change.note.length<=2000)))throw Error('The assistant returned an invalid part adjustment.');
   seen.add(change.partId);return {partId:change.partId,position:change.position,rotation:change.rotation,dimensions:change.dimensions,note:change.note};
  });
- return {message:value.message,changes,enclosure:value.enclosure,...(value.question!==undefined?{question}:{}),...(value.additions!==undefined?{additions:additions.map(a=>({key:a.key,sourceId:a.sourceId,position:[...a.position],rotation:[...a.rotation]}))}:{}),...(value.removals!==undefined?{removals:[...removals]}:{}),...(value.connections!==undefined?{connections:connections.map(c=>Object.fromEntries(['fromPart','fromPort','toPart','toPort','type','bundle','length','color','note'].map(k=>[k,c[k]])))}:{}),...(value.removeConnections!==undefined?{removeConnections:[...removeConnections]}:{})};
+ return {...(value.sourcing?{sourcing:cleanSourcing(value.sourcing)}:{}),message:value.message,changes,enclosure:value.enclosure,...(value.question!==undefined?{question}:{}),...(value.additions!==undefined?{additions:additions.map(a=>({key:a.key,sourceId:a.sourceId,position:[...a.position],rotation:[...a.rotation]}))}:{}),...(value.removals!==undefined?{removals:[...removals]}:{}),...(value.connections!==undefined?{connections:connections.map(c=>Object.fromEntries(['fromPart','fromPort','toPart','toPort','type','bundle','length','color','note'].map(k=>[k,c[k]])))}:{}),...(value.removeConnections!==undefined?{removeConnections:[...removeConnections]}:{})};
 }
 export function applyAdjustments(state,proposal){
  const next=validateState(state),p=validateAdjustment(proposal,next.instances.map(i=>i.id));

@@ -68,6 +68,16 @@ integrated, so the starter has no external conductors. See **Pins & internals**
 for the internal map and Grove expansion contacts. Source and license bundle:
 `/reference/makeup-cyberdeck/source.zip`.
 
+Select a component and ask Codex, for example: “Find an alternative near 02134
+from Amazon or Micro Center that I can get within two days.” You can also use
+Find parts → codex. Include a city/ZIP and deadline; no precise address is needed.
+Codex can search the web, compare the exact SKU and connection requirements, and
+show retailer links with dated availability evidence. Generic stock is kept
+separate from arrival dates. Missing evidence stays unverified; results older
+than a day ask you to recheck. **Check fit & add…** researches a candidate for
+review; it never automatically swaps your existing component or purchases it.
+Shopping cards stay in private account/browser chat, excluded from shared layouts.
+
 Find parts cards show names, dimensions and purchasing actions first. Interface
 text and research descriptions are available in collapsed details. Research
 and link forms use brief labels instead of introductory subtitles. The homepage

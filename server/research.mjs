@@ -1,3 +1,4 @@
+import { SOURCING_INSTRUCTIONS, shoppingContext, verifiedSourcing } from './sourcing.mjs';
 import { proposalSchema, validateProposal, publicUrl } from './schema.mjs';
 import { readResearchStream } from './research-stream.mjs';
 export const MODEL='gpt-6-astra';
@@ -16,9 +17,9 @@ export function prepareRequest(body){
  if(!body.prompt.trim()&&!links.length&&!images.length)throw Error('Add a prompt, photo or link first.');
  const catalog=Array.isArray(body.catalog)?body.catalog.slice(0,45):[];
  const context=body.context&&typeof body.context==='object'?body.context:null;
- const text=JSON.stringify({task:body.mode,request:body.prompt,publicLinks:links,existingAssembly:context,availableModels:catalog});
+ const text=JSON.stringify({task:body.mode,request:body.prompt,publicLinks:links,existingAssembly:context,availableModels:catalog,selectedPartId:body.selectedPartId||null,shoppingContext:shoppingContext(body.shoppingContext)});
  if(text.length>70000)throw Error('Project context is too large; export it and start a smaller study.');
- return {model:MODEL,instructions:SYSTEM,input:[{role:'user',content:[{type:'input_text',text},...images.map(image_url=>({type:'input_image',image_url,detail:'high'}))]}],tools:[{type:'web_search'}],include:['web_search_call.action.sources'],reasoning:{effort:'medium'},text:{format:{type:'json_schema',name:'assembly_proposal',strict:true,schema:proposalSchema}},max_output_tokens:12000,max_tool_calls:8,store:false};
+ return {model:MODEL,instructions:SYSTEM+'\n'+SOURCING_INSTRUCTIONS,input:[{role:'user',content:[{type:'input_text',text},...images.map(image_url=>({type:'input_image',image_url,detail:'high'}))]}],tools:[{type:'web_search'}],include:['web_search_call.action.sources'],reasoning:{effort:'medium'},text:{format:{type:'json_schema',name:'assembly_proposal',strict:true,schema:proposalSchema}},max_output_tokens:12000,max_tool_calls:8,store:false};
 }
 export async function runResearch(body,key,fetchImpl=fetch,clientSignal,onProgress){
  if(typeof key!=='string'||!/^sk-[A-Za-z0-9_-]{16,512}$/.test(key))return {status:401,body:{error:'Connect your OpenAI API key to use codex.',code:'key_required'}};
@@ -36,6 +37,7 @@ export async function runResearch(body,key,fetchImpl=fetch,clientSignal,onProgre
   if(data.status!=='completed')return {status:502,body:{error:'Research did not finish. Try a narrower request; draft parts need review.'}};
   const raw=content.filter(c=>c.type==='output_text').map(c=>c.text).join('');
   const proposal=validateProposal(JSON.parse(raw));
+  if(proposal.sourcing)proposal.sourcing=verifiedSourcing(proposal.sourcing,data);
   const cited=(data.output||[]).filter(item=>item.type==='web_search_call').flatMap(item=>item.action?.sources||[]).filter(s=>publicUrl(s.url)).map(s=>({label:s.title||new URL(s.url).hostname,url:s.url}));
   const unique=new Map([...proposal.sources,...cited].map(s=>[s.url,s]));proposal.sources=[...unique.values()].slice(0,24);
   return {status:200,body:{proposal,model:MODEL,usage:data.usage?{inputTokens:data.usage.input_tokens,outputTokens:data.usage.output_tokens}:null}};

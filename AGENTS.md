@@ -83,6 +83,7 @@ Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for boundaries and data flow;
   never publish chat, private project notes or prompts with a layout.
 - Keep the header compact: Share (and Remix for a public view), save status and
   one menu for account, key, theme, projects, export and undo/redo.
+- Nearby sourcing lives in `server/sourcing.mjs` and `src/sourcing.js`. Respect explicit city/ZIP, retailer and deadline; never infer location. Stock is distinct from arrival. Preserve evidence URLs, exact SKUs and checked timestamps; unverified dates remain unknown. Shopping cards are private chat, never public snapshots.
 - Assistant actions use trusted catalog IDs and exact ports, apply atomically
   after review, and remain undoable. Questions offer choices plus Other, preserve
   part context, and cannot mix unanswered questions with edits.

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-16 · Nearby alternatives
+
+- Enabled web research in selected-part Codex chat and location/deadline context in Find parts.
+- Added direct retailer cards with exact/alternative labels, evidence, fit notes and date-aware availability.
+- Uncited availability is downgraded, generic stock never implies arrival, and older checks visibly expire.
+- Shopping results persist privately; candidates require fit research and review before adding.
+
 ## Shareable projects and a simpler header
 
 - Added public read-only share links with account-owned remixes.

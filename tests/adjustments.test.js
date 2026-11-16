@@ -46,7 +46,7 @@ test('invalid or unknown adjustments are rejected atomically',()=>{
 });
 test('assistant request carries selected-part context and conversation, with no storage or code tools',()=>{
  const r=prepareAdjustment({...request(),history:[{role:'user',text:'Keep the antenna clear.'}]});
- assert.equal(r.store,false);assert.equal(r.text.format.strict,true);assert.equal(r.tools,undefined);
+ assert.equal(r.store,false);assert.equal(r.text.format.strict,true);assert.deepEqual(r.tools,[{type:'web_search'}]);
  assert.match(r.input[0].content[0].text,/selectedPartId.*grove-scd41/);assert.match(r.input[0].content[0].text,/Keep the antenna clear/);
  assert.throws(()=>prepareAdjustment({...request(),selectedPartId:'missing'}));
 });
