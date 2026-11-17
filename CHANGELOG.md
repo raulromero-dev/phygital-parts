@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-11-17 · Parallel layout alternatives
+
+- Codex can propose up to four independent alternatives together, with dimensions and checks for review. Saving retains the original active layout.
+- Switch, compare, duplicate, rename and remove layouts; each keeps its own parts, placements, notes and cables. Up to eight alternatives persist with account/browser projects and JSON backups.
+- Preserve older snapshots, reject stale/invalid proposals atomically, keep undo, and publish only the active assembly in share links.
+
 ## 2026-11-17 · Compact and exploded views
 
 - Start with 20% separation, with a Compact action and a slider that reaches the exact saved assembly at 0%. Links with `?view=compact` open directly at zero.

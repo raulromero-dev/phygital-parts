@@ -7,6 +7,7 @@ import { portsFor } from './connections.js';
 import { applyAdjustments } from './adjustments.js';
 import { cleanChat, conversationText } from './chat-data.js';
 import { PARTS } from './catalog.js';
+import { layoutSummary } from './layouts.js';
 
 export function mountAssistant(app){
  const $=s=>document.querySelector(s);
@@ -33,6 +34,7 @@ export function mountAssistant(app){
  }
  function describe(proposal,state){
   const lines=[];
+  if(proposal.layouts?.length)return proposal.layouts.map(l=>`New layout: ${l.name}`);
   const name=id=>{const source=(proposal.additions||[]).find(a=>a.key===id)?.sourceId||id;return partFor(state,source)?.short||PARTS[source]?.short||source;};
   for(const a of proposal.additions||[])lines.push(`Add ${name(a.key)}`);
   for(const id of proposal.removals||[])lines.push(`Remove ${name(id)} and its cables`);
@@ -52,17 +54,18 @@ export function mountAssistant(app){
  function answer(message,text){if(!message||message.answered||pending||build?.active||!text.trim())return;app.ensureKey(()=>{message.answered=true;send(text.trim(),message.target);});}
  function renderMessages(){
   const log=$('#chat-messages');
-  log.innerHTML=messages.length?messages.map(message=>`<article class="chat-message ${message.role}">${message.partName?`<small>↳ ${esc(message.partName)}</small>`:''}<p>${esc(message.text)}</p>${message.question?questionHtml(message):''}${message.sourcing?sourcingHtml(message.sourcing,{review:!!app.researchOffer,messageId:message.id}):''}${message.proposal?`<div class="chat-proposal"><ul>${describe(message.proposal,message.state).map(line=>`<li>${esc(line)}</li>`).join('')}</ul>${message.checks?`<small>${esc(message.checks)}</small>`:''}<button class="button" data-chat-apply="${message.id}" ${message.applied?'disabled':''}>${message.applied?'Applied':'Apply changes'}</button></div>`:''}</article>`).join(''):'<p class="chat-empty">Move a part, or find an alternative nearby. Include a city or ZIP and when you need it.</p>';
+  log.innerHTML=messages.length?messages.map(message=>`<article class="chat-message ${message.role}">${message.partName?`<small>↳ ${esc(message.partName)}</small>`:''}<p>${esc(message.text)}</p>${message.question?questionHtml(message):''}${message.sourcing?sourcingHtml(message.sourcing,{review:!!app.researchOffer,messageId:message.id}):''}${message.proposal?`<div class="chat-proposal">${message.layoutPreviews?`<div class="chat-layout-previews">${message.layoutPreviews.map(l=>`<article><strong>${esc(l.name)}</strong><span>${l.dimensions}</span><small>${l.parts} parts · ${l.warnings} checks</small>${l.description?`<p>${esc(l.description)}</p>`:""}</article>`).join("")}</div>`:""}${message.layoutPreviews?'':`<ul>${describe(message.proposal,message.state).map(line=>`<li>${esc(line)}</li>`).join('')}</ul>`}${message.checks?`<small>${esc(message.checks)}</small>`:''}<button class="button" data-chat-apply="${message.id}" ${message.applied?'disabled':''}>${message.applied?'Saved':message.proposal.layouts?.length?'Save layouts':'Apply changes'}</button>${message.applied&&message.proposal.layouts?.length?'<button class="text-button" data-open-layouts>Compare layouts</button>':''}</div>`:''}</article>`).join(''):'<p class="chat-empty">Move a part, or find an alternative nearby. Include a city or ZIP and when you need it.</p>';
   if(build)log.insertAdjacentHTML('beforeend',`<section class="chat-build">${build.active?loadingIndicator(build.label,true):`<p>${esc(build.label)}</p>`}<ul>${[...build.items.values()].map(item=>`<li><span>${esc(item.name)}</span><small>${esc(item.status)}</small></li>`).join('')}</ul><div class="chat-build-footer"><small class="build-elapsed">${Math.floor((Date.now()-build.started)/1000)}s</small>${build.active?'<button type="button" class="chat-play-game" id="build-play-game">Play Cable Hop ↗</button>':''}</div>${!build.active&&build.retry?'<button class="text-button" id="retry-build">Retry build</button>':''}</section>`);
   root.querySelectorAll('[data-chat-answer]').forEach(button=>button.onclick=()=>{const message=messages.find(m=>m.id===+button.dataset.chatAnswer);answer(message,message.question.options[+button.dataset.option]);});
   root.querySelectorAll('[data-chat-other]').forEach(form=>form.onsubmit=event=>{event.preventDefault();answer(messages.find(m=>m.id===+form.dataset.chatOther),form.querySelector('input').value);});
   root.querySelectorAll('[data-review-offer]').forEach(button=>button.onclick=()=>{const message=messages.find(m=>m.id===+button.dataset.message);app.researchOffer(message.sourcing.offers[+button.dataset.reviewOffer],message.sourcing,message.target);});
+  root.querySelectorAll('[data-open-layouts]').forEach(b=>b.onclick=()=>app.openLayouts?.());
   $('#build-play-game')?.addEventListener('click',playGame);
   $('#retry-build')?.addEventListener('click',()=>build.retry());
   if(pending)log.insertAdjacentHTML('beforeend',`<div class="chat-thinking">${loadingIndicator('Working on your request…',true)}</div>`);
   root.querySelectorAll('[data-chat-apply]').forEach(button=>button.onclick=()=>{
    const message=messages.find(m=>m.id===+button.dataset.chatApply);
-   try{app.applyAdjustment(message.proposal,message.base);message.applied=true;renderMessages();app.toast('Changes applied. Undo is available.');}catch(error){app.toast(error.message);}
+   try{app.applyAdjustment(message.proposal,message.base);message.applied=true;renderMessages();app.toast(message.proposal.layouts?.length?'Layouts saved. Your original is kept.':'Changes applied. Undo is available.');}catch(error){app.toast(error.message);}
   });
   log.scrollTop=log.scrollHeight;
   try{if(!app.isShared?.())localStorage.setItem(historyKey,JSON.stringify(cleanChat(messages)));}catch{}
@@ -76,13 +79,13 @@ export function mountAssistant(app){
   const previous=messages.map(m=>({role:m.role,text:conversationText(m)})).slice(-8);
   messages.push({id:++sequence,role:'user',text:prompt,partName:target?partFor(state,target)?.short:null});$('#chat-prompt').value='';pending=true;abort=new AbortController();$('#chat-send').disabled=true;$('#chat-stop').hidden=false;$('#chat-status').textContent='Working on your request';renderMessages();
   try{
-   const context={name:state.name,enclosure:state.enclosure,lockCore:state.lockCore,parts:state.instances.map(instance=>{const part=partFor(state,instance.id);return {...instance,name:part.name,interface:part.interface,electrical:part.electrical,placement:part.placement,purchaseLinks:part.purchaseLinks||part.links,ports:portsFor(state,instance.id)};}),connections:state.connections};
+   const context={name:state.name,enclosure:state.enclosure,lockCore:state.lockCore,layouts:state.layouts?{activeId:state.layouts.activeId,variants:state.layouts.variants.map(({id,name})=>({id,name}))}:null,parts:state.instances.map(instance=>{const part=partFor(state,instance.id);return {...instance,name:part.name,interface:part.interface,electrical:part.electrical,placement:part.placement,purchaseLinks:part.purchaseLinks||part.links,ports:portsFor(state,instance.id)};}),connections:state.connections};
    const response=await fetch('/api/adjust',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+app.getKey()},body:JSON.stringify({prompt,selectedPartId:target,context,history:previous,shoppingContext:browsingContext()}),signal:abort.signal});
    const result=await response.json();if(!response.ok)throw Error(result.error||'The assistant could not finish.');
    if(generation!==projectGeneration)return;
-   const proposal=result.proposal,hasChanges=proposal.additions?.length||proposal.removals?.length||proposal.connections?.length||proposal.removeConnections?.length||proposal.enclosure||proposal.changes.some(c=>c.position||c.rotation||c.dimensions||c.note);
+   const proposal=result.proposal,hasChanges=proposal.layouts?.length||proposal.additions?.length||proposal.removals?.length||proposal.connections?.length||proposal.removeConnections?.length||proposal.enclosure||proposal.changes.some(c=>c.position||c.rotation||c.dimensions||c.note);
    const message={id:++sequence,role:'assistant',text:proposal.message,...(proposal.sourcing?{sourcing:proposal.sourcing,target,partName:target?partFor(state,target)?.short:null}:{}),...(proposal.question?{question:proposal.question,target,answered:false}:{})};
-   if(hasChanges){const preview=applyAdjustments(state,proposal);const warnings=checks(preview).filter(c=>c.level==='warn');Object.assign(message,{proposal,state,base:JSON.stringify(state),checks:warnings.length?`${warnings.length} assembly checks need review after this change.`:'Review the proposed changes before applying.'});}
+   if(hasChanges){const preview=applyAdjustments(state,proposal);const warnings=checks(preview).filter(c=>c.level==='warn');Object.assign(message,{proposal,state,base:JSON.stringify(state),checks:proposal.layouts?.length?'Original layout stays unchanged.':warnings.length?`${warnings.length} assembly checks need review after this change.`:'Review the proposed changes before applying.'});if(proposal.layouts?.length)message.layoutPreviews=preview.layouts.variants.slice(-proposal.layouts.length).map(v=>({name:v.name,description:v.description,...layoutSummary(v.document)}));}
    messages.push(message);
   }catch(error){if(generation!==projectGeneration)return;messages.push({id:++sequence,role:'assistant',text:error.name==='AbortError'?'Stopped. Your assembly is unchanged.':error.message});}
   finally{if(generation!==projectGeneration)return;pending=false;abort=null;$('#chat-send').disabled=false;$('#chat-stop').hidden=true;$('#chat-status').textContent='Tap a part to attach it.';renderMessages();}

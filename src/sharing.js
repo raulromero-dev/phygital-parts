@@ -6,6 +6,7 @@ export function readSharedDocument(value){
  const state=validateState(value);
  state.notes=[];state.decisions={};state.brief='';state.projectLinks=[];
  delete state.research;delete state.build;
+ delete state.layouts; // Publish only the active assembly, never private alternatives.
  return state;
 }
 
@@ -58,7 +59,7 @@ export function mountSharing(app,accounts){
   }
   busy=true;let existing;
   try{existing=await accounts.sharedVersion();}catch(error){fail(error);busy=false;return;}busy=false;
-  app.dialog('Share project',`<p class="dialog-intro">Anyone with the link can view and remix this version.</p><p class="hint share-privacy">Includes parts, placement and cable details. Chat, prompts and private project notes stay private.</p>${existing?`<label for="share-url">Share link</label><div class="share-link-row"><input id="share-url" readonly value="${app.esc(shareUrl(existing.token))}"><button class="button primary" id="copy-share">Copy link</button></div><div class="dialog-actions"><button class="button" id="publish-share">Update shared version</button><button class="text-button" id="revoke-share">Turn off link</button></div>`:'<button class="button primary" id="publish-share">Create share link</button>'}<p class="hint share-status" id="share-status" role="status">${existing?'Edits stay private until you update the shared version.':''}</p>`);
+  app.dialog('Share project',`<p class="dialog-intro">Anyone with the link can view and remix this version.</p><p class="hint share-privacy">Includes this layout’s parts, placement and cable details. Other layouts, chat and private notes stay private.</p>${existing?`<label for="share-url">Share link</label><div class="share-link-row"><input id="share-url" readonly value="${app.esc(shareUrl(existing.token))}"><button class="button primary" id="copy-share">Copy link</button></div><div class="dialog-actions"><button class="button" id="publish-share">Update shared version</button><button class="text-button" id="revoke-share">Turn off link</button></div>`:'<button class="button primary" id="publish-share">Create share link</button>'}<p class="hint share-status" id="share-status" role="status">${existing?'Edits stay private until you update the shared version.':''}</p>`);
   $('#copy-share')?.addEventListener('click',()=>copy(shareUrl(existing.token)));
   $('#publish-share').onclick=async()=>{
    if(busy)return;busy=true;const button=$('#publish-share');button.disabled=true;$('#share-status').textContent='Publishing…';

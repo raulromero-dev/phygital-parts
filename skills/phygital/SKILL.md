@@ -63,7 +63,12 @@ Purchase actions are separate from adding a part. Review proposed additions to e
 Review generated drafts and connections before physical assembly. Select a part before using the floating
 **codex** chat to add or duplicate parts, map cables and request placement adjustments.
 Answer selectable questions or choose Other for a custom response. Inspect and apply the
-proposal; undo remains available. Export JSON for reuse and CSV for cable maps.
+proposal; undo remains available. Ask for parallel alternatives to explore up to
+four arrangements together. Review and **Save layouts**, then compare/switch with
+the layout selector. Each of up to eight layouts keeps independent parts and cables;
+the original remains available. Account/browser saves and JSON exports retain all
+layouts; share links, CSV and GLB contain only the active assembly.
+Export JSON for reuse and CSV for cable maps.
 
 Research and chat use a visitor-provided OpenAI key and incur that account's API
 usage. Starters and manual edits need no key. Do not run a paid request merely to

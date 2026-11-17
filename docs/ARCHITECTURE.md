@@ -79,6 +79,22 @@ options, with Other supplied by the UI, and cannot include assembly changes.
 Application checks the original base state and preserves undo. It cannot order
 parts, run commands or modify firmware.
 
+Parallel layout proposals use a bounded `layouts` action (up to four) instead of
+editing the current layout. Every alternative starts from the same current base;
+all must validate before one undoable save. Alternatives cannot mix with top-level
+actions or an unanswered question. The review cards show each option's component
+envelope and unresolved checks, then leave the original active.
+
+`src/layouts.js` manages `state.layouts = { activeId, variants }` (up to eight).
+Each variant has an ID, name, description and complete validated assembly document
+without nested layouts. Top-level state is always the active assembly. Validation
+synchronizes its snapshot; switching saves outgoing edits before loading another
+variant, preserving the project name. Parts, custom definitions, notes, decisions
+and cables are independent. Account saves, copies and JSON exports retain the
+collection; CSV/GLB use the active assembly. Shared snapshots expose only the
+active layout and remove the private collection. Collection documents are capped
+below the database document limit; older documents without layouts still work.
+
 ## Persistence and hosting
 
 Each workspace has separate browser autosave, snapshots and chat history (last

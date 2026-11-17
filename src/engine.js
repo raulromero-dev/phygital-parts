@@ -116,7 +116,7 @@ function normalizeCustom(p){
  const models=new Set(Object.values(PARTS).map(part=>part.modelId||part.id));
  return {model:modelEvidence(p.model),visual:normalizeVisual(p.visual),id:p.id,name:p.name,short:str(p.short,100)?p.short:p.name,dimensions:[...p.dimensions],owned:!!p.owned,category:'Custom',kind:['board','chip','camera','battery','screen','motor','connector','antenna','other','headers','strip'].includes(p.kind)?p.kind:'board',color:/^#[a-f0-9]{6}$/i.test(p.color)?p.color:'#124567',confidence:['sourced','estimate','unknown','manufacturer','partial','listing'].includes(p.confidence)?p.confidence:'estimate',dimensionNote:text('dimensionNote','User-entered dimensions; verify clearance.'),interface:text('interface','Unspecified'),summary:text('summary','Custom component; compatibility unreviewed.'),placement:text('placement','Check mounting and clearance.'),electrical:text('electrical','Check pinout, supply and current requirements.'),sources:[],photo:text('photo','User-added component'),modelNote:text('modelNote','Parametric planning envelope; not manufacturer CAD.'),...(models.has(p.modelId)?{modelId:p.modelId}:{}),links:links('links'),purchaseLinks:links('purchaseLinks'),procurementLabel:text('procurementLabel','Buy'),procurementLinks:links('procurementLinks'),quantity:1,ports:Array.isArray(p.ports)?p.ports.filter(q=>/^[a-z0-9+_-]+$/.test(q.id)&&str(q.label,100)&&['unknown','sda','scl','power','ground','gpio','rf','motor','analog','tx','rx','usb'].includes(q.signal)).slice(0,40).map(q=>({id:q.id,label:q.label,signal:q.signal,group:str(q.group,150)?q.group:'Custom contacts',anchor:vec(q.anchor,-1,1)?[...q.anchor]:[0,0,0],rail:str(q.rail,30)?q.rail:'unknown'})):[],tags:['Custom']};
 }
-export function validateState(v) {
+export function validateState(v,{nested=false}={}) {
   if(!v||v.version!==1||!str(v.name,120)||!Array.isArray(v.instances)||v.instances.length>60||!vec(v.enclosure,1,2000))throw Error('This is not a valid Hardware Studio v1 project.');
   const custom=Array.isArray(v.custom)?v.custom:[];
   if(custom.length>40||custom.some(p=>!/^custom-[a-z0-9-]+$/.test(p.id)||!str(p.name,100)||!vec(p.dimensions,.1,1000)))throw Error('Invalid custom component.');
@@ -141,6 +141,22 @@ export function validateState(v) {
     if(!str(c.id,100)||!str(c.from,150)||!str(c.to,150)||!endpoint(clean,c.from)||!endpoint(clean,c.to)||c.from===c.to||!str(c.type,100)||!str(c.bundle,100)||!num(c.length,0,5000)||!/^#[0-9a-fA-F]{6}$/.test(c.color)||!['Planned','Bench checked'].includes(c.status)||!str(c.note))throw Error('Invalid cable endpoint or specification.');
     if(clean.connections.some(x=>x.id===c.id))throw Error('Duplicate cable ID.');
     clean.connections.push({id:c.id,from:c.from,to:c.to,type:c.type,bundle:c.bundle,length:c.length,color:c.color,status:c.status,note:c.note});
+  }
+  if(v.layouts!==undefined){
+    const group=v.layouts;
+    if(nested||!group||!Array.isArray(group.variants)||group.variants.length<1||group.variants.length>8||!group.variants.some(x=>x?.id===group.activeId))throw Error('Invalid project layouts.');
+    const seen=new Set();
+    const variants=group.variants.map(item=>{
+      if(!item||!/^layout-[a-z0-9-]{1,70}$/.test(item.id)||seen.has(item.id)||!str(item.name,80)||!item.name.trim()||!str(item.description??'',600)||!item.document||item.document.layouts!==undefined)throw Error('Invalid layout alternative.');
+      seen.add(item.id);
+      const document=validateState(item.document,{nested:true});
+      return {id:item.id,name:item.name.trim(),description:item.description||'',document};
+    });
+    // Top-level fields are the currently edited branch. Save its latest state
+    // inside the collection as well, so every export has a consistent snapshot.
+    variants.find(v=>v.id===group.activeId).document=structuredClone(clean);
+    clean.layouts={activeId:group.activeId,variants};
+    if(new TextEncoder().encode(JSON.stringify(clean)).length>1800000)throw Error('Layout collection is too large. Export a backup and remove an unused layout.');
   }
   return clean;
 }

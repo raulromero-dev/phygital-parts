@@ -4,12 +4,16 @@ import { PARTS } from './catalog.js';
 import { libraryPart } from './product-data.js';
 import { portsFor, connectionIssues } from './connections.js';
 import { validateQuestion } from './chat-data.js';
+import { addLayouts, layoutDocument } from './layouts.js';
 const vector=(v,min,max)=>Array.isArray(v)&&v.length===3&&v.every(n=>typeof n==='number'&&Number.isFinite(n)&&n>=min&&n<=max);
 export function validateAdjustment(value,ids){
- if(!value||typeof value.message!=='string'||!value.message.trim()||value.message.length>2400||!Array.isArray(value.changes)||value.changes.length>12||!(value.enclosure===null||vector(value.enclosure,1,2000)))throw Error('Invalid adjustment proposal.');
+ if(!value||typeof value.message!=='string'||!value.message.trim()||value.message.length>2400||!Array.isArray(value.changes)||value.changes.length>60||!(value.enclosure===null||vector(value.enclosure,1,2000)))throw Error('Invalid adjustment proposal.');
  const additions=value.additions??[],removals=value.removals??[],connections=value.connections??[],removeConnections=value.removeConnections??[];
+ const layouts=value.layouts??[];
+ if(!Array.isArray(layouts)||layouts.length>4)throw Error('Propose up to four layout alternatives.');
+ if(layouts.length&&(value.changes.length||value.enclosure||additions.length||removals.length||connections.length||removeConnections.length))throw Error('Keep layout alternatives separate from edits to the current layout.');
  const question=validateQuestion(value.question);
- if(question&&(value.changes.length||value.enclosure||additions.length||removals.length||connections.length||removeConnections.length))throw Error('Answer the question before proposing changes.');
+ if(question&&(layouts.length||value.changes.length||value.enclosure||additions.length||removals.length||connections.length||removeConnections.length))throw Error('Answer the question before proposing changes.');
  if(!Array.isArray(additions)||additions.length>12||!Array.isArray(removals)||removals.length>12||!Array.isArray(connections)||connections.length>60||!Array.isArray(removeConnections)||removeConnections.length>60)throw Error('Too many assembly actions.');
  const added=new Set(),removed=new Set();
  for(const a of additions){if(!a||!/^new-[a-z0-9-]{1,60}$/.test(a.key)||added.has(a.key)||ids.includes(a.key)||(!ids.includes(a.sourceId)&&!PARTS[a.sourceId])||a.sourceId==='kit'||!vector(a.position,-2000,2000)||!vector(a.rotation,-360,360))throw Error('Invalid part addition.');added.add(a.key);}
@@ -22,10 +26,21 @@ export function validateAdjustment(value,ids){
   if(!change||typeof change.partId!=='string'||!available.includes(change.partId)||seen.has(change.partId)||!(change.position===null||vector(change.position,-2000,2000))||!(change.rotation===null||vector(change.rotation,-360,360))||!(change.dimensions===null||vector(change.dimensions,.1,1000))||!(change.note===null||(typeof change.note==='string'&&change.note.length<=2000)))throw Error('The assistant returned an invalid part adjustment.');
   seen.add(change.partId);return {partId:change.partId,position:change.position,rotation:change.rotation,dimensions:change.dimensions,note:change.note};
  });
- return {...(value.sourcing?{sourcing:cleanSourcing(value.sourcing)}:{}),message:value.message,changes,enclosure:value.enclosure,...(value.question!==undefined?{question}:{}),...(value.additions!==undefined?{additions:additions.map(a=>({key:a.key,sourceId:a.sourceId,position:[...a.position],rotation:[...a.rotation]}))}:{}),...(value.removals!==undefined?{removals:[...removals]}:{}),...(value.connections!==undefined?{connections:connections.map(c=>Object.fromEntries(['fromPart','fromPort','toPart','toPort','type','bundle','length','color','note'].map(k=>[k,c[k]])))}:{}),...(value.removeConnections!==undefined?{removeConnections:[...removeConnections]}:{})};
+ const names=new Set();
+ const alternatives=layouts.map(l=>{
+  if(!l||typeof l.name!=='string'||!l.name.trim()||l.name.length>80||names.has(l.name.trim().toLowerCase())||typeof l.description!=='string'||l.description.length>600||l.layouts!==undefined||l.question!=null)throw Error('Invalid layout alternative.');
+  names.add(l.name.trim().toLowerCase());
+  const actions=validateAdjustment({...l,message:l.description||l.name,layouts:undefined,question:undefined},ids);
+  return {name:l.name.trim(),description:l.description,changes:actions.changes,enclosure:actions.enclosure,additions:actions.additions||[],removals:actions.removals||[],connections:actions.connections||[],removeConnections:actions.removeConnections||[]};
+ });
+ return {...(value.layouts!==undefined?{layouts:alternatives}:{}),...(value.sourcing?{sourcing:cleanSourcing(value.sourcing)}:{}),message:value.message,changes,enclosure:value.enclosure,...(value.question!==undefined?{question}:{}),...(value.additions!==undefined?{additions:additions.map(a=>({key:a.key,sourceId:a.sourceId,position:[...a.position],rotation:[...a.rotation]}))}:{}),...(value.removals!==undefined?{removals:[...removals]}:{}),...(value.connections!==undefined?{connections:connections.map(c=>Object.fromEntries(['fromPart','fromPort','toPart','toPort','type','bundle','length','color','note'].map(k=>[k,c[k]])))}:{}),...(value.removeConnections!==undefined?{removeConnections:[...removeConnections]}:{})};
 }
 export function applyAdjustments(state,proposal){
  const next=validateState(state),p=validateAdjustment(proposal,next.instances.map(i=>i.id));
+ if(p.layouts?.length){
+  const base=layoutDocument(next);
+  return addLayouts(next,p.layouts.map(l=>({name:l.name,description:l.description,document:applyAdjustments(base,{...l,message:l.description||l.name})})));
+ }
  // Resolve new aliases once within this transaction. Reuse source CAD and ports.
  const aliases=new Map();
  for(const a of p.additions||[]){

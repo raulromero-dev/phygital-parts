@@ -30,10 +30,13 @@ its original stays local. Account edits and the last 40 chat messages autosave.
 Without sign-in, projects remain in this browser. **Save a copy** and **Import
 project** create independent projects; they never replace the source. Copies and
 imports go to your account when signed in. The sidebar name is editable, and
-layout snapshots remain browser-local inside Projects.
+named layouts keep independent parts, placements and cables within one project.
+Use the layout selector and compare button to switch, duplicate, rename or remove
+alternatives. They autosave to the account or browser with the project; older
+snapshots remain available under **Layouts → Older snapshots & examples**.
 
 **Export → Project file** creates a portable JSON backup of the assembly, cables,
-custom parts, notes and decisions (no chat or keys). Clearing site data removes
+custom parts, all layout alternatives, notes and decisions (no chat or keys). Clearing site data removes
 browser copies, not account copies. A cloud URL requires its owner's sign-in;
 it does not make the project public. Save failures and conflicts are visible;
 conflicts preserve your draft and offer Save a copy instead of overwriting.
@@ -135,8 +138,10 @@ and terms; the application license does not relicense those files.
    its context, then request movement, rotation, corrected dimensions, enclosure
    changes or review notes. Review each proposal and choose **Apply changes**;
    the edit is undoable. Proposals are rejected if the assembly has changed
-   since the request. The assistant does not edit wiring or add parts; use
-   Connections and Find parts for those actions.
+   since the request. Codex can also add or duplicate catalog/existing parts and
+   map their contacts. Ask for alternatives to receive up to four independent
+   layout proposals at once. **Save layouts** keeps the original active; use
+   **Compare layouts** to open an option. A project holds up to eight layouts.
 
 The interface supports light/dark mode and Color/Mono component rendering.
 An outline board logo, a one-turn entrance animation and very faint circuit

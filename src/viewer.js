@@ -104,6 +104,9 @@ export class AssemblyViewer {
   }
   invalidate(id){this.cache.delete(id);const group=this.groups.get(id);if(group)this.assembly.remove(group);this.groups.delete(id);this.labels.get(id)?.remove();this.labels.delete(id);this.leaders.querySelector(`[data-part="${id}"]`)?.remove();}
   async sync(state,selected){
+    // A layout may reuse an instance ID with a different CAD definition.
+    this.definitions ||= new Map();
+    for(const i of state.instances){const signature=JSON.stringify(partFor(state,i.id));if(this.definitions.get(i.id)!==signature){this.invalidate(i.id);this.definitions.set(i.id,signature);}}
     this.state=state;this.selected=selected;const generation=(this.generation||0)+1;this.generation=generation;
     const ids=new Set(state.instances.map(i=>i.id));for(const [id,g]of this.groups)if(!ids.has(id)){this.assembly.remove(g);this.groups.delete(id);this.labels.get(id)?.remove();this.labels.delete(id);this.leaders.querySelector(`[data-part="${id}"]`)?.remove();}
     await Promise.all(state.instances.map(async i=>{
