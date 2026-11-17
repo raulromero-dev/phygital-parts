@@ -1,6 +1,7 @@
 import { bounds, mounted, partFor } from './engine.js';
 
 export const DEFAULT_EXPLODE = .2;
+export const initialExplode = search => new URLSearchParams(search).get('view') === 'compact' ? 0 : DEFAULT_EXPLODE;
 export const clampExplode = value => Number.isFinite(value) ? Math.max(0, Math.min(1, value)) : 0;
 
 // A viewing offset only: zero is exactly the saved assembly, including its

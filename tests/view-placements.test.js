@@ -3,7 +3,14 @@ import assert from 'node:assert/strict';
 import { defaultState } from '../src/catalog.js';
 import { moveInstance } from '../src/engine.js';
 import { appendHaldzemoComparison } from '../src/haldzemo-assembly.js';
-import { DEFAULT_EXPLODE, explodedOffsets } from '../src/view-placements.js';
+import { DEFAULT_EXPLODE, initialExplode, explodedOffsets } from '../src/view-placements.js';
+
+test('compact viewing links override the separated default without changing project data', () => {
+  assert.equal(initialExplode(''), DEFAULT_EXPLODE);
+  assert.equal(initialExplode('?layout=compact'), DEFAULT_EXPLODE);
+  assert.equal(initialExplode('?view=compact'), 0);
+  assert.equal(initialExplode('?view=unknown'), DEFAULT_EXPLODE);
+});
 
 test('zero removes all viewing offsets without changing the document', () => {
   const state = defaultState(), before = structuredClone(state);

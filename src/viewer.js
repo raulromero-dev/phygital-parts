@@ -13,8 +13,8 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { activeConnections, endpoint, portsFor, harnessFor } from './connections.js';
 import { partFor, radians } from './engine.js';
 export class AssemblyViewer {
-  constructor(host,{onSelect,onMove,onDragStart,onDragEnd,onError,onConnection,onPort}){
-    this.host=host;this.callbacks={onSelect,onMove,onDragStart,onDragEnd,onError,onConnection,onPort};this.groups=new Map();this.cache=new Map();this.labels=new Map();this.explode=DEFAULT_EXPLODE;this.showLabels=false;this.showWires=true;this.mode='inspect';
+  constructor(host,{onSelect,onMove,onDragStart,onDragEnd,onError,onConnection,onPort,explode=DEFAULT_EXPLODE}){
+    this.host=host;this.callbacks={onSelect,onMove,onDragStart,onDragEnd,onError,onConnection,onPort};this.groups=new Map();this.cache=new Map();this.labels=new Map();this.explode=clampExplode(explode);this.showLabels=false;this.showWires=true;this.mode='inspect';
     this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#fafafa');this.scene.fog=new THREE.Fog('#fafafa',650,1300);
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:true});this.renderer.setPixelRatio(Math.min(devicePixelRatio,2.5));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.1;host.prepend(this.renderer.domElement);
     this.renderer.domElement.setAttribute('aria-label','Interactive 3D assembly. Drag to orbit, scroll to zoom; select parts from the component list for keyboard editing.');this.renderer.domElement.setAttribute('role','img');
