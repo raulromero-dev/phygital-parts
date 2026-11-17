@@ -1,3 +1,4 @@
+import { HALDZEMO_ID, HALDZEMO_PORTS, HALDZEMO_INTERNALS, JUMPER_MF } from './haldzemo.js';
 import { CROWPANEL_PORTS, CROWPANEL_INTERNALS } from './crowpanel.js';
 import { WATCH_PORTS } from './smartwatch.js';
 import { AIR_PORTS } from './air-monitor.js';
@@ -81,6 +82,7 @@ for(const id of ['lcd-27579','lcd-18366']){
 // Manufacturer GH housing spans X -9.2..10.3, rear Y -5..-1, Z 23.57..29.41 mm.
 // Pin 1 at +X follows the rear pinout photo; each contact is spaced 1.25 mm.
 PORTS['lcd-27579'].forEach((p,n)=>p.anchor=[(.55+(6-n)*1.25)/25.27,-.6,29.4/36.53]);
+PORTS[HALDZEMO_ID]=HALDZEMO_PORTS;
 export function harnesses(state){
  const groups=new Map();
  for(const c of activeConnections(state)){
@@ -91,6 +93,7 @@ export function harnesses(state){
 }
 export function harnessFor(state,id){return harnesses(state).find(h=>h.connections.some(c=>c.id===id));}
 export function cableDescription(h){
+ if(h.type===JUMPER_MF&&h.name.startsWith('Haldzemo'))return 'Eleven separate 2.54 mm female-to-male jumpers: female housings over the screen’s rear male pins → male ends into the carrier’s outer female sockets. 100 mm nominal wires; housings and bends add space. Jumpers are separate from the included FPC cable. LED, MISO and SD_CS stay open. Click a row for its mapping; colors are illustrative.';
  if(h.type==='Board-to-board headers')return 'The XIAO seats directly in the two seven-contact sockets behind the display. These lines show the electrical map, not separate cables. Use pre-soldered XIAO headers or solder the included headers first.';
  if(h.name==='Included antenna coax')return 'XIAO U.FL snap socket → included thin coax lead → antenna. No RP-SMA adapter. Measure the shipped antenna and lead before finalizing the case.';
  if(h.name==='Haptic hub uplink')return 'Carrier spare Grove I²C socket → standard four-wire Grove cable → TCA9548A hub upstream socket. Power and ground are shared by all branches; supply capacity still needs review.';
@@ -137,7 +140,10 @@ INTERNALS['haptic-hub']=[{name:'TCA9548A channel switch',route:'Upstream SDA/SCL
 for(const id of ['lcd-27579','lcd-18366'])INTERNALS[id]=[{name:'SPI display controller',route:'MOSI + SCLK transfer pixels; CS selects the display, DC selects command/data, RST resets it and BL controls backlight. 3.3 V supply and logic are paired in this plan. The 2.8-inch touch controller has separate, currently unmapped contacts.',evidence:'Waveshare manufacturer interface tables'}];
 INTERNALS['ring-board']=RING_INTERNALS;
 INTERNALS['cardputer-adv']=CARDPUTER_INTERNALS;
-export const CABLE_TYPES=['Soldered battery tabs','Board-to-board headers','HY2.0 4-pin harness · verify mating','Grove / 4-wire harness','JST-PH pigtail','U.FL coax / adapter','Hook-up wire','Header / jumper','Custom cable','Grove → STEMMA QT (4528)','STEMMA 3-pin → jumper (3893/3894)','Motor leads → screw terminals','Waveshare 13-pin display cable','PH2.0 8-pin display cable'];
+INTERNALS[HALDZEMO_ID]=HALDZEMO_INTERNALS;
+INTERNALS['grove-haptic']=INTERNALS['grove-haptic-1'];
+INTERNALS['grove-mux']=INTERNALS['haptic-hub'];
+export const CABLE_TYPES=[JUMPER_MF,'Soldered battery tabs','Board-to-board headers','HY2.0 4-pin harness · verify mating','Grove / 4-wire harness','JST-PH pigtail','U.FL coax / adapter','Hook-up wire','Header / jumper','Custom cable','Grove → STEMMA QT (4528)','STEMMA 3-pin → jumper (3893/3894)','Motor leads → screw terminals','Waveshare 13-pin display cable','PH2.0 8-pin display cable'];
 export function portsFor(state,id){return PORTS[id]||state.custom?.find(p=>p.id===id)?.ports||[];}
 export function endpoint(state,ref){const [id,pin]=ref.split(':');const p=portsFor(state,id).find(p=>p.id===pin);return p?{...p,part:id,ref}:null;}
 export function endpointLabel(state,ref){const p=endpoint(state,ref);return p?`${p.group} · ${p.label}`:ref;}
@@ -164,10 +170,13 @@ export function connectionIssues(state,c){
  if(a.rail==='unknown'||b.rail==='unknown')out.push('Voltage range or breakout supply is unverified.');
  if(a.signal==='unknown'||b.signal==='unknown')out.push('Unassigned contact. Record continuity and signal purpose.');
  if(a.signal==='analog'||b.signal==='analog')out.push('Verify ADC range, protection, pin availability and calibration.');
- if(state.instances.some(i=>i.id==='expansion')&&[a,b].some(p=>['xiao','expansion'].includes(p.part)&&['d1','d3'].includes(p.net||p.id)))out.push('Pin already serves the onboard button or buzzer. Review that connection before reuse.');
- if(state.instances.some(i=>i.id==='expansion')&&[a,b].some(p=>['xiao','expansion'].includes(p.part)&&['d8','d9','d10'].includes(p.net||p.id)))out.push('SPI pins may be shared with the carrier microSD. Audit the carrier schematic.');
- if(state.instances.some(i=>i.id==='expansion')&&[a,b].some(p=>['xiao','expansion'].includes(p.part)&&(p.net||p.id)==='d2'))out.push('D2 is microSD chip-select. Disable microSD and remove its card before reassigning this pin.');
- if(state.instances.some(i=>i.id==='expansion')&&[a,b].some(p=>['xiao','expansion'].includes(p.part)&&['d6','d7'].includes(p.net||p.id)))out.push('D6/D7 also serve Grove UART. Keep UART unused when reassigning these pins.');
+ const model=id=>state.custom?.find(p=>p.id===id)?.modelId||id;
+ const carrierPin=p=>model(p.part)==='expansion'||(p.part==='xiao'&&ids.has('expansion'));
+ const pinNet=p=>p.net||p.id.replace(/^h-/, '');
+ if([a,b].some(p=>carrierPin(p)&&['d1','d3'].includes(pinNet(p))))out.push('Pin already serves the onboard button or buzzer. Review that connection before reuse.');
+ if([a,b].some(p=>carrierPin(p)&&['d8','d9','d10'].includes(pinNet(p))))out.push('SPI pins may be shared with the carrier microSD. Audit the carrier schematic.');
+ if([a,b].some(p=>carrierPin(p)&&pinNet(p)==='d2'))out.push('D2 is microSD chip-select. Disable microSD and remove its card before reassigning this pin.');
+ if([a,b].some(p=>carrierPin(p)&&['d6','d7'].includes(pinNet(p))))out.push('D6/D7 also serve Grove UART. Keep UART unused when reassigning these pins.');
  const controllerNet=p=>['xiao','expansion'].includes(p?.part)?(p.net||p.id):null;
  const selectedNets=[a,b].map(controllerNet).filter(Boolean);
  for(const net of selectedNets.filter(n=>['d0','d2','d6','d7'].includes(n))){
@@ -179,7 +188,7 @@ export function connectionIssues(state,c){
  if([a,b].some(p=>p.signal==='power')&&conflicts.length)out.push('Power contact has multiple planned connections. Verify sources and the charging path.');
  if([a,b].some(p=>p.part.startsWith('mosfet-')&&p.id==='sig')&&conflicts.some(other=>[other.from,other.to].some(ref=>{const p=endpoint(state,ref);return p?.part.startsWith('mosfet-')&&p.id==='sig'&&[c.from,c.to].includes(ref);})))out.push('Driver signal has multiple planned sources. Use one independent GPIO per driver input.');
  if(a.signal==='rf'&&conflicts.length)out.push('RF feed has more than one cable; a reviewed switch/splitter would be needed.');
- if(a.part==='battery'||b.part==='battery')out.push('Meter polarity and verify the single charging path.');
+ if(model(a.part)==='battery'||model(b.part)==='battery')out.push('Meter polarity and verify the single charging path.');
  const ai=state.instances.find(i=>i.id===a.part),bi=state.instances.find(i=>i.id===b.part);
  if(ai&&bi){const dist=Math.hypot(...ai.position.map((v,i)=>v-bi.position[i]));if(c.length&&c.length<dist/2)out.push('Cable is short relative to the part centres; measure the routed path.');}
  if(c.status!=='Bench checked')out.push('Planned wiring; not physically verified.');

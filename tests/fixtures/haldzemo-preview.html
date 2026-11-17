@@ -1,0 +1,12 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Haldzemo cable inspection</title><style>body{margin:0;background:#fafafa;font:14px system-ui;color:#171717}#view{height:calc(100vh - 110px);position:relative}header,footer{padding:12px 24px;display:flex;align-items:center;gap:16px}button{padding:8px 14px;border:1px solid #ccc;border-radius:10px;background:white;cursor:pointer}.part-label{display:none}.connection-hover{position:absolute;pointer-events:none;background:white;padding:8px;border-radius:8px}.label-leaders{position:absolute;inset:0;pointer-events:none}footer{border-top:1px solid #ddd}strong{margin-right:auto}</style></head><body><header><strong>Haldzemo · cable inspection</strong><button id="angle">Assembly</button><button id="front">Screen</button><button id="back">Rear header</button><button id="isolate">Screen alone</button></header><div id="view"></div><footer id="mapping">Click a jumper to inspect its pin map. Generic housings; photo-based model.</footer><script type="module">
+import { AssemblyViewer } from '/src/viewer.js';
+import { defaultState } from '/src/catalog.js';
+import { appendHaldzemoComparison } from '/src/haldzemo-assembly.js';
+import { endpointLabel } from '/src/connections.js';
+const base=defaultState();base.instances=[];base.connections=[];base.custom=[];base.notes=[];base.enclosure=[170,65,250];base.enclosureVisible=false;
+const state=appendHaldzemoComparison(base,{x:0});
+const noop=()=>{};const viewer=new AssemblyViewer(document.querySelector('#view'),{onSelect:noop,onMove:noop,onDragStart:noop,onDragEnd:noop,onPort:noop,onError:message=>document.querySelector('#mapping').textContent=message,onConnection:id=>{const c=state.connections.find(c=>c.id===id);viewer.highlightCable(id);document.querySelector('#mapping').textContent=endpointLabel(state,c.from)+' → '+endpointLabel(state,c.to)+' · '+c.type;}});
+await viewer.sync(state,null);viewer.setView('3d');
+document.querySelector('#isolate').onclick=()=>{for(const [id,g]of viewer.groups)g.visible=id==='lcd-haldzemo-28';viewer.wires.visible=false;viewer.setView('rear','lcd-haldzemo-28');};
+document.querySelector('#angle').onclick=()=>{for(const g of viewer.groups.values())g.visible=true;viewer.wires.visible=true;viewer.setView('3d');};document.querySelector('#front').onclick=()=>viewer.setView('top','lcd-haldzemo-28');document.querySelector('#back').onclick=()=>viewer.setView('rear','lcd-haldzemo-28');
+</script></body></html>

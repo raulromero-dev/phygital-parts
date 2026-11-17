@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-16 · Haldzemo comparison
+
+- Added the exact B0G8Z6NS9B display, a photo-based Blender model and all 14 rear header contacts.
+- Mapped 11 separate female-to-male jumpers for SPI display and I²C touch, with clickable housings and wire paths.
+- Added an additive comparison builder that preserves existing layouts, with a separate carrier, battery, thermal camera and four multiplexed haptics.
+- Kept model estimates, optional unwired pins, reduced-brightness 3.3 V power and shared-pin checks explicit. Duplicated Grove modules now retain channel and power checks.
+
 ## 2026-11-16 · Nearby alternatives
 
 - Enabled web research in selected-part Codex chat and location/deadline context in Find parts.

@@ -1,3 +1,4 @@
+import { HALDZEMO_ID, HALDZEMO } from './haldzemo.js';
 import { PARTS } from './catalog.js';
 import { SCREENS, MOTOR_IDS, DRIVER_IDS, PLUG_MOTOR_IDS } from './options.js';
 const add=(s,id,position,rotation=[0,0,0])=>{if(!s.instances.some(i=>i.id===id))s.instances.push({id,position,rotation,dimensions:[...PARTS[id].dimensions]});};
@@ -50,18 +51,20 @@ export function addHaptics(s){
 export function planningIssues(s){
  const has=id=>s.instances.some(i=>i.id===id),out=[];
  const screens=SCREENS.filter(p=>has(p.id));
+ const haldzemo=s.instances.filter(i=>(s.custom?.find(p=>p.id===i.id)?.modelId||i.id)===HALDZEMO_ID);
+ if(haldzemo.length)out.push({title:'Haldzemo: review power and shared pins',detail:HALDZEMO.electrical+' LED, MISO and SD_CS remain open; D9 is the touch interrupt. The included FPC is not the jumper cable. Contact housings and routed lengths need a physical check.',ids:haldzemo.map(i=>i.id)});
  if(has('crowpanel-advance-28'))out.push({title:'CrowPanel is a separate controller study',detail:'Built-in ESP32-S3 and PCB antenna; no haptic motor or external antenna socket is included. Existing XIAO connections are unchanged. Use J7 I²C GPIO15/16 for a reviewed thermal/haptic harness; verify HY2.0 mating, pin order, power and shared-bus firmware before replacing the current controller.',ids:['crowpanel-advance-28']});
  if(screens.filter(p=>p.address==='0x3D').length>1)out.push({title:'External screens share 0x3D',detail:'Use one of these displays on the shared I²C bus, or add a reviewed multiplexer.',ids:screens.map(p=>p.id)});
  for(const p of screens.filter(p=>!p.ready))out.push({title:`${p.short}: pinout and address pending`,detail:'Fit comparison only. Confirm installed header, pin order and actual I²C address; 0x3C would conflict with the onboard display.',ids:[p.id]});
  if(DRIVER_IDS.some(has))out.push({title:'Motor power design is incomplete',detail:'Four independent driver channels are planned, but the 3 V regulator, input, solderless distribution and combined stall-current budget are unresolved. The supply box remains outside the enclosure. Do not connect it to the battery or GPIO power.',ids:['motor-rail',...DRIVER_IDS]});
  if(s.instances.some(i=>i.id==='lcd-27579'&&i.dimensions[1]<10))out.push({title:'LCD depth is below the manufacturer CAD envelope',detail:'The earlier proxy reserved 8 mm; Waveshare CAD is 10 mm including rear socket and standoffs. Use Dimensions → Reset dimensions to restore it. Saved custom dimensions were preserved.',ids:['lcd-27579']});
  if(screens.some(p=>p.protocol==='spi'))out.push({title:'SPI display assignments need review',detail:'Display only: D10 MOSI, D8 SCLK, D0 CS, D2 DC, D6 reset, D7 backlight, 3V3 and GND. Disable microSD/remove its card; leave UART unused. Touch is not mapped. 27579 manufacturer CAD depth is 10 mm; 18366 depth remains provisional. Check lid clearance, cable bends and the combined power budget.',ids:screens.filter(p=>p.protocol==='spi').map(p=>p.id)});
- const plugIds=s.instances.filter(i=>PLUG_MOTOR_IDS.includes(i.id)||PLUG_MOTOR_IDS.includes(s.custom?.find(p=>p.id===i.id)?.modelId)).map(i=>i.id);
+ const plugIds=s.instances.filter(i=>PLUG_MOTOR_IDS.includes(i.id)||[...PLUG_MOTOR_IDS,'grove-haptic'].includes(s.custom?.find(p=>p.id===i.id)?.modelId)).map(i=>i.id);
  if(plugIds.length){
   out.push({title:'Plug-in haptics need a power and fit check',detail:`${plugIds.length} Grove Haptic Motor module${plugIds.length===1?'':'s'}: up to 750 mW each, ${plugIds.length*.75} W combined (about ${(plugIds.length*.75/3.3).toFixed(2)} A at 3.3 V), before the controller, display and camera. Supply capacity is unverified. Check module dimensions, mounting and cable clearance.`,ids:['haptic-hub',...plugIds]});
   out.push({title:'Select one haptic channel at a time',detail:'These modules use 0x5A. Give each motor its own TCA9548A 0x70 channel, one enabled at a time, at the module’s documented 100 kHz. Disable haptic branches before using a faster camera clock. Firmware must implement this routing.',ids:['haptic-hub',...plugIds]});
   // Validate actual edited routes, not just the presence of a hub in the scene.
-  const hubIds=s.instances.filter(i=>i.id==='haptic-hub'||s.custom?.find(p=>p.id===i.id)?.modelId==='haptic-hub').map(i=>i.id);
+  const hubIds=s.instances.filter(i=>i.id==='haptic-hub'||['haptic-hub','grove-mux'].includes(s.custom?.find(p=>p.id===i.id)?.modelId)).map(i=>i.id);
   const branches=new Set();let bad=!hubIds.length;
   for(const id of plugIds){
    const channelPins=['sda','scl'].map(pin=>s.connections.filter(c=>[c.from,c.to].includes(id+':'+pin)).map(c=>c.from===id+':'+pin?c.to:c.from));

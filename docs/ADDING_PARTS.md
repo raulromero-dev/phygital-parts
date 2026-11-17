@@ -62,3 +62,9 @@ Validate state and JSON round trips, endpoint existence, duplicated model/port
 reuse and relevant voltage/bus/geometry checks. Inspect the real rendered model
 and both sides of its connectors. Explain limits in part details; concise cards
 and purchase links should remain easy to scan.
+
+The Haldzemo example is split between `src/haldzemo.js` (listing evidence and
+14-pin map), `src/haldzemo-assembly.js` (additive comparison) and
+`src/jumper-geometry.js` (generic mated connector bodies). Run the local server
+and visit `/tests/fixtures/haldzemo-preview.html` to inspect both sides and click
+the jumpers. It contains only a generic catalog assembly, never private projects.

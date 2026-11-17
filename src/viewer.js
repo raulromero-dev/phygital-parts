@@ -1,3 +1,5 @@
+import { JUMPER_MF, HALDZEMO_ID } from './haldzemo.js';
+import { jumperCurve, jumperConnector } from './jumper-geometry.js';
 import { loadCad, buildImageModel } from './part-models.js';
 import { buildProxy } from './proxy.js';
 import * as THREE from 'three';
@@ -95,7 +97,7 @@ export class AssemblyViewer {
         };
         object.material=Array.isArray(object.material)?object.material.map(referenceMaterial):referenceMaterial(object.material);
       });
-      const box=new THREE.Box3().setFromObject(group);const size=box.getSize(new THREE.Vector3());const center=box.getCenter(new THREE.Vector3());group.position.sub(center);const normalized=new THREE.Group();normalized.add(group);const ratios=part.dimensions.map((d,i)=>d/[size.x,size.y,size.z][i]);if(['xiao','oled-938','lcd-27579','crowpanel-advance-28','cardputer-adv'].includes(part.modelId||part.id)||part.modelId==='mosfet-5648')normalized.scale.setScalar(Math.min(...ratios));else normalized.scale.set(...ratios);return normalized;}
+      const box=new THREE.Box3().setFromObject(group);const size=box.getSize(new THREE.Vector3());const center=box.getCenter(new THREE.Vector3());group.position.sub(center);const normalized=new THREE.Group();normalized.add(group);const ratios=part.dimensions.map((d,i)=>d/[size.x,size.y,size.z][i]);if(['xiao','oled-938','lcd-27579','lcd-haldzemo-28','crowpanel-advance-28','cardputer-adv'].includes(part.modelId||part.id)||part.modelId==='mosfet-5648')normalized.scale.setScalar(Math.min(...ratios));else normalized.scale.set(...ratios);return normalized;}
       catch(error){this.callbacks.onError(`Could not load ${part.short}; showing a dimension box.`);return new THREE.Mesh(new THREE.BoxGeometry(...part.dimensions),new THREE.MeshStandardMaterial({color:part.color}));}
     })();this.cache.set(part.id,promise);return promise;
   }
@@ -146,8 +148,22 @@ export class AssemblyViewer {
       // Mated headers are contacts, not looping jumper cables (also in exploded view).
       if(c.type==='Board-to-board headers')mid.copy(from).lerp(to,.5);
       // Round, smooth cable geometry is illustrative: length and gauge remain user records.
-      const curve=new THREE.CatmullRomCurve3([from,mid,to]);
-      const cable=new THREE.Mesh(new THREE.TubeGeometry(curve,64,/coax/i.test(c.type)?.5:.32,10,false),new THREE.MeshStandardMaterial({color:this.highlighted?.has(c.id)?(this.theme==='dark'?'#ffffff':'#111111'):(this.theme==='dark'?'#aaaaaa':'#666666'),roughness:.55,transparent:true,opacity:this.highlighted?.size&&!this.highlighted.has(c.id)?.18:.9}));
+      let curve=new THREE.CatmullRomCurve3([from,mid,to]);
+      const opacity=this.highlighted?.size&&!this.highlighted.has(c.id)?.18:.95;
+      if(c.type===JUMPER_MF){
+        const pa=partFor(this.state,a.part),pb=partFor(this.state,b.part);
+        const screenA=(pa.modelId||pa.id)===HALDZEMO_ID,screenB=(pb.modelId||pb.id)===HALDZEMO_ID;
+        const carrierA=(pa.modelId||pa.id)==='expansion',carrierB=(pb.modelId||pb.id)==='expansion';
+        // Only use this physical orientation for a verified model/port family.
+        if((screenA&&carrierB)||(screenB&&carrierA)){
+          const female=screenA?from:to,male=screenA?to:from;
+          const fn=new THREE.Vector3(0,-1,0).transformDirection((screenA?ga:gb).matrixWorld);
+          const mn=new THREE.Vector3(0,1,0).transformDirection((screenA?gb:ga).matrixWorld);
+          curve=jumperCurve(female,male,fn,mn);
+          this.wires.add(jumperConnector(female,fn,'female',c.id,opacity),jumperConnector(male,mn,'male',c.id,opacity));
+        }
+      }
+      const cable=new THREE.Mesh(new THREE.TubeGeometry(curve,64,/coax/i.test(c.type)?.5:.32,10,false),new THREE.MeshStandardMaterial({color:c.type===JUMPER_MF?c.color:this.highlighted?.has(c.id)?(this.theme==='dark'?'#ffffff':'#111111'):(this.theme==='dark'?'#aaaaaa':'#666666'),roughness:.55,transparent:true,opacity:this.highlighted?.size&&!this.highlighted.has(c.id)?.18:.9}));
       cable.userData.connectionId=c.id;cable.castShadow=true;this.wires.add(cable);
       // A generous invisible pick tube makes fine wires selectable without
       // changing their visible diameter or intercepting clicks through solids.
