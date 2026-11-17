@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-17 · Compact and exploded views
+
+- Start with 20% separation, with a Compact action and a slider that reaches the exact saved assembly at 0%.
+- Separate physical layers in height order, keeping seated XIAO/carrier pairs together, including duplicate boards.
+- Return to assembled positions automatically for moving, rotating or mapping contacts; exports and fit measurements retain saved coordinates.
+- Route stacked Haldzemo jumpers through available rear-edge clearance or around the header to approach carrier contacts from above. Cable geometry remains illustrative.
+- Check the LCD body and its projecting edge header separately, allowing boards to occupy the open underside without resizing components. Fit regions follow the estimated Blender model.
+
 ## 2026-11-16 · Haldzemo comparison
 
 - Added the exact B0G8Z6NS9B display, a photo-based Blender model and all 14 rear header contacts.

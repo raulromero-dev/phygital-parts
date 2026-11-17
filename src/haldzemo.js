@@ -39,3 +39,11 @@ export function haldzemoJumpers(displayId,carrierId){
   note:'Individual 2.54 mm female end → screen rear male pin; male end → carrier outer female socket. 100 mm nominal wire length, housings additional; measure the routed path. Colors are illustrative, not pin identification. 3.3 V reduced-brightness supply needs a current-budget check. Disable/remove both microSD cards and keep UART unused. LED, MISO and SD_CS stay open; touch needs separate FT6336G firmware. Verify delivered labels and continuity.'
  }));
 }
+
+// Conservative solid regions from blender/haldzemo.py. The pins project only
+// at the rear edge; the remaining space below the PCB can accept other boards.
+// These are photo-model estimates, not a certified collision mesh.
+export const HALDZEMO_FIT_REGIONS = [
+ {position:[0,2.695,0],dimensions:[50,8.89,86]},
+ {position:[0,-4.445,40.6],dimensions:[35.56,5.39,2.5]}
+];

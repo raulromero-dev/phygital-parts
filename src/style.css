@@ -29,3 +29,5 @@
 /* Reference-colored component preview; the workspace remains neutral. */
 .material-colors{position:absolute;right:18px;bottom:46px;z-index:4}
 .material-colors button{min-width:47px;min-height:30px}
+
+.compact-view{margin-top:12px}.exploded-control input{min-width:0;flex:1}.exploded-control output{min-width:30px;text-align:right;font-variant-numeric:tabular-nums}

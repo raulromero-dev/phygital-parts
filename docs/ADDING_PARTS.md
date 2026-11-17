@@ -68,3 +68,10 @@ The Haldzemo example is split between `src/haldzemo.js` (listing evidence and
 `src/jumper-geometry.js` (generic mated connector bodies). Run the local server
 and visit `/tests/fixtures/haldzemo-preview.html` to inspect both sides and click
 the jumpers. It contains only a generic catalog assembly, never private projects.
+
+The Haldzemo fit check uses two conservative solid regions from its Blender
+reconstruction: the display/body and the projecting edge header. These preserve
+the empty underside when nesting another board; they are estimated planning
+volumes, not manufacturer-certified clearances. Overall dimensions and exports
+remain unchanged. Test both real header collisions and the intended open space
+when adjusting these regions.

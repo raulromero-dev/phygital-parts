@@ -1,5 +1,6 @@
 import { JUMPER_MF, HALDZEMO_ID } from './haldzemo.js';
-import { jumperCurve, jumperConnector } from './jumper-geometry.js';
+import { haldzemoJumperCurve, jumperConnector } from './jumper-geometry.js';
+import { DEFAULT_EXPLODE, clampExplode, explodedOffsets } from './view-placements.js';
 import { loadCad, buildImageModel } from './part-models.js';
 import { buildProxy } from './proxy.js';
 import * as THREE from 'three';
@@ -13,7 +14,7 @@ import { activeConnections, endpoint, portsFor, harnessFor } from './connections
 import { partFor, radians } from './engine.js';
 export class AssemblyViewer {
   constructor(host,{onSelect,onMove,onDragStart,onDragEnd,onError,onConnection,onPort}){
-    this.host=host;this.callbacks={onSelect,onMove,onDragStart,onDragEnd,onError,onConnection,onPort};this.groups=new Map();this.cache=new Map();this.labels=new Map();this.explode=0;this.showLabels=false;this.showWires=true;this.mode='inspect';
+    this.host=host;this.callbacks={onSelect,onMove,onDragStart,onDragEnd,onError,onConnection,onPort};this.groups=new Map();this.cache=new Map();this.labels=new Map();this.explode=DEFAULT_EXPLODE;this.showLabels=false;this.showWires=true;this.mode='inspect';
     this.scene=new THREE.Scene();this.scene.background=new THREE.Color('#fafafa');this.scene.fog=new THREE.Fog('#fafafa',650,1300);
     this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,preserveDrawingBuffer:true});this.renderer.setPixelRatio(Math.min(devicePixelRatio,2.5));this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;this.renderer.outputColorSpace=THREE.SRGBColorSpace;this.renderer.toneMapping=THREE.ACESFilmicToneMapping;this.renderer.toneMappingExposure=1.1;host.prepend(this.renderer.domElement);
     this.renderer.domElement.setAttribute('aria-label','Interactive 3D assembly. Drag to orbit, scroll to zoom; select parts from the component list for keyboard editing.');this.renderer.domElement.setAttribute('role','img');
@@ -115,7 +116,8 @@ export class AssemblyViewer {
   }
   updatePlacement(){
     if(!this.state)return;
-    this.state.instances.forEach((i,index)=>{const g=this.groups.get(i.id);if(!g)return;g.position.fromArray(i.position);g.position.y+=this.explode*(index*14);g.rotation.set(...radians(i.rotation));const p=partFor(this.state,i.id);g.scale.set(...i.dimensions.map((n,a)=>n/p.dimensions[a]));});
+    const offsets=explodedOffsets(this.state,this.explode);
+    this.state.instances.forEach(i=>{const g=this.groups.get(i.id);if(!g)return;g.position.fromArray(i.position);g.position.y+=offsets.get(i.id);g.rotation.set(...radians(i.rotation));const p=partFor(this.state,i.id);g.scale.set(...i.dimensions.map((n,a)=>n/p.dimensions[a]));});
   }
   disposeGroup(g){for(const child of [...g.children]){child.traverse(o=>{o.geometry?.dispose();if(o.material){for(const m of Array.isArray(o.material)?o.material:[o.material])m.dispose();}});g.remove(child);}}
   makeEnclosure(){
@@ -159,7 +161,7 @@ export class AssemblyViewer {
           const female=screenA?from:to,male=screenA?to:from;
           const fn=new THREE.Vector3(0,-1,0).transformDirection((screenA?ga:gb).matrixWorld);
           const mn=new THREE.Vector3(0,1,0).transformDirection((screenA?gb:ga).matrixWorld);
-          curve=jumperCurve(female,male,fn,mn);
+          curve=haldzemoJumperCurve(female,male,(screenA?ga:gb).matrixWorld,mn,(screenA?gb:ga).matrixWorld);
           this.wires.add(jumperConnector(female,fn,'female',c.id,opacity),jumperConnector(male,mn,'male',c.id,opacity));
         }
       }
@@ -175,7 +177,7 @@ export class AssemblyViewer {
   }
   setSelected(id){this.selected=id;this.transform.detach();const g=this.groups.get(id);const locked=id==='xiao'&&this.state?.lockCore&&this.groups.has('expansion');if(g&&['translate','rotate'].includes(this.mode)&&!this.explode&&!locked){this.transform.attach(g);this.transform.setMode(this.mode);}this.labels.forEach((l,k)=>l.classList.toggle('selected',k===id));this.makePorts();}
   setMode(mode){this.mode=mode;this.setSelected(this.selected);}
-  setExplode(value){this.explode=value;this.updatePlacement();this.makeWires();this.setSelected(this.selected);}
+  setExplode(value){this.explode=clampExplode(value);this.updatePlacement();this.makeWires();this.setSelected(this.selected);}
   setView(view,partId){
     this.floor.visible=view!=='rear';this.grid.visible=view!=='rear';
     const box=new THREE.Box3().setFromObject(this.groups.get(partId)||this.assembly),center=box.isEmpty()?new THREE.Vector3(0,12,0):box.getCenter(new THREE.Vector3());

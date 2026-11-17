@@ -11,6 +11,43 @@ export function jumperCurve(female,male,femaleNormal,maleNormal){
  // These service bends follow part rotation, rather than arching through its PCB.
  return new THREE.CatmullRomCurve3([start,start.clone().addScaledVector(femaleNormal,lead),start.clone().lerp(end,.5),end.clone().addScaledVector(maleNormal,lead),end]);
 }
+
+// In a stack, return around the LCD's rear edge before approaching the carrier
+// from above. The path is illustrative, not a bend-radius or collision solver.
+// Working in screen-local space also preserves this route when boards rotate.
+export function haldzemoJumperCurve(female,male,screenMatrix,maleNormal,carrierMatrix){
+ const femaleNormal=new THREE.Vector3(0,-1,0).transformDirection(screenMatrix);
+ const inverse=screenMatrix.clone().invert();
+ const start=female.clone().addScaledVector(femaleNormal,JUMPER_EXIT).applyMatrix4(inverse);
+ const end=male.clone().addScaledVector(maleNormal,JUMPER_EXIT).applyMatrix4(inverse);
+ const normal=maleNormal.clone().transformDirection(inverse);
+ if(normal.y<.99||end.y>=-3||Math.abs(end.x)>35||Math.abs(end.z)>43)
+  return jumperCurve(female,male,femaleNormal,maleNormal);
+ if(carrierMatrix){
+  const carrier=new THREE.Box3(new THREE.Vector3(-21,-5,-29),new THREE.Vector3(21,5,29))
+   .applyMatrix4(inverse.clone().multiply(carrierMatrix));
+  const gap=start.z-1.2-carrier.max.z;
+  if(gap>=4&&gap<=15&&end.y>-8){
+   // Leave the housing downwards, then turn up in the clear corridor between
+   // its front face and the carrier's rear edge. Fan out before the seated XIAO.
+   const turn=carrier.max.z+gap/2,high=carrier.max.y+2;
+   const points=[start,new THREE.Vector3(start.x,start.y-1.25,start.z-1.5),
+    new THREE.Vector3(start.x,start.y-1.25,turn),new THREE.Vector3(start.x,high,turn),
+    new THREE.Vector3(end.x,high,carrier.max.z-18),
+    new THREE.Vector3(end.x,high,end.z+5),new THREE.Vector3(end.x,end.y+.8,end.z+2),end];
+   return new THREE.CatmullRomCurve3(points.map(p=>p.applyMatrix4(screenMatrix)),false,'catmullrom',.12);
+  }
+ }
+ // Keep the return below the rear packages (lowest modeled surface: -1.75),
+ // while leaving the male housing from above even in a close stack.
+ const low=start.y-1.25,high=Math.min(-2.8,Math.max(end.y+3,start.y+3)),rear=48.5;
+ const side=start.x<0?-20.5:20.5;
+ const points=[start,new THREE.Vector3(start.x,low,start.z+1.5),
+  new THREE.Vector3(start.x,low,rear),new THREE.Vector3(start.x,high,rear),
+  new THREE.Vector3(side,high,rear),new THREE.Vector3(side,high,36.5),
+  new THREE.Vector3(end.x,high,end.z),end];
+ return new THREE.CatmullRomCurve3(points.map(p=>p.applyMatrix4(screenMatrix)),false,'catmullrom',.15);
+}
 export function jumperConnector(position,normal,gender,connectionId,opacity=1){
  const group=new THREE.Group();group.position.copy(position);
  group.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),normal);

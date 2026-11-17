@@ -5,6 +5,7 @@ import { Box3, Vector3, Matrix3, Matrix4, Euler, Quaternion } from 'three';
 import { OBB } from 'three/addons/math/OBB.js';
 import { endpoint, seedConnections, connectionIssues, activeConnections } from './connections.js';
 import { PARTS, defaultState } from './catalog.js';
+import { HALDZEMO_ID, HALDZEMO, HALDZEMO_FIT_REGIONS } from './haldzemo.js';
 export const STORAGE_KEY='phygital.parts.v1';
 export const clone=x=>JSON.parse(JSON.stringify(x));
 export const partFor=(state,id)=>PARTS[id]||state.custom.find(p=>p.id===id);
@@ -12,6 +13,18 @@ export const radians=r=>r.map(n=>n*Math.PI/180);
 export function boxFor(i) {
   const rotation=new Matrix3().setFromMatrix4(new Matrix4().makeRotationFromEuler(new Euler(...radians(i.rotation))));
   return new OBB(new Vector3(...i.position),new Vector3(...i.dimensions).multiplyScalar(.5),rotation);
+}
+export function fitBoxes(i,part) {
+  // The LCD's projecting edge header is not a full-width block underneath it.
+  // These conservative regions follow the estimated Blender model, not a
+  // manufacturer-certified clearance. Overall dimensions stay unchanged.
+  if((part?.modelId||part?.id)!==HALDZEMO_ID)return [boxFor(i)];
+  const q=new Quaternion().setFromEuler(new Euler(...radians(i.rotation)));
+  const scale=i.dimensions.map((d,n)=>d/HALDZEMO.dimensions[n]);
+  return HALDZEMO_FIT_REGIONS.map(region=>{
+    const position=new Vector3(...region.position.map((v,n)=>v*scale[n])).applyQuaternion(q).add(new Vector3(...i.position)).toArray();
+    return boxFor({...i,position,dimensions:region.dimensions.map((d,n)=>d*scale[n])});
+  });
 }
 export function bounds(i) {
   const q=new Quaternion().setFromEuler(new Euler(...radians(i.rotation))); const b=new Box3();
@@ -56,8 +69,9 @@ export function checks(state) {
     // Hollow shells enclose other geometry; their bounding boxes cannot resolve clearance.
     if([ia.id,ib.id].every(id=>id.startsWith('ring-'))&&[ia.id,ib.id].some(id=>['ring-inner','ring-outer'].includes(id)))continue;
     // Touching faces are a valid seating contact, so shrink only for numerical tolerance.
-    const ba=boxFor(ia),bb=boxFor(ib);ba.halfSize.multiplyScalar(.998);bb.halfSize.multiplyScalar(.998);
-    if(ba.intersectsOBB(bb)){
+    const aa=fitBoxes(ia,partFor(state,ia.id)),bb=fitBoxes(ib,partFor(state,ib.id));
+    for(const box of [...aa,...bb])box.halfSize.multiplyScalar(.998);
+    if(aa.some(a=>bb.some(b=>a.intersectsOBB(b)))){
       const curved=[ia.id,ib.id].includes('ring-battery')&&[ia.id,ib.id].includes('ring-board');
       add(curved?'review':'warn',curved?'Ring battery clearance needs CAD review':`${partFor(state,ia.id).short} overlaps ${partFor(state,ib.id).short}`,curved?'The curved battery and PCB bounding boxes intersect in the upstream assembly. Inspect their actual surfaces in CAD; this is not a verified clearance.':'The rotated bounding envelopes intersect. Detailed geometry, cable routing and tolerances still need a bench check.',[ia.id,ib.id],'Fit');
     }
