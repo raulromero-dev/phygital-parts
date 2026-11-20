@@ -85,3 +85,17 @@ Use Share to publish a read-only snapshot. Anyone with its link can inspect part
 and cables without login; changes require Remix into the visitor's own account.
 Chat and private project notes are excluded. Owners explicitly update or turn off
 links. Never treat a shared snapshot as permission to modify its owner's project.
+
+### Screen preview and photos
+
+Use **Simulate** beside Layout and Connections to run a compiled screen renderer
+with synthetic inputs and touch. The Haldzemo profile reuses the real original
+firmware; it is not a full MCU or electrical simulation. Other projects import a
+`phygital-firmware` JSON bundle using `docs/FIRMWARE_PREVIEWS.md` and the C ABI
+example. Preserve source revision, native resolution and framebuffer parity.
+Save the binding with the current layout; copies and account saves retain it.
+
+The floating Codex chat accepts up to four photos by attachment, paste or drop.
+Photos are resized and sent to the visitor's provider only when a request is
+submitted. They remain in tab memory, not saved projects or public shares; after
+reload, users reattach a photo to discuss it again.

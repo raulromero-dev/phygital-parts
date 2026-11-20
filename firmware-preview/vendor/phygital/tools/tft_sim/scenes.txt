@@ -1,0 +1,64 @@
+# Screens the simulator renders (tools/tft_sim/run.sh → out/<name>.png). Edit, re-run, look.
+# One scene per "scene <name>" block; every line resets nothing, "scene" resets everything.
+#   page 0|1|2|3            heat, sweep, locate, trackers
+#   frame quiet|warm        synthetic thermal frame; "warm" has a camera-sized spot at (20, 9)
+#   host LEVEL X Y DC       the phone/laptop verdict (0 none, 1 lead, 2 strong) with its spot
+#   cand W|B RSSI WEIGHT NAME…    a Wi-Fi or Bluetooth candidate (weight 70+ High, 50+ Med, 30+ Low)
+#   target N                locate the N-th cand (0-based); "target none" for no target
+#   rssi R  /  seen 0|1     the locate reading and whether the target was heard
+#   tag KIND STATE RSSI     tracker row: kind 0 AirTag 1 Find My 2 SmartTag 3 Google 4 Tile 5 Chipolo 6 Pebblebee; state 0 ? 1 near 2 away
+#   alert wifi|tag|none     the board's own Wi-Fi / tracker alert flags
+#   app 0|1  /  sound 0|1   app linked, sound on
+#   toast TEXT              a toast over the page
+#   devices N               "N devices" count on Sweep
+
+scene 01-heat-quiet
+page 0
+frame quiet
+
+scene 02-heat-lead
+page 0
+frame warm
+
+scene 03-sweep-alert
+page 1
+alert wifi
+alert tag
+devices 23
+cand W -43 95 TK mini spy camera (iWFCam app)
+cand B -50 85 AirTag away
+cand W -66 15 Espressif Inc.
+cand W -71 15 SHENZHEN BILIAN ELECTRONIC
+
+scene 04-sweep-quiet
+page 1
+devices 9
+cand W -66 15 Espressif Inc.
+cand W -70 15 Apple, Inc.
+
+scene 05-locate-close
+page 2
+alert wifi
+cand W -43 95 TK mini spy camera (iWFCam app)
+target 0
+rssi -48
+seen 1
+
+scene 06-locate-none
+page 2
+target none
+
+scene 07-trackers
+page 3
+alert tag
+tag 0 2 -52
+tag 3 0 -58
+tag 4 1 -79
+
+scene 08-toast
+page 1
+app 1
+sound 0
+alert wifi
+cand W -43 95 TK mini spy camera (iWFCam app)
+toast SOUND OFF

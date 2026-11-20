@@ -55,7 +55,7 @@ export async function handleNodeRequest(req,res,runner=runResearch){
   if(!body){let bytes=0;const chunks=[];for await(const chunk of req){bytes+=chunk.length;if(bytes>3500000)throw Error('Request too large.');chunks.push(chunk);}body=Buffer.concat(chunks).toString();}
   if(typeof body==='string')body=JSON.parse(body);
   if(Buffer.byteLength(JSON.stringify(body))>3500000)throw Error('Request too large.');
- }catch{res.statusCode=400;res.end(JSON.stringify({error:'Invalid request. Use one image up to 2 MB.'}));return;}
+ }catch{res.statusCode=400;res.end(JSON.stringify({error:'Request too large or invalid. Try fewer or smaller photos.'}));return;}
  const key=(req.headers.authorization||'').replace(/^Bearer /,'');
  const abort=new AbortController();const disconnected=()=>{if(!res.writableEnded)abort.abort();};res.on('close',disconnected);
  const streaming=runner===runResearch&&req.headers.accept?.includes('application/x-ndjson');

@@ -7,6 +7,7 @@ export function readSharedDocument(value){
  state.notes=[];state.decisions={};state.brief='';state.projectLinks=[];
  delete state.research;delete state.build;
  delete state.layouts; // Publish only the active assembly, never private alternatives.
+ delete state.firmware; // Imported code and private preview bindings are not shared.
  return state;
 }
 

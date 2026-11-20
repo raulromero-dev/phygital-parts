@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-20
+
+- Updated Haldzemo defaults to the user-reported working 10-wire harness: VCC on
+  5V/VBUS, DC on D9, and polled touch without CTP_INT. Recorded 5 V source and
+  touch-bus voltage review separately from the physical map.
+- Added an integrated Simulate tab using the actual pinned Phygital screen
+  renderer compiled to WASM, eight pixel-matched scenes, touch, sensor inputs,
+  pause/reset and PNG export. Added reusable adapters/imports and per-layout saves.
+- Added photo upload, paste and drop in the existing Codex chat. Bounded vision
+  inputs remain in tab memory; persistent history stores only attachment counts.
+
 ## 2026-11-17 · Parallel layout alternatives
 
 - Codex can propose up to four independent alternatives together, with dimensions and checks for review. Saving retains the original active layout.

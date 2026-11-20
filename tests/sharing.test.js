@@ -16,10 +16,11 @@ test('shared URLs are separate from private account and browser projects',()=>{
 });
 test('shared view validates assembly geometry and excludes private conversation context',()=>{
  const source=defaultState();source.notes=[{part:'thermal',text:'Private note',at:new Date().toISOString()}];source.brief='Private prompt';source.projectLinks=['https://example.com/private'];source.build={status:'running'};source.research={summary:'Private research'};source.decisions={thermal:'Skip'};source.chat=[{text:'Private chat'}];source.apiKey='not-for-sharing';
+ source.firmware={partId:'expansion',profile:'phygital-tft'};
  const before=structuredClone(source),view=readSharedDocument(source);
  assert.deepEqual(view.instances,source.instances);assert.deepEqual(view.connections,source.connections);
  assert.deepEqual(view.notes,[]);assert.deepEqual(view.decisions,{});assert.deepEqual(view.projectLinks,[]);assert.equal(view.brief,'');
- for(const key of ['research','build','chat','apiKey'])assert.equal(view[key],undefined);
+ for(const key of ['research','build','chat','apiKey','firmware'])assert.equal(view[key],undefined);
  assert.deepEqual(source,before);
  assert.throws(()=>readSharedDocument({...source,instances:[{id:'thermal',position:[NaN,0,0]}]}),/Invalid/);
 });

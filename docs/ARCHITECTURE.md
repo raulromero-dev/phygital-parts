@@ -3,7 +3,7 @@
 Phygital Studio is a browser-first hardware workbench. Its six examples load
 without AI: makeup cyberdeck, thermal camera, air monitor, wearable haptics,
 smartwatch and smart ring. The original unwanted-surveillance detector remains
-an isolated reference project. The application does not run that device's firmware.
+an isolated reference project. The Simulation tab runs that device's actual screen renderer against synthetic inputs; it does not emulate its full MCU or radios.
 
 ## Boundaries
 
@@ -77,7 +77,9 @@ and enclosure changes. New aliases are resolved within one atomic reviewed edit;
 physical port and power checks reject invalid wiring. A question contains 2–4
 options, with Other supplied by the UI, and cannot include assembly changes.
 Application checks the original base state and preserves undo. It cannot order
-parts, run commands or modify firmware.
+parts, run commands or modify firmware source. Chat accepts up to four resized
+photos as Responses image inputs, including bounded in-session photo context.
+Only image counts enter persisted chat; raw photos never enter project documents.
 
 Parallel layout proposals use a bounded `layouts` action (up to four) instead of
 editing the current layout. Every alternative starts from the same current base;
@@ -148,3 +150,19 @@ The DB copies an explicit allowlist into `project_shares`; it does not relax RLS
 on `projects`. Remix inserts a new document for the authenticated caller and
 navigates to its private cloud route. Publishing is revision-checked, updates
 are explicit, and revocation deletes the snapshot while retaining private rows.
+
+## Firmware preview
+
+`src/firmware-preview.js` mounts inside the existing workbench stage, alongside
+the parts list and floating chat. `firmware-runtime.js` hosts a bounded C ABI
+framebuffer adapter in `firmware-worker.js`. Inputs and native-pixel taps call
+the compiled renderer, and RGB565 pixels become the canvas frame. Timeout stops
+the worker; closing the tab/view or changing project tears it down. There is no
+server-side compilation or paid provider request.
+
+The real Phygital source snapshot is pinned in `firmware-preview/sources.json`.
+The app lazy-loads its compiled bundle. Other projects can import the same bounded
+format with their own native resolution, scenes and inputs. `state.firmware`
+holds the target component and either the builtin profile or a validated imported
+bundle; validation, layouts, undo, account saves and JSON exports retain it.
+Public snapshot allowlists omit it. See [the adapter guide](FIRMWARE_PREVIEWS.md).

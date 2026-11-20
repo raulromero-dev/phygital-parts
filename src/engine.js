@@ -1,3 +1,4 @@
+import { validateFirmwareState } from './firmware-data.js';
 import { modelEvidence, normalizeVisual } from './model-data.js';
 import { safeUrl } from './product-data.js';
 import { planningIssues } from './planning.js';
@@ -127,6 +128,7 @@ export function validateState(v,{nested=false}={}) {
   if(!Array.isArray(v.notes)||v.notes.length>500||v.notes.some(n=>!str(n.text)||!str(n.part,100)||!str(n.at,60)))throw Error('Invalid review notes.');
   const clean=defaultState();
   Object.assign(clean,{name:v.name,instances:v.instances.map(i=>({id:i.id,position:[...i.position],rotation:[...i.rotation],dimensions:[...i.dimensions]})),enclosure:[...v.enclosure],enclosureVisible:v.enclosureVisible!==false,lockCore:v.lockCore!==false,assumptions:{...v.assumptions},notes:v.notes.map(n=>({text:n.text,part:n.part,at:n.at})),custom:custom.map(normalizeCustom),decisions:{}});
+  if(v.firmware&&clean.instances.some(i=>i.id===v.firmware.partId))clean.firmware=validateFirmwareState(v.firmware,clean.instances.map(i=>i.id));
   clean.preset=str(v.preset,30)?v.preset:'blank';
   if(typeof v.updatedAt==='string'&&Number.isFinite(Date.parse(v.updatedAt)))clean.updatedAt=new Date(v.updatedAt).toISOString();
   clean.brief=str(v.brief,8000)?v.brief:'';

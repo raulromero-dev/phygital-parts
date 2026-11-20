@@ -313,3 +313,17 @@ mapping without signing in. **Remix** creates a separate project in their own
 Google account. Update the published version or turn the link off from Share.
 Chat, prompts and private project notes are excluded. See [account and sharing
 setup](docs/ACCOUNTS.md) for the database contract.
+
+### Preview screen firmware
+
+**Simulate** lives beside Layout and Connections. Try the actual Phygital/Haldzemo
+screen renderer, switch test scenes, tap its controls and adjust synthetic inputs.
+Save the preview with the project or export a PNG. Other projects can import a
+compiled preview built from their own firmware using the
+[framebuffer adapter guide](docs/FIRMWARE_PREVIEWS.md). This previews screen behavior;
+it does not emulate the full ESP32 or validate wiring.
+
+Codex chat also accepts photos through the **＋** attachment button, clipboard
+paste or drag-and-drop. Up to four JPG/PNG/WebP photos are resized before sending
+to the visitor's AI provider. Photos remain in tab memory; saved chat retains
+attachment counts, and asks you to reattach after a reload.

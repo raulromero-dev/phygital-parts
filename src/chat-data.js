@@ -10,6 +10,8 @@ export function cleanChat(value){
  if(!Array.isArray(value))return [];
  const messages=value.filter(m=>m&&['user','assistant'].includes(m.role)&&typeof m.text==='string').slice(-40).map(m=>{
   const result={role:m.role,text:m.text.slice(0,4000),partName:typeof m.partName==='string'?m.partName.slice(0,100):null,applied:!!m.applied};
+  const imageCount=Array.isArray(m.images)?Math.min(m.images.length,4):Number.isInteger(m.imageCount)?Math.min(Math.max(m.imageCount,0),4):0;
+  if(m.role==='user'&&imageCount)result.imageCount=imageCount;
   if(m.role==='assistant'&&m.question)try{result.question=validateQuestion(m.question);result.answered=!!m.answered;result.target=typeof m.target==='string'?m.target.slice(0,100):null;}catch{}
   if(m.role==='assistant'&&m.sourcing)try{result.sourcing=cleanSourcing(m.sourcing);result.target=typeof m.target==='string'?m.target.slice(0,100):null;}catch{}
   return result;
@@ -19,5 +21,5 @@ export function cleanChat(value){
  return messages;
 }
 export function conversationText(message){
- return [message.text,message.question?.prompt,message.question?.options.join(' / '),message.sourcing?JSON.stringify(message.sourcing):null].filter(Boolean).join('\n').slice(0,4000);
+ return [message.imageCount&&!message.images?.length?'[Earlier photos are no longer attached. Ask the user to reattach them if needed.]':null,message.text,message.question?.prompt,message.question?.options.join(' / '),message.sourcing?JSON.stringify(message.sourcing):null].filter(Boolean).join('\n').slice(0,4000);
 }

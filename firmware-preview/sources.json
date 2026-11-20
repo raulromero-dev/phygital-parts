@@ -1,0 +1,18 @@
+{
+  "repository": "https://github.com/raulromero-dev/phygital",
+  "revision": "4384fa97e9f9b09fb06db2445dd5fe902bf32069",
+  "files": {
+    "tft_ui.h": "11f91b1f2930d6c8cd76db2238844083f71726108b2215f18185d1215220f9a4",
+    "tft_fonts.h": "29b089a3b2350875222b5c9d1cf8aa7ebe545bfdc84f6fce4fb0c920df22e338",
+    "heat_rule.h": "1d3bcf5cdc7217fe2db729e7f61bd8d9533da33cbee627ccbe56d1350701325d",
+    "tools/tft_sim/sim.cpp": "dfc31237a3c7f4e6f998a5fb5ff749fd640d5216239308e3cb5db28c54d86c34",
+    "tools/tft_sim/scenes.txt": "297f0820320eb9c074d308ac3938527c64e771237a5c45c5c14bee88893cac60",
+    "tools/tft_sim/stubs/Adafruit_I2CDevice.h": "ca7729a0ae34c2cfac9d17f533135135cc018e3e8337edabf259a33122cc562d",
+    "tools/tft_sim/stubs/Adafruit_SPIDevice.h": "b2e0533031c3e6dc6fdd9f0a3bfb27a7c657b9338992e6234f7c2036fb752c24",
+    "tools/tft_sim/stubs/Adafruit_ILI9341.h": "3ec90001f2159eb3e151d01c246445df46359a05161742a6f7f3e3d20ea30bb6",
+    "tools/tft_sim/stubs/SPI.h": "0957479477a09c4e864cb9a9fe6fe176a3fc0a4d5d3f7b5cbcac0d282c52f526",
+    "tools/tft_sim/stubs/Print.h": "029cf34e694b6c420ad2e4916de3fb1a66511ae82d13ace6cb46b4b1452adf52",
+    "tools/tft_sim/stubs/Arduino.h": "b32aac190cb8469948c7dc5897b672ee1090869fccb6d01042a786166c6871d2"
+  },
+  "gfxVersion": "1.12.6"
+}

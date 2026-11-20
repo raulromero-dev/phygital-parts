@@ -1,0 +1,9 @@
+{
+  "name": "128 × 64 adapter example",
+  "width": 128,
+  "height": 64,
+  "sourceUrl": "https://github.com/raulromero-dev/phygital-studio/tree/main/firmware-preview/examples",
+  "revision": "example-v1",
+  "scenes": ["Idle", "Reading"],
+  "inputs": [{"id":0,"name":"Level","min":0,"max":100,"step":1,"value":30,"unit":"%"}]
+}

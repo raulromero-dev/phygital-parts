@@ -9,22 +9,22 @@ import { appendHaldzemoComparison } from '../src/haldzemo-assembly.js';
 import { planningIssues } from '../src/planning.js';
 import { jumperCurve, haldzemoJumperCurve, jumperConnector, JUMPER_EXIT } from '../src/jumper-geometry.js';
 
-test('additive comparison preserves the original assembly and maps 11 physical jumpers',()=>{
+test('additive comparison preserves the original assembly and maps the 10 physical jumpers of the working harness',()=>{
  const original=defaultState(),snapshot=structuredClone(original);
  const s=appendHaldzemoComparison(original,{at:'2026-11-16T23:00:00.000Z'});
  assert.deepEqual(original,snapshot);assert.deepEqual(s.instances.slice(0,original.instances.length),original.instances);
  assert.deepEqual(s.connections.slice(0,original.connections.length),original.connections);
  const wires=s.connections.filter(c=>c.type===JUMPER_MF);
- assert.equal(wires.length,11);assert.equal(HALDZEMO_PORTS.length,14);
- assert.equal(new Set(wires.map(c=>c.to)).size,11);
- assert(!wires.some(c=>/:(led|miso|sd-cs)$/.test(c.from)));
+ assert.equal(wires.length,10);assert.equal(HALDZEMO_PORTS.length,14);
+ assert.equal(new Set(wires.map(c=>c.to)).size,10);
+ assert(!wires.some(c=>/:(led|miso|tp-int|sd-cs)$/.test(c.from)));
  assert(wires.every(c=>c.to.startsWith('custom-haldzemo-carrier:')));
- assert(wires.some(c=>c.from.endsWith(':tp-int')&&c.to.endsWith(':h-d9')));
+ assert(wires.some(c=>c.from.endsWith(':dc')&&c.to.endsWith(':h-d9')));
  assert(wires.some(c=>c.from.endsWith(':tp-sda')&&c.to.endsWith(':h-d4')));
  for(const c of s.connections){assert(endpoint(s,c.from));assert(endpoint(s,c.to));assert(!connectionIssues(s,c).some(t=>/short|crossed|rails differ|signal pin|not a valid motor/.test(t)));}
  const restored=validateState(JSON.parse(JSON.stringify(s)));
  assert.deepEqual(restored.connections,s.connections);
- assert(connectionIssues(restored,wires.find(c=>c.to.endsWith(':h-d2'))).some(t=>t.includes('Disable microSD')));assert.equal(restored.instances.length,original.instances.length+10);
+ assert(wires.some(c=>c.from.endsWith(':vcc')&&c.to.endsWith(':h-5v')));assert(!wires.some(c=>c.to.endsWith(':h-d2')));assert.equal(restored.instances.length,original.instances.length+10);
  assert.equal(restored.custom.find(p=>p.id==='custom-haldzemo-carrier').modelId,'expansion');
  assert(!planningIssues(restored).some(p=>p.title==='Haptic channel mapping is incomplete or shared'));
  assert(planningIssues(restored).some(p=>p.detail.includes('3 W')));

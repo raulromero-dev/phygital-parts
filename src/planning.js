@@ -52,7 +52,7 @@ export function planningIssues(s){
  const has=id=>s.instances.some(i=>i.id===id),out=[];
  const screens=SCREENS.filter(p=>has(p.id));
  const haldzemo=s.instances.filter(i=>(s.custom?.find(p=>p.id===i.id)?.modelId||i.id)===HALDZEMO_ID);
- if(haldzemo.length)out.push({title:'Haldzemo: review power and shared pins',detail:HALDZEMO.electrical+' LED, MISO and SD_CS remain open; D9 is the touch interrupt. The included FPC is not the jumper cable. Contact housings and routed lengths need a physical check.',ids:haldzemo.map(i=>i.id)});
+ if(haldzemo.length)out.push({title:'Haldzemo: review power and shared pins',detail:HALDZEMO.electrical+' LED, MISO, CTP_INT and SD_CS remain open; D9 carries DC and touch is polled. The included FPC is not the jumper cable. Contact housings and routed lengths need a physical check.',ids:haldzemo.map(i=>i.id)});
  if(has('crowpanel-advance-28'))out.push({title:'CrowPanel is a separate controller study',detail:'Built-in ESP32-S3 and PCB antenna; no haptic motor or external antenna socket is included. Existing XIAO connections are unchanged. Use J7 I²C GPIO15/16 for a reviewed thermal/haptic harness; verify HY2.0 mating, pin order, power and shared-bus firmware before replacing the current controller.',ids:['crowpanel-advance-28']});
  if(screens.filter(p=>p.address==='0x3D').length>1)out.push({title:'External screens share 0x3D',detail:'Use one of these displays on the shared I²C bus, or add a reviewed multiplexer.',ids:screens.map(p=>p.id)});
  for(const p of screens.filter(p=>!p.ready))out.push({title:`${p.short}: pinout and address pending`,detail:'Fit comparison only. Confirm installed header, pin order and actual I²C address; 0x3C would conflict with the onboard display.',ids:[p.id]});

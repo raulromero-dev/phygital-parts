@@ -2,7 +2,7 @@
 
 Phygital helps people describe a hardware idea, find actual parts, visualize
 their fit, and map component-to-component connections. It is an assembly-planning
-workbench, not firmware or an electrical simulator. Start with [README.md](README.md).
+workbench with opt-in screen-renderer previews, not an electrical simulator. Start with [README.md](README.md).
 For product usage, the reusable [Phygital skill](skills/phygital/SKILL.md) is the entrypoint.
 
 ## Run and navigate
@@ -25,7 +25,8 @@ Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for boundaries and data flow;
 | Change | Start here |
 | --- | --- |
 | Homepage, links, part search, research progress | `src/product.js`, `src/product.css` |
-| Floating codex chat and selected-part context | `src/assistant.js`, `src/adjustments.js` |
+| Floating codex chat, photos and selected-part context | `src/assistant.js`, `src/chat-images.js`, `src/adjustments.js` |
+| Screen firmware preview and reusable adapters | `src/firmware-*.js`, `firmware-preview/`, `docs/FIRMWARE_PREVIEWS.md` |
 | Independent layout alternatives and comparisons | `src/layouts.js`, `src/adjustments.js`, `src/main.js` |
 | Workspace controls and import/export | `src/main.js`, `src/engine.js` |
 | Starters and separate storage namespaces | `src/routes.js`, `src/templates.js` |
@@ -67,6 +68,14 @@ Read [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for boundaries and data flow;
   an actual reference image sent to Astra for bounded declarative geometry.
   Never execute model-generated code. Preserve source links and label image
   approximations; unavailable assets keep a planning envelope.
+- Screen previews reuse compiled firmware drawing code, not lookalike screenshots.
+  Preserve pinned source hashes, native-frame parity and provenance. Generic imported
+  bundles run only in a bounded disposable worker with no network/filesystem/DOM.
+  A successful preview is not hardware, power or bus validation. Keep preview
+  bindings per layout, and omit imported firmware from public shares.
+- Chat photos are resized in the browser, bounded to four/2 MB per request and
+  sent as actual image inputs to the visitor-key provider. Only attachment counts
+  survive reload; raw images stay in tab memory and never enter exports/analytics.
 - User keys stay in tab memory. Do not put keys, prompts, images or chat content
   into URLs, analytics, logs, commits or project exports. Research streams expose
   only allowlisted phase metadata, complete validated draft parts, and the final

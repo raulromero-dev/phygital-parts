@@ -93,7 +93,7 @@ export function harnesses(state){
 }
 export function harnessFor(state,id){return harnesses(state).find(h=>h.connections.some(c=>c.id===id));}
 export function cableDescription(h){
- if(h.type===JUMPER_MF&&h.name.startsWith('Haldzemo'))return 'Eleven separate 2.54 mm female-to-male jumpers: female housings over the screen’s rear male pins → male ends into the carrier’s outer female sockets. 100 mm nominal wires; housings and bends add space. Jumpers are separate from the included FPC cable. LED, MISO and SD_CS stay open. Click a row for its mapping; colors are illustrative.';
+ if(h.type===JUMPER_MF&&h.name.startsWith('Haldzemo'))return `${h.connections.length} individual 2.54 mm female-to-male jumpers: female housings over the screen’s rear male pins → male ends into the carrier’s outer female sockets. Housings and bends add space. The included FPC cable is not used. Click a conductor for its mapping and length; colors are illustrative.`;
  if(h.type==='Board-to-board headers')return 'The XIAO seats directly in the two seven-contact sockets behind the display. These lines show the electrical map, not separate cables. Use pre-soldered XIAO headers or solder the included headers first.';
  if(h.name==='Included antenna coax')return 'XIAO U.FL snap socket → included thin coax lead → antenna. No RP-SMA adapter. Measure the shipped antenna and lead before finalizing the case.';
  if(h.name==='Haptic hub uplink')return 'Carrier spare Grove I²C socket → standard four-wire Grove cable → TCA9548A hub upstream socket. Power and ground are shared by all branches; supply capacity still needs review.';
