@@ -2,6 +2,9 @@
 
 ## 2026-11-20
 
+- Added **Simulate → Download files**: a ZIP of the compiled preview, selected
+  scene/input settings, project/layout backup, cable CSV, screen PNG and matching
+  editable renderer sources. Saved previews now restore test settings and pause.
 - Updated Haldzemo defaults to the user-reported working 10-wire harness: VCC on
   5V/VBUS, DC on D9, and polled touch without CTP_INT. Recorded 5 V source and
   touch-bus voltage review separately from the physical map.

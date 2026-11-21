@@ -318,7 +318,9 @@ setup](docs/ACCOUNTS.md) for the database contract.
 
 **Simulate** lives beside Layout and Connections. Try the actual Phygital/Haldzemo
 screen renderer, switch test scenes, tap its controls and adjust synthetic inputs.
-Save the preview with the project or export a PNG. Other projects can import a
+Choose **Download files** for the preview, current test settings, layout/wiring,
+screen PNG and matching editable renderer source. **Save preview to project**
+also keeps scene, input values and pause state. Other projects can import a
 compiled preview built from their own firmware using the
 [framebuffer adapter guide](docs/FIRMWARE_PREVIEWS.md). This previews screen behavior;
 it does not emulate the full ESP32 or validate wiring.

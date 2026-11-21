@@ -13,7 +13,7 @@ for line in source.read_text().splitlines():
     if line.startswith('scene '): scenes.append({'name': line[6:], 'lines': []})
     else: scenes[-1]['lines'].append(line)
 (folder / 'scenes.generated.h').write_text('static const int SCENE_COUNT = %d;\nstatic const char *SCENES[] = {%s};\n' % (len(scenes), ','.join(json.dumps('\n'.join(s['lines'])) for s in scenes)))
-out = root / 'public/firmware'; out.mkdir(exist_ok=True)
+out = root / 'public/firmware'; out.mkdir(parents=True, exist_ok=True)
 exports = ['sim_init','sim_width','sim_height','sim_frame','sim_scene','sim_step','sim_tap','sim_input','sim_get_input']
 cmd = [os.environ.get('EMXX','em++'), '-std=c++17','-O2','-DARDUINO=10819',
        '-I'+str(folder/'vendor/phygital/tools/tft_sim/stubs'), '-I'+str(folder/'vendor/adafruit-gfx'),

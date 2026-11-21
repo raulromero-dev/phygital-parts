@@ -11,7 +11,21 @@ export function validateFirmwareBundle(v){
  if(!Array.isArray(inputs)||inputs.length>12)throw Error('Include at most 12 simulated inputs.');
  for(const i of inputs){if(!i||!Number.isInteger(i.id)||i.id<0||i.id>255||seen.has(i.id)||!text(i.name,80)||!i.name.trim()||![i.min,i.max,i.step,i.value].every(Number.isFinite)||i.min>=i.max||i.step<=0||i.value<i.min||i.value>i.max||Math.abs(i.min)>1e6||Math.abs(i.max)>1e6||!text(i.unit??'',20))throw Error('Invalid simulated input.');seen.add(i.id);}
  let sourceUrl='';if(v.sourceUrl){try{const u=new URL(v.sourceUrl);if(!['https:','http:'].includes(u.protocol)||u.username||u.password||u.href.length>2000)throw 0;sourceUrl=u.href;}catch{throw Error('Use a public HTTP(S) source link.');}}
- return {format:'phygital-firmware',version:1,name:v.name.trim(),width:v.width,height:v.height,pixelFormat:'rgb565',wasm:v.wasm,scenes:[...v.scenes],inputs:inputs.map(i=>({id:i.id,name:i.name,min:i.min,max:i.max,step:i.step,value:i.value,unit:i.unit||''})),sourceUrl,revision:text(v.revision,100)?v.revision:'',sha256:/^[a-f0-9]{64}$/.test(v.sha256)?v.sha256:''};
+ const clean={format:'phygital-firmware',version:1,name:v.name.trim(),width:v.width,height:v.height,pixelFormat:'rgb565',wasm:v.wasm,scenes:[...v.scenes],inputs:inputs.map(i=>({id:i.id,name:i.name,min:i.min,max:i.max,step:i.step,value:i.value,unit:i.unit||''})),sourceUrl,revision:text(v.revision,100)?v.revision:'',sha256:/^[a-f0-9]{64}$/.test(v.sha256)?v.sha256:''};
+ if(v.session!==undefined)clean.session=validateFirmwareSession(v.session,clean);
+ return clean;
+}
+
+// Save controllable test settings, never arbitrary VM memory or executable code.
+export function validateFirmwareSession(value,bundle){
+ if(!value||!Number.isInteger(value.scene)||value.scene<0||value.scene>=(bundle?.scenes.length??32)||typeof value.paused!=='boolean'||!Array.isArray(value.inputs)||value.inputs.length>12)throw Error('Invalid saved simulation settings.');
+ const seen=new Set();
+ const inputs=value.inputs.map(i=>{
+  const spec=bundle?.inputs.find(input=>input.id===i?.id);
+  if(!i||!Number.isInteger(i.id)||i.id<0||i.id>255||seen.has(i.id)||!Number.isFinite(i.value)||Math.abs(i.value)>1e6||(bundle&&(!spec||i.value<spec.min||i.value>spec.max)))throw Error('Invalid saved simulation input.');
+  seen.add(i.id);return {id:i.id,value:i.value};
+ });
+ return {scene:value.scene,paused:value.paused,inputs};
 }
 
 // Inspect declared allocations before instantiation, including a potentially
@@ -30,5 +44,6 @@ export function checkWasmLimits(bytes){
 export function validateFirmwareState(value,ids){
  if(value==null)return null;
  if(!value||!ids.includes(value.partId)||!['phygital-tft','imported'].includes(value.profile))throw Error('Choose a component for the firmware preview.');
- return {partId:value.partId,profile:value.profile,...(value.profile==='imported'?{bundle:validateFirmwareBundle(value.bundle)}:{})};
+ const bundle=value.profile==='imported'?validateFirmwareBundle(value.bundle):null;
+ return {partId:value.partId,profile:value.profile,...(bundle?{bundle}:{}),...(value.session!==undefined?{session:validateFirmwareSession(value.session,bundle)}:{})};
 }

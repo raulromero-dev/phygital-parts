@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "node server/dev.mjs",
-    "build": "vite build",
+    "dev": "node scripts/package-firmware-source.mjs && node server/dev.mjs",
+    "build": "node scripts/package-firmware-source.mjs && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --test tests/*.test.js",
     "dev:ui": "vite --host 127.0.0.1",

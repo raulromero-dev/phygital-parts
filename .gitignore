@@ -1,5 +1,6 @@
 node_modules/
 dist/
+public/firmware/phygital-tft-source.json
 .vercel/
 .env
 .env.*

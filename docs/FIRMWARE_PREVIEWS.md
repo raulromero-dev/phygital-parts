@@ -8,6 +8,34 @@ Copies, account saves and JSON exports preserve it. Each layout can use a differ
 preview. Public sharing currently omits private preview bindings and imported
 code; visitors can still try the bundled demo without signing in.
 
+**Download files** creates `phygital-simulation.zip` directly from the Simulation
+panel, without a login or API key. It contains a reimportable `preview.json`, the
+compiled `renderer.wasm`, a `project.json` backup of every layout, the current
+`connections.csv`, a `screen.png`, and instructions. The built-in Phygital renderer
+also includes its pinned C/C++ source, adapter, dependency license and build script
+under `source/`. Imported previews include source only when their compiled checksum
+matches that pinned renderer; otherwise the README points to the supplied source
+URL and explains that original source was not provided.
+
+Downloads and **Save preview to project** retain the named test scene, current
+test-input values and pause setting. Reopening restarts that scene with those
+controls; touch-navigation history and elapsed animation time are not saved VM
+state. The PNG preserves the captured appearance. Under **Use your own firmware**,
+**Preview only · JSON** downloads just the portable renderer and settings. Import
+that JSON to reuse them in another project, or import `project.json` from My
+projects to create a separate assembly copy. The backup includes project notes;
+chat, uploaded photos and API keys are excluded.
+
+These are screen-preview files, not a complete device-flashable firmware image.
+For the bundled source, activate Emscripten and run
+`python3 source/scripts/build-firmware-preview.py`, then import the resulting
+`source/public/firmware/phygital-tft.json` back into Studio. Edit the real drawing
+code under `source/firmware-preview/vendor/phygital/` to change the display UI.
+
+`scripts/package-firmware-source.mjs` creates the source download from an explicit
+repository allowlist during `npm run dev` and `npm run build`. It includes no
+environment files, private projects or unrelated hardware drafts.
+
 The Haldzemo profile compiles the real `tft_ui.h`, `tft_fonts.h` and `heat_rule.h`
 from [the original Phygital firmware](https://github.com/raulromero-dev/phygital),
 using its `tools/tft_sim` Arduino/ILI9341 stubs and real Adafruit GFX. The browser
